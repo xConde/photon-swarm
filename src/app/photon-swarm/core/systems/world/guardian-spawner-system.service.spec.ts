@@ -179,14 +179,11 @@ describe('GuardianSpawnerSystemService', () => {
   // ---------------------------------------------------------------------------
 
   describe('update() - liveness and respawn', () => {
-    beforeEach(() => {
-      // Install jasmine fake clock so Date.now() advances predictably
-      jasmine.clock().install();
-      jasmine.clock().mockDate(new Date(1_000_000));
-    });
+    let nowMs: number;
 
-    afterEach(() => {
-      jasmine.clock().uninstall();
+    beforeEach(() => {
+      nowMs = 1_000_000;
+      spyOn(Date, 'now').and.callFake(() => nowMs);
     });
 
     it('schedules a respawn timer when a guardian dies', () => {
@@ -214,7 +211,7 @@ describe('GuardianSpawnerSystemService', () => {
       const countAfterFirstTick = entityFactorySpy.createGuardian.calls.count();
 
       // Guardian 1 has respawnDelayMs = 45000
-      jasmine.clock().tick(46000);
+      nowMs += 46000;
 
       // Reposition player far from guardian 1's home (2000, 1500)
       playerX$.next(10000);
@@ -241,7 +238,7 @@ describe('GuardianSpawnerSystemService', () => {
       service.update(TICK, mockEntityManager.manager);
 
       // Advance past respawn delay (45000ms) for guardian 1
-      jasmine.clock().tick(46000);
+      nowMs += 46000;
 
       // Position player CLOSE to guardian 1's home (within 3000px)
       playerX$.next(2100);
@@ -271,7 +268,7 @@ describe('GuardianSpawnerSystemService', () => {
       service.update(TICK, mockEntityManager.manager);
 
       // Advance past respawn delay for guardian 1 (45000ms)
-      jasmine.clock().tick(46000);
+      nowMs += 46000;
 
       // Player far from guardian 1's home
       playerX$.next(10000);
@@ -297,7 +294,7 @@ describe('GuardianSpawnerSystemService', () => {
 
       service.update(TICK, mockEntityManager.manager);
 
-      jasmine.clock().tick(46000);
+      nowMs += 46000;
       playerX$.next(10000);
       playerY$.next(8000);
 
@@ -367,14 +364,12 @@ describe('GuardianSpawnerSystemService', () => {
       expect(countAfterTick2 - countAfterTick1).toBeLessThanOrEqual(2);
     });
 
-    describe('with fake clock', () => {
-      beforeEach(() => {
-        jasmine.clock().install();
-        jasmine.clock().mockDate(new Date(1_000_000));
-      });
+    describe('with controlled time', () => {
+      let nowMs: number;
 
-      afterEach(() => {
-        jasmine.clock().uninstall();
+      beforeEach(() => {
+        nowMs = 1_000_000;
+        spyOn(Date, 'now').and.callFake(() => nowMs);
       });
 
       it('spawn budget is shared between respawn queue and lazy spawn', () => {
@@ -395,7 +390,7 @@ describe('GuardianSpawnerSystemService', () => {
         service.update(TICK, mockEntityManager.manager);
 
         // Advance past respawn delays (guardian 1: 45s, guardian 2: 60s)
-        jasmine.clock().tick(65000);
+        nowMs += 65000;
 
         // Player far from all guardian homes
         playerX$.next(10000);
