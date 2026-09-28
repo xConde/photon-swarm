@@ -1,0 +1,59 @@
+<!-- Map Modal - Diablo 2 style overlay -->
+@if (isVisible && !hideForModal) {
+  <div class="map-modal-container">
+    <div
+      class="map-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="map-heading"
+      [appFocusTrap]="true"
+      focusTrapInitial="container"
+    >
+      <h2 id="map-heading">Automap</h2>
+      <!-- Close button removed - use M key to toggle map -->
+      <canvas #mapCanvas class="map-canvas" aria-hidden="true"></canvas>
+      <div class="map-legend">
+        <div class="legend-item">
+          <span class="legend-color player"></span>
+          <span>You</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color elite"></span>
+          <span>Elite</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color boss"></span>
+          <span>Boss</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color powerup"></span>
+          <span>Item</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color faction-crimson"></span>
+          <span>Crimson</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color faction-azure"></span>
+          <span>Azure</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color faction-verdant"></span>
+          <span>Verdant</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color faction-shadow"></span>
+          <span>Shadow</span>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Minimap - Always visible during gameplay, even when map is open -->
+@if (!hideForModal) {
+  <div class="minimap-container">
+    <canvas #minimapCanvas aria-hidden="true"></canvas>
+    <div class="minimap-border"></div>
+  </div>
+}

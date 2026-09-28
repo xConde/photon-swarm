@@ -1,0 +1,85 @@
+@use '../../../styles/design-system' as ds;
+
+// === MAIN CONTAINER ===
+.end-screen-container {
+  position: absolute;
+  inset: 0;
+  // Overlay must stay dark in both themes — it obscures the live game canvas.
+  // var(--game-bg-overlay) resolves to near-white in day-mode which defeats the scrim.
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(10, 10, 15, 0.92) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: ds.$z-modal;
+  animation: fadeInOverlay ds.$animation-medium ds.$easing-standard;
+  overflow-y: auto;
+  // Breathing room on every edge: when the panel is taller than the viewport its
+  // `margin: auto 0` collapses to 0 and the card ran flush against all four edges
+  // on phones. Padding on the scroll container keeps the frame visible while scrolling.
+  padding: ds.$spacing-standard ds.$spacing-tight;
+
+  // Themed thin scrollbar (same treatment as the shop grid) — the default scrollbar
+  // overlaid the panel's right border and read as a clipped card.
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--game-panel-border, rgba(0, 255, 255, 0.3));
+    border-radius: ds.$radius-small;
+  }
+}
+
+// === CONTENT PANEL ===
+// Canonical modal surface: bg-overlay + blur + 1px panel-border + radius-large
+.end-screen-content {
+  --end-frame-accent: var(--game-danger, #{ds.$dark-danger});
+
+  @include ds.instrument-panel(var(--end-frame-accent), var(--game-panel-bg, #{ds.$dark-bg-secondary}), 16px);
+  backdrop-filter: blur(var(--game-blur-panel, 6px));
+  // Death is the default end-state: tint the panel border + halo danger-red so the
+  // frame itself signals "we died" before the headline is parsed. Subtle — a 32%
+  // blend into the panel border plus a faint 1px ring + soft outer glow, not a loud
+  // red box. The .victory override below swaps this whole treatment to ascension-gold.
+  border: ds.$border-width solid
+    color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 32%, var(--game-panel-border, rgba(0, 255, 255, 0.18)));
+  padding: ds.$spacing-standard ds.$spacing-comfortable;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  box-shadow:
+    var(--game-shadow-soft, 0 4px 16px rgba(0, 0, 0, 0.5)),
+    0 0 0 1px color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 14%, transparent),
+    0 0 26px color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 12%, transparent);
+  animation: slideUpFadeIn ds.$animation-medium ds.$easing-standard;
+  position: relative;
+  margin: auto 0;
+
+  // Phones: the card already fills the (padded) container width — tighten the inner
+  // padding so the stat grid + sections breathe without growing the scroll height.
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: ds.$spacing-standard;
+  }
+}
+
+// Victory swaps the death-red frame treatment to ascension-gold so the etched
+// registration marks and border agree with the gold title + backdrop pulse.
+.end-screen-container.victory .end-screen-content {
+  --end-frame-accent: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+
+  border-color: color-mix(
+    in srgb,
+    var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 32%,
+    var(--game-panel-border, rgba(0, 255, 255, 0.18))
+  );
+  box-shadow:
+    var(--game-shadow-soft, 0 4px 16px rgba(0, 0, 0, 0.5)),
+    0 0 0 1px color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 16%, transparent),
+    0 0 26px color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 14%, transparent);
+}

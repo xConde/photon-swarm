@@ -1,0 +1,31 @@
+@use '../../../styles/design-system' as ds;
+
+// Shared button mixin with theme support
+@mixin button-styles() {
+  background-color: transparent;
+  border: ds.$border-width solid var(--game-button-border, rgba(0, 255, 255, 0.5));
+  border-radius: ds.$radius-small;
+  color: var(--game-accent, ds.$dark-accent);
+  cursor: pointer;
+  font-size: ds.$text-base;
+  // WCAG 2.5.5: minimum 44px touch target
+  min-height: 44px;
+  padding: ds.$spacing-tight ds.$spacing-standard;
+  transition: all ds.$animation-standard ds.$easing-standard;
+
+  &:hover:not(:disabled) {
+    background-color: var(--game-accent, ds.$dark-accent);
+    color: var(--game-bg-primary, ds.$dark-bg-primary);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent, ds.$dark-accent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}

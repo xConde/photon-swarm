@@ -1,0 +1,42 @@
+@use '../../../styles/design-system' as ds;
+
+// === TITLE ===
+.end-title {
+  font-size: ds.$text-display;
+  font-weight: ds.$weight-bold;
+  letter-spacing: ds.$tracking-tight;
+  color: var(--game-danger, #{ds.$dark-danger});
+  text-shadow: 0 2px 8px color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 30%, transparent);
+  margin: 0 0 ds.$spacing-tight 0;
+  line-height: ds.$leading-tight;
+
+  // Victory variant — ascension-gold replaces danger-red
+  &.victory-title {
+    color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+    text-shadow: 0 2px 8px color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 35%, transparent);
+  }
+}
+
+.end-tagline {
+  margin: 0 0 ds.$spacing-standard 0;
+  font-size: ds.$text-small;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  text-align: center;
+  font-style: italic;
+  line-height: ds.$leading-tight;
+}
+
+.end-screen-container.victory {
+  // Soft gold backdrop pulse so the victory state reads before the player parses the headline
+  background-image: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 6%, transparent) 0%,
+    transparent 60%
+  );
+}
+
+.restart-btn.victory-restart {
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 12%, transparent);
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  border-color: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 30%, transparent);
+}

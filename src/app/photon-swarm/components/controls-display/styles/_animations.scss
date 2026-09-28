@@ -1,0 +1,21 @@
+// Keyframe animations
+@use '../../../styles/design-system' as ds;
+
+// ---------------------------------------------------------------------------
+// Keyframe animations
+// ---------------------------------------------------------------------------
+
+// SHIFT active / flight mode: subtle beacon pulse (ongoing movement state)
+@keyframes flight-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 ds.$spacing-tight + 2px color-mix(in srgb, var(--game-accent) 40%, transparent),
+      0 1px 0 color-mix(in srgb, var(--game-accent) 20%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 ds.$spacing-generous - 4px color-mix(in srgb, var(--game-accent) 65%, transparent),
+      0 1px 0 color-mix(in srgb, var(--game-accent) 20%, transparent);
+  }
+}

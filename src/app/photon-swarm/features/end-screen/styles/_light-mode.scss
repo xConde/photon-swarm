@@ -1,0 +1,95 @@
+@use '../../../styles/design-system' as ds;
+
+// =============================================================================
+// LIGHT MODE (Day Mode)
+// All theming handled via var(--game-*) which .day-mode overrides globally.
+// Component-scoped overrides only for elements that need additional adjustment.
+// =============================================================================
+:host-context(.day-mode) {
+  // End-screen surface is intentionally dark in both themes (black scrim over the live canvas).
+  // In day-mode --game-text-* cascade to dark slate (designed for light surfaces) which makes
+  // all stats/labels invisible. Re-assert light text tokens here so the dark surface stays legible.
+  --game-text-primary: rgba(255, 255, 255, 0.95);
+  --game-text-secondary: rgba(255, 255, 255, 0.7);
+  --game-text-muted: rgba(255, 255, 255, 0.5);
+
+  // Victory backdrop — same token path as dark mode; light-mode gold token is goldenrod
+  .end-screen-container.victory {
+    background-image: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 6%, transparent) 0%,
+      transparent 60%
+    );
+  }
+
+  // Stat / zone rows use slate tint in day-mode for depth on the light surface
+  .stat-item {
+    background: color-mix(in srgb, var(--game-panel-border, rgba(71, 85, 105, 0.3)) 8%, transparent);
+    border-color: var(--game-panel-border, rgba(71, 85, 105, 0.3));
+
+    &:hover {
+      background: color-mix(in srgb, var(--game-panel-border, rgba(71, 85, 105, 0.3)) 14%, transparent);
+    }
+  }
+
+  .zone-stat-row {
+    background: color-mix(in srgb, var(--game-panel-border, rgba(71, 85, 105, 0.3)) 6%, transparent);
+    border-color: var(--game-panel-border, rgba(71, 85, 105, 0.3));
+  }
+
+  .best-item {
+    background: color-mix(in srgb, var(--game-panel-border, rgba(71, 85, 105, 0.3)) 6%, transparent);
+    border-color: var(--game-panel-border, rgba(71, 85, 105, 0.3));
+
+    &.new-record {
+      background: color-mix(in srgb, var(--game-success, #{ds.$light-success}) 6%, transparent);
+      border-color: color-mix(in srgb, var(--game-success, #{ds.$light-success}) 15%, transparent);
+    }
+  }
+
+  .ascension-badge {
+    background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 8%, transparent);
+    border-color: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 15%, transparent);
+  }
+
+  .ascension-panel {
+    background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 5%, transparent);
+    border-color: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 12%, transparent);
+  }
+
+  // Full-opacity goldenrod (#b8860b) on light surface (#f8fafc) ≈ 4.6:1 — passes WCAG AA.
+  // Dark-mode keeps opacity: 0.7 (see _ascension.scss); this override is day-mode only.
+  .ascension-label {
+    color: var(--game-ascension-gold, #{ds.$light-ascension-gold});
+    opacity: 1;
+  }
+
+  .bonus-item {
+    background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 6%, transparent);
+  }
+
+  .zone-cleared-badge {
+    background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$light-ascension-gold}) 12%, transparent);
+  }
+
+  // Restart button in day-mode: solid accent fill on hover (light accent = dark slate, white text).
+  .restart-btn {
+    &:hover {
+      background: var(--game-accent, #{ds.$light-accent});
+      // Light-mode accent is dark slate — use white text for contrast.
+      color: #{ds.$light-bg-primary};
+      border-color: var(--game-accent, #{ds.$light-accent});
+      box-shadow: none; // No glow in light mode
+    }
+  }
+
+  .ascend-btn {
+    &:hover {
+      // Gold fill always wants DARK text — black on goldenrod is 6.45:1, near-white is
+      // only 3.11:1 (fails WCAG AA). $dark-bg-primary matches the base _ascension hover.
+      background: var(--game-ascension-gold, #{ds.$light-ascension-gold});
+      color: #{ds.$dark-bg-primary};
+      box-shadow: none; // No glow in light mode
+    }
+  }
+}

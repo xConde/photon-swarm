@@ -1,0 +1,56 @@
+@use '../../../styles/design-system' as ds;
+
+.run-build {
+  margin-bottom: ds.$spacing-tight;
+  padding-top: ds.$spacing-tight;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  text-align: left;
+}
+
+.run-build-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ds.$spacing-micro;
+}
+
+.run-build-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: ds.$spacing-tight;
+  padding: ds.$spacing-tight;
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: ds.$radius-base;
+  background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 3%, transparent);
+
+  &.curse {
+    border-color: color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 35%, transparent);
+  }
+
+  &.blessing {
+    border-color: color-mix(in srgb, var(--game-success, #{ds.$dark-success}) 35%, transparent);
+  }
+}
+
+.run-build-name {
+  overflow: hidden;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  font-size: ds.$text-xs;
+  font-weight: ds.$weight-medium;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.run-build-meta {
+  flex: none;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  font-family: ds.$font-mono;
+  font-size: 9px;
+  letter-spacing: ds.$tracking-wide;
+  text-transform: uppercase;
+
+  strong {
+    color: var(--game-accent, #{ds.$dark-accent});
+  }
+}

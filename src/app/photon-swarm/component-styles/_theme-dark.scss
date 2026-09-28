@@ -1,0 +1,70 @@
+@use '../styles/design-system' as ds;
+
+// =============================================================================
+// NIGHT/DARK MODE OVERRIDES
+// Interaction symmetry: Solid → Ghost on hover (opposite of light mode)
+// =============================================================================
+
+:host-context(.night-mode) {
+  // Dark mode button behavior (Contact page pattern)
+  // Dark mode: Solid → Ghost on hover
+  .shop-button {
+    background-color: var(--game-accent, #{ds.$dark-accent});
+    color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+    border-color: var(--game-accent, #{ds.$dark-accent});
+    filter: brightness(0.85);
+
+    &:hover:not(:disabled) {
+      background-color: transparent;
+      color: var(--game-accent, #{ds.$dark-accent});
+      border-color: var(--game-button-border, rgba(0, 255, 255, 0.3));
+      filter: brightness(1);
+    }
+  }
+
+  .pause-menu .menu-btn {
+    background-color: var(--game-accent, #{ds.$dark-accent});
+    color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+    border-color: var(--game-accent, #{ds.$dark-accent});
+    filter: brightness(0.85);
+
+    &:hover:not(:disabled) {
+      background-color: transparent;
+      color: var(--game-accent, #{ds.$dark-accent});
+      border-color: rgba(ds.$dark-accent, 0.5);
+      filter: brightness(1);
+      box-shadow: 0 0 ds.$spacing-standard rgba(ds.$dark-accent, 0.3);
+
+      .btn-text {
+        color: var(--game-accent, #{ds.$dark-accent});
+      }
+
+      .btn-icon {
+        color: var(--game-accent, #{ds.$dark-accent});
+      }
+    }
+  }
+
+  // Save & Quit is the one semantic exception: destructive action uses danger accent.
+  .pause-menu .save-btn {
+    border-color: rgba(ds.$dark-danger, 0.5);
+    color: ds.$dark-danger;
+
+    .btn-text,
+    .btn-icon {
+      color: ds.$dark-danger;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: transparent;
+      color: ds.$dark-danger;
+      border-color: rgba(ds.$dark-danger, 0.6);
+      box-shadow: 0 0 ds.$spacing-standard rgba(ds.$dark-danger, 0.4);
+
+      .btn-text,
+      .btn-icon {
+        color: ds.$dark-danger;
+      }
+    }
+  }
+}

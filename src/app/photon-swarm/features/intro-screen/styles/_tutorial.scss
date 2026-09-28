@@ -1,0 +1,538 @@
+@use '../../../styles/design-system' as ds;
+
+.instructions-container {
+  max-width: 600px;
+  margin: 0 auto 10px;
+
+  @media (max-width: 480px) {
+    margin-bottom: ds.$spacing-micro;
+  }
+
+  .mission-text {
+    margin: 0;
+    font-size: clamp(ds.$text-base, 1.4vw, ds.$text-medium);
+    line-height: ds.$leading-relaxed;
+    color: var(--game-accent-light, ds.$dark-accent-light);
+    text-shadow: 0 0 2px var(--game-glow-color, rgba(0, 200, 255, 0.3));
+    text-align: center;
+    max-width: 650px;
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+/* Tutorial Stepper Styles */
+.stepper-container {
+  inline-size: 100%;
+  max-inline-size: clamp(20rem, 85%, 45rem);
+  margin-block: clamp(ds.$spacing-tight, 2vh, ds.$spacing-comfortable)
+    clamp(ds.$spacing-standard, 3vh, ds.$spacing-comfortable);
+  background-color: var(--game-panel-bg, rgba(0, 30, 60, 0.5));
+  border-radius: ds.$radius-medium;
+  padding: ds.$spacing-standard ds.$spacing-standard;
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 150, 255, 0.3));
+  animation: fadeIn ds.$animation-slow ds.$easing-standard;
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    max-inline-size: 95%;
+    margin-block-start: 0;
+    margin-block-end: ds.$spacing-standard;
+    padding: ds.$spacing-tight;
+  }
+}
+
+.steps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ds.$spacing-micro;
+
+  h3 {
+    margin: 0;
+    font-size: clamp(ds.$text-medium, 2vw, ds.$text-large + 2px);
+    color: var(--game-accent-light, ds.$dark-accent);
+    font-weight: ds.$weight-medium;
+    letter-spacing: ds.$tracking-wide;
+  }
+
+  .step-indicator {
+    display: flex;
+    gap: ds.$spacing-tight;
+
+    .step-dot {
+      // Visual dot is 9px; tap target expanded to >=44px via ::before pseudo
+      // WCAG 2.5.5: 9px + 2 * 17.5px = 44px
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border-radius: 50%;
+      background-color: var(--game-button-bg, rgba(255, 255, 255, 0.2));
+      border: ds.$border-width solid var(--game-button-border, rgba(255, 255, 255, 0.4));
+      transition: all ds.$animation-standard ds.$easing-standard;
+      cursor: pointer;
+      // Expand touch target without changing visual size
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -17.5px;
+      }
+
+      &.active {
+        background-color: var(--game-accent, ds.$dark-accent);
+        box-shadow: 0 0 ds.$spacing-tight var(--game-glow-color, rgba(93, 204, 255, 0.7));
+        transform: scale(1.1);
+      }
+
+      &:hover:not(.active) {
+        background-color: var(--game-text-muted, rgba(255, 255, 255, 0.3));
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--game-accent, ds.$dark-accent);
+        outline-offset: 2px;
+      }
+    }
+  }
+}
+
+// Arrow + content laid out as a flex row so arrows don't overlap keys
+.tutorial-body {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.tutorial-arrow {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: clamp(ds.$text-xlarge, 4vw, ds.$text-display);
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  cursor: pointer;
+  // Touch-friendly: minimum 44px tap target
+  min-height: 44px;
+  min-width: 44px;
+  padding: ds.$spacing-tight;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all ds.$animation-fast ds.$easing-standard;
+  border-radius: ds.$radius-small;
+  align-self: center;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover:not(:disabled) {
+    color: var(--game-accent, ds.$dark-accent);
+  }
+
+  &:active:not(:disabled) {
+    color: var(--game-accent, ds.$dark-accent);
+    background: color-mix(in srgb, var(--game-accent) 6%, transparent);
+    transform: scale(0.9);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent, ds.$dark-accent);
+    outline-offset: 2px;
+    color: var(--game-accent, ds.$dark-accent);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+.step-content-area {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+
+  > .step-content {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity ds.$animation-standard ds.$easing-standard;
+    // Center content vertically within the grid cell (tallest step sets height)
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &.active {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}
+
+.step-content {
+  h4 {
+    font-size: ds.$text-medium;
+    margin: 0 0 ds.$spacing-comfortable;
+    text-align: center;
+    color: var(--game-text-primary, ds.$dark-text);
+    font-weight: ds.$weight-regular;
+  }
+}
+
+// ── 3D stacked key display (Movement step) ──
+.key-stack-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: ds.$spacing-standard;
+}
+
+.key-stack {
+  position: relative;
+  display: grid;
+  place-items: center;
+  // Extra padding so the offset background layer doesn't clip
+  padding: 0 12px 14px 0;
+
+  // Larger keys for the movement step
+  .keyboard-visual {
+    gap: 8px;
+
+    .key {
+      inline-size: clamp(3rem, 14vw, 3.6rem);
+      block-size: clamp(3rem, 14vw, 3.6rem);
+      font-size: ds.$text-large;
+      font-weight: ds.$weight-medium;
+    }
+
+    .key-row {
+      gap: 8px;
+    }
+  }
+
+  > .key-layer {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+
+    &.foreground {
+      z-index: 2;
+      opacity: 1;
+      transform: translate(-6px, -6px);
+    }
+
+    // Background: large offset so alternate keys peek out clearly
+    &.background {
+      z-index: 1;
+      opacity: 0.55;
+      transform: translate(6px, 6px);
+      pointer-events: none;
+
+      .key {
+        // Background layer: slightly darker than --key-bg; uses --game-panel-bg as theme-aware base
+        background-color: var(--game-panel-bg);
+        border-color: color-mix(in srgb, var(--game-panel-border) 25%, transparent);
+
+        span {
+          opacity: 0.65;
+        }
+      }
+
+      .key-label {
+        opacity: 0.45;
+      }
+    }
+  }
+}
+
+.keyboard-mouse-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: ds.$spacing-standard;
+  margin-bottom: ds.$spacing-micro;
+}
+
+.keyboard-group,
+.mouse-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Utility keys: bigger with more spacing
+.keyboard-group.single-key {
+  .keyboard-visual .key {
+    inline-size: clamp(3rem, 14vw, 3.6rem);
+    block-size: clamp(3rem, 14vw, 3.6rem);
+    font-size: ds.$text-large;
+    font-weight: ds.$weight-medium;
+
+    &.escape-key {
+      font-size: ds.$text-base;
+    }
+  }
+
+  .key-label {
+    margin-top: ds.$spacing-tight;
+    font-size: ds.$text-base;
+  }
+}
+
+// Utility step: wider gap between the two keys
+.step-content:last-child .keyboard-mouse-container {
+  gap: clamp(ds.$spacing-generous, 12vw, 5rem);
+}
+
+.keyboard-group.single-key .dual-key-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.keyboard-group.dual-actions {
+  flex-direction: row;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 10px;
+
+  .action-key-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 180px;
+
+    .key-label {
+      margin-top: ds.$spacing-tight;
+      text-align: center;
+      line-height: ds.$leading-snug;
+      font-size: ds.$text-small;
+      min-height: 2.2em;
+    }
+  }
+}
+
+.keyboard-group.triple-actions {
+  flex-direction: row;
+  gap: ds.$spacing-tight;
+  justify-content: center;
+  margin-bottom: ds.$spacing-micro;
+  flex-wrap: wrap;
+
+  .action-key-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 140px;
+    min-width: 80px;
+
+    .key-label {
+      margin-top: ds.$spacing-micro;
+      text-align: center;
+      line-height: ds.$leading-tight;
+      font-size: ds.$text-micro;
+      min-height: 2em;
+    }
+  }
+}
+
+.keyboard-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+
+  &.wide-key {
+    min-width: 110px;
+
+    .space-key {
+      width: 110px !important;
+    }
+  }
+
+  &.dual-key-row {
+    /* override the default column direction */
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+    /* pull the keys up a bit so the label sits nicely */
+    margin-bottom: 4px;
+  }
+
+  .key-row {
+    display: flex;
+    gap: 4px;
+  }
+
+  .key {
+    position: relative;
+    inline-size: clamp(1.5rem, 9vw, 2.25rem);
+    block-size: clamp(1.5rem, 9vw, 2.25rem);
+    background-color: var(--key-bg, rgba(40, 40, 50, 0.8));
+    border: ds.$border-width solid var(--key-border, rgba(80, 130, 200, 0.8));
+    border-radius: ds.$radius-small;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: ds.$text-base;
+    user-select: none;
+    overflow: hidden;
+    color: var(--game-text-primary, ds.$dark-text);
+
+    span {
+      z-index: 2;
+      position: relative;
+    }
+
+    .key-highlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--key-highlight, rgba(93, 204, 255, 0.6));
+      opacity: 0;
+      transition: opacity ds.$animation-standard ds.$easing-standard;
+
+      &.active {
+        opacity: 1;
+      }
+    }
+
+    &.escape-key {
+      background-color: var(--key-escape-bg, rgba(60, 40, 50, 0.8));
+      border-color: var(--key-escape-border, rgba(200, 80, 130, 0.8));
+    }
+
+    &.space-key {
+      inline-size: clamp(3.5rem, 40vw, 5.5rem) !important;
+      block-size: ds.$spacing-major;
+      border-radius: ds.$radius-base;
+      background-color: var(--key-special-bg, rgba(50, 50, 60, 0.8));
+      font-size: ds.$text-small;
+    }
+
+    &.shift-key {
+      inline-size: clamp(3.5rem, 40vw, 5.5rem) !important;
+      block-size: ds.$spacing-major;
+      border-radius: ds.$radius-base;
+      background-color: var(--key-special-bg, rgba(50, 50, 60, 0.8));
+      font-size: ds.$text-small;
+    }
+  }
+}
+
+.mouse-group {
+  // No float animation — restrained neon principle: no always-on ambient animations
+}
+
+.mouse-visual {
+  position: relative;
+  inline-size: 36px;
+  block-size: 56px;
+
+  @media (max-width: 480px) {
+    inline-size: 28px;
+    block-size: 44px;
+  }
+  background-color: var(--key-bg, rgba(40, 40, 50, 0.8));
+  border: ds.$border-width solid var(--key-border, rgba(80, 130, 200, 0.8));
+  border-radius: 18px;
+  margin-bottom: 4px;
+
+  .mouse-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .mouse-button {
+      position: absolute;
+      width: 50%;
+      height: 40%;
+      top: 0;
+      background-color: var(--key-bg, rgba(40, 40, 50, 0.8));
+      border-bottom: ds.$border-width solid var(--key-border, rgba(80, 130, 200, 0.5));
+      border-radius: 25px 25px 0 0;
+      transition: background-color ds.$animation-standard ds.$easing-standard;
+
+      &.left {
+        left: 0;
+        border-top-right-radius: 0;
+        border-right: ds.$border-width solid var(--key-border, rgba(80, 130, 200, 0.5));
+      }
+
+      &.right {
+        right: 0;
+        border-top-left-radius: 0;
+      }
+
+      &.highlight {
+        background-color: var(--key-highlight, rgba(93, 204, 255, 0.6));
+      }
+    }
+
+    .mouse-wheel {
+      position: absolute;
+      width: 4px;
+      height: ds.$spacing-tight;
+      top: ds.$spacing-standard;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--game-text-muted, rgba(150, 150, 150, 0.8));
+      border-radius: 3px;
+    }
+  }
+}
+
+.mouse-label,
+.key-label {
+  font-size: ds.$text-small;
+  color: var(--game-accent-light, ds.$dark-accent-light);
+  text-align: center;
+  line-height: ds.$leading-relaxed;
+}
+
+.instruction-desc {
+  text-align: center;
+  font-size: ds.$text-caption;
+  color: var(--game-text-primary, rgba(255, 255, 255, 0.9));
+  margin-bottom: ds.$spacing-tight;
+  font-weight: ds.$weight-medium;
+}
+
+/* Animations */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes neonPulse {
+  from {
+    text-shadow:
+      0 0 4px var(--game-glow-color, rgba(0, 255, 255, 0.7)),
+      0 0 8px var(--game-glow-color, rgba(0, 255, 255, 0.5));
+  }
+  to {
+    text-shadow: 0 0 2px var(--game-glow-color, rgba(0, 255, 255, 0.4));
+  }
+}

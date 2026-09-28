@@ -1,0 +1,358 @@
+@if (isVisible) {
+  <div class="shop-container" role="dialog" aria-modal="true" aria-labelledby="shop-heading">
+    <h2 id="shop-heading">Shop</h2>
+    <button class="close-button" aria-label="Close shop" (click)="closeShop()">&times;</button>
+
+    <div class="shop-header">
+      <div class="shop-tabs" role="tablist" aria-label="Shop categories" (keydown)="onTablistKeydown($event)">
+        @for (tab of tabs; track tab) {
+          <button
+            class="tab-button"
+            role="tab"
+            [id]="'shop-tab-' + tabKey(tab)"
+            [attr.aria-controls]="'shop-panel-' + tabKey(tab)"
+            [attr.aria-selected]="activeTab === tab"
+            [tabindex]="activeTab === tab ? 0 : -1"
+            [class.active]="activeTab === tab"
+            (click)="activeTab = tab"
+          >
+            {{ tab }}
+          </button>
+        }
+      </div>
+      <span class="shards-display">{{ photonPoints }} Shards</span>
+    </div>
+
+    <!-- Upgrades section -->
+    @if (activeTab === 'Upgrades') {
+      <div class="cosmetics-container" role="tabpanel" id="shop-panel-upgrades" aria-labelledby="shop-tab-upgrades">
+        <div class="module-brief">
+          <span class="module-brief__label">Deployment module</span>
+          <span>Unlock modules permanently. Mount one for your next run.</span>
+        </div>
+        <div class="cosmetic-grid upgrade-grid">
+          @for (item of shopItems; track item.id) {
+            <button
+              type="button"
+              class="cosmetic-item upgrade-item"
+              [class.disabled]="!item.unlocked && photonPoints < item.cost"
+              [class.affordable]="!item.unlocked && photonPoints >= item.cost"
+              [class.mounted]="activeModuleId === item.id"
+              [disabled]="!item.unlocked && photonPoints < item.cost"
+              (click)="buyUpgrade(item)"
+            >
+              <div class="upgrade-heading">
+                <span class="module-role">{{ item.role }}</span>
+                @if (item.unlocked) {
+                  <span class="module-unlocked">Unlocked</span>
+                }
+              </div>
+              <p class="upgrade-name">{{ item.name }}</p>
+              <p class="upgrade-desc">{{ item.description }}</p>
+              <p class="upgrade-preview">{{ item.effectLabel }}</p>
+              <div class="upgrade-footer">
+                <span class="module-action" [class.module-action--mounted]="activeModuleId === item.id">
+                  {{ getModuleAction(item) }}
+                </span>
+                @if (!item.unlocked) {
+                  <span class="module-currency">shards</span>
+                } @else if (activeModuleId !== item.id) {
+                  <span class="module-currency">next deployment</span>
+                }
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Consumables section -->
+    @if (activeTab === 'Consumables') {
+      <div
+        class="cosmetics-container"
+        role="tabpanel"
+        id="shop-panel-consumables"
+        aria-labelledby="shop-tab-consumables"
+      >
+        <div class="cosmetic-filters">
+          @for (category of ['combat', 'defense', 'utility']; track $index) {
+            <button
+              class="filter-button"
+              [class.active]="activeConsumableCategory === category"
+              (click)="filterConsumables(category)"
+            >
+              {{ category | titlecase }}
+            </button>
+          }
+        </div>
+
+        <div class="cosmetic-grid consumable-grid">
+          @for (item of filteredConsumables; track item.id) {
+            <div
+              class="cosmetic-item consumable-item"
+              [class.disabled]="photonPoints < item.cost && getConsumableQuantity(item.id) === 0"
+            >
+              <div class="consumable-actions">
+                <button class="buy-button" [disabled]="photonPoints < item.cost" (click)="buyConsumable(item)">
+                  Buy ({{ item.cost }})
+                </button>
+                <button
+                  class="use-button"
+                  [disabled]="getConsumableQuantity(item.id) === 0 || !gameEngine.isGameActive()"
+                  (click)="useConsumable(item)"
+                >
+                  Use
+                </button>
+              </div>
+              @if (getConsumableQuantity(item.id) > 0) {
+                <div class="status-chip quantity">Owned: {{ getConsumableQuantity(item.id) }}</div>
+              }
+              <div class="consumable-icon">
+                <i [class]="item.icon"></i>
+              </div>
+              <div class="cosmetic-info">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+                @if (item.duration > 0) {
+                  <p class="duration">Duration: {{ item.duration }}s</p>
+                }
+                @if (item.cooldown) {
+                  <p class="cooldown">Cooldown: {{ item.cooldown }}s</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Cosmetics section -->
+    @if (activeTab === 'Cosmetics') {
+      <div class="cosmetics-container" role="tabpanel" id="shop-panel-cosmetics" aria-labelledby="shop-tab-cosmetics">
+        <div class="cosmetic-filters">
+          @for (category of cosmeticCategories; track category.id) {
+            <button
+              class="filter-button"
+              [class.active]="activeCosmeticCategory === category.id"
+              (click)="filterCosmetics(category.id)"
+            >
+              {{ category.name }}
+            </button>
+          }
+        </div>
+
+        <div class="cosmetic-grid">
+          @for (cosmetic of filteredCosmetics; track cosmetic.id) {
+            <div
+              class="cosmetic-item"
+              [class.active]="isActiveCosmetic(cosmetic)"
+              [class.affordable]="!cosmetic.unlocked && photonPoints >= cosmetic.cost"
+              [class.disabled]="!cosmetic.unlocked && photonPoints < cosmetic.cost"
+              (click)="handleCosmeticClick(cosmetic)"
+            >
+              @if (!cosmetic.unlocked) {
+                <div class="status-chip cost">{{ cosmetic.cost }} Shards</div>
+              }
+              @if (cosmetic.unlocked && !isActiveCosmetic(cosmetic)) {
+                <div class="status-chip activate">Activate</div>
+              }
+              @if (cosmetic.unlocked && isActiveCosmetic(cosmetic)) {
+                <div class="status-chip active">Active</div>
+              }
+              <div class="cosmetic-preview">
+                @switch (cosmetic.type) {
+                  <!-- Ship Colors: live hull preview in the active shape + this color -->
+                  @case ('shipColor') {
+                    <app-ship-preview
+                      [shapeId]="getPreviewShapeId()"
+                      [fillColor]="getPreviewFillColor(cosmetic)"
+                    ></app-ship-preview>
+                  }
+
+                  <!-- Beam Colors -->
+                  @case ('beamColor') {
+                    <div
+                      class="color-preview"
+                      [style.background-color]="cosmetic.colors && cosmetic.colors.length ? cosmetic.colors[0] : '#ccc'"
+                    ></div>
+                  }
+
+                  <!-- Ship Shapes: live hull preview in this shape + active color -->
+                  @case ('shipShape') {
+                    <app-ship-preview
+                      [shapeId]="cosmetic.id"
+                      [fillColor]="getPreviewFillColor(cosmetic)"
+                    ></app-ship-preview>
+                  }
+
+                  <!-- Accessories -->
+                  @case ('accessory') {
+                    <div class="accessory-preview">
+                      <!-- None -->
+                      @if (cosmetic.id === 'none') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1"
+                            stroke-dasharray="2 2"
+                          />
+                          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="1.5" />
+                          <line x1="6" y1="18" x2="18" y2="6" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
+                      }
+                      <!-- Crown -->
+                      @if (cosmetic.id === 'crown') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <path d="M5,16 L5,15 L3,8 L7,10 L12,4 L17,10 L21,8 L19,15 L19,16 L5,16 Z" fill="gold" />
+                          <path d="M5,19 L5,17 L19,17 L19,19 L5,19 Z" fill="gold" />
+                        </svg>
+                      }
+                      <!-- Santa Hat (fixed) -->
+                      @if (cosmetic.id === 'santa-hat') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <!-- Hat body -->
+                          <path d="M4,16 C4,12 8,8 12,8 C16,8 20,12 20,16 L4,16 Z" fill="#cc0000" />
+                          <!-- White trim -->
+                          <path d="M4,16 C4,18 6,20 12,20 C18,20 20,18 20,16" fill="#ffffff" />
+                          <!-- Pom-pom -->
+                          <circle cx="20" cy="16" r="2" fill="#ffffff" />
+                        </svg>
+                      }
+                      <!-- Halo -->
+                      @if (cosmetic.id === 'halo') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <ellipse cx="12" cy="5" rx="8" ry="3" stroke="gold" stroke-width="2" fill="none" />
+                          <path d="M12,5 L12,8" stroke="gold" stroke-width="1" opacity="0.6" />
+                        </svg>
+                      }
+                      <!-- Energy Shield -->
+                      @if (cosmetic.id === 'energy-shield') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <circle cx="12" cy="12" r="10" fill="none" stroke="#00aaff" stroke-width="1.5" />
+                          <circle cx="12" cy="12" r="8" fill="none" stroke="#00aaff" stroke-width="1" opacity="0.7" />
+                          <circle cx="12" cy="12" r="6" fill="none" stroke="#00aaff" stroke-width="0.5" opacity="0.4" />
+                        </svg>
+                      }
+                      <!-- Satellite Orbiter -->
+                      @if (cosmetic.id === 'satellite-orbiter') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <circle cx="12" cy="12" r="6" fill="none" stroke="white" stroke-width="1" />
+                          <circle cx="18" cy="12" r="2" fill="#00ffcc" />
+                          <circle cx="12" cy="6" r="1.5" fill="#ff9dea" />
+                        </svg>
+                      }
+                      <!-- Trail Effect -->
+                      @if (cosmetic.id === 'trail-effect') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <path
+                            d="M4,12 C8,10 12,14 16,12 C20,10 22,14 20,18"
+                            stroke="#00aaff"
+                            stroke-width="2"
+                            fill="none"
+                            stroke-linecap="round"
+                          />
+                          <path
+                            d="M4,8 C8,6 12,10 16,8 C20,6 22,10 20,14"
+                            stroke="#00aaff"
+                            stroke-width="1.5"
+                            fill="none"
+                            stroke-linecap="round"
+                            opacity="0.7"
+                          />
+                          <path
+                            d="M4,4 C8,2 12,6 16,4 C20,2 22,6 20,10"
+                            stroke="#00aaff"
+                            stroke-width="1"
+                            fill="none"
+                            stroke-linecap="round"
+                            opacity="0.4"
+                          />
+                        </svg>
+                      }
+                      <!-- Damage Aura -->
+                      @if (cosmetic.id === 'damage-aura') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <circle cx="12" cy="12" r="8" fill="none" stroke="#ff5a5f" stroke-width="0.5" />
+                          <path d="M12,4 L14,8 L12,12 L10,8 Z" fill="#ff5a5f" opacity="0.8" />
+                          <path d="M20,12 L16,14 L12,12 L16,10 Z" fill="#ff5a5f" opacity="0.8" />
+                          <path d="M12,20 L10,16 L12,12 L14,16 Z" fill="#ff5a5f" opacity="0.8" />
+                          <path d="M4,12 L8,10 L12,12 L8,14 Z" fill="#ff5a5f" opacity="0.8" />
+                        </svg>
+                      }
+                      <!-- Sparkling Stars -->
+                      @if (cosmetic.id === 'sparkling-stars') {
+                        <svg viewBox="0 0 24 24" width="100%" height="100%">
+                          <g>
+                            <polygon points="12,4 14,9 20,9 15,13 17,18 12,15 7,18 9,13 4,9 10,9" fill="#00ffff" />
+                            <polygon points="6,4 6.5,5 7.5,5 6.7,6 7,7 6,6.3 5,7 5.3,6 4.5,5 5.5,5" fill="#ffff00" />
+                            <polygon
+                              points="18,4 18.5,5 19.5,5 18.7,6 19,7 18,6.3 17,7 17.3,6 16.5,5 17.5,5"
+                              fill="#ffff00"
+                            />
+                            <polygon
+                              points="5,17 5.5,18 6.5,18 5.7,19 6,20 5,19.3 4,20 4.3,19 3.5,18 4.5,18"
+                              fill="#ffff00"
+                            />
+                            <polygon
+                              points="19,17 19.5,18 20.5,18 19.7,19 20,20 19,19.3 18,20 18.3,19 17.5,18 18.5,18"
+                              fill="#ffff00"
+                            />
+                            <polygon points="9,11 9.2,10.2 10,10 9.2,9.8 9,9 8.8,9.8 8,10 8.8,10.2" fill="white" />
+                            <polygon points="16,8 16.2,7.2 17,7 16.2,6.8 16,6 15.8,6.8 15,7 15.8,7.2" fill="white" />
+                            <polygon points="8,16 8.2,15.2 9,15 8.2,14.8 8,14 7.8,14.8 7,15 7.8,15.2" fill="white" />
+                            <polygon
+                              points="17,15 17.2,14.2 18,14 17.2,13.8 17,13 16.8,13.8 16,14 16.8,14.2"
+                              fill="white"
+                            />
+                          </g>
+                        </svg>
+                      }
+                      <!-- Fallback -->
+                      @if (
+                        ![
+                          'none',
+                          'crown',
+                          'santa-hat',
+                          'halo',
+                          'energy-shield',
+                          'satellite-orbiter',
+                          'trail-effect',
+                          'damage-aura',
+                          'sparkling-stars',
+                        ].includes(cosmetic.id)
+                      ) {
+                        <div class="icon-preview">
+                          {{ cosmetic.name }}
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <!-- Default fallback -->
+                  @default {
+                    <div class="icon-preview">{{ cosmetic.name[0] }}</div>
+                  }
+                }
+              </div>
+
+              <div class="cosmetic-info">
+                <h3>{{ cosmetic.name }}</h3>
+                <p>{{ cosmetic.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Use controls-display component in modal-hint mode - positioned outside modal -->
+@if (isVisible) {
+  <app-controls-display [controls]="[{ key: 'ESC', action: 'Close' }]" displayMode="modal-hint" position="bottom-right">
+  </app-controls-display>
+}

@@ -1,0 +1,230 @@
+@use '../../../styles/design-system' as ds;
+
+// ===== THEME-SPECIFIC OVERRIDES =====
+
+// Light mode (Day mode) - Ghost → Solid hover pattern
+// Following Contact page and Quote-Weave patterns for A24 vintage aesthetic
+:host-context(.day-mode) {
+  // CRITICAL: Override game-* variables for cream background theme
+  --game-bg-primary: #{ds.$light-bg-primary}; // Cream background
+  --game-accent: #{ds.$light-accent}; // Dark slate gray
+  --game-accent-light: #{ds.$light-accent-light};
+  --game-text-primary: #{ds.$light-text};
+  --game-text-secondary: #{rgba(ds.$light-accent, 0.7)};
+  --game-text-muted: #{rgba(ds.$light-accent, 0.5)};
+  --game-button-bg: #{rgba(ds.$light-accent, 0.05)};
+  --game-button-border: #{rgba(ds.$light-accent, 0.4)};
+  --game-glow-color: #{rgba(ds.$light-accent, 0.2)};
+  --game-panel-bg: #{rgba(ds.$light-accent, 0.05)};
+  --game-panel-border: #{rgba(ds.$light-accent, 0.2)};
+
+  // Keyboard/mouse visual colors for light theme
+  --key-bg: #{rgba(ds.$light-accent, 0.08)};
+  --key-border: #{rgba(ds.$light-accent, 0.3)};
+  --key-highlight: #{rgba(ds.$light-accent, 0.25)};
+  --key-escape-bg: #{rgba(ds.$light-danger, 0.08)};
+  --key-escape-border: #{rgba(ds.$light-danger, 0.35)};
+  --key-special-bg: #{rgba(ds.$light-accent, 0.1)};
+
+  // Ensure host background is cream
+  background-color: ds.$light-bg-primary;
+  color: ds.$light-accent;
+
+  // Disable neon animations in light mode
+  .intro-header h1,
+  .intro-header h2 {
+    animation: none;
+    text-shadow: none;
+  }
+
+  // Input styling for light mode (like Contact page)
+  .input-container input {
+    background-color: rgba(ds.$light-accent, 0.05);
+    border-color: rgba(ds.$light-accent, 0.3);
+    color: ds.$light-accent;
+
+    &:focus {
+      border-color: ds.$light-accent;
+      box-shadow: 0 0 0 2px rgba(ds.$light-accent, 0.1);
+    }
+
+    &::placeholder {
+      color: rgba(ds.$light-accent, 0.5);
+    }
+  }
+
+  // Panel/container styling for light mode
+  .stepper-container {
+    background-color: rgba(ds.$light-accent, 0.03);
+    border-color: rgba(ds.$light-accent, 0.15);
+  }
+
+  // Welcome text styling
+  .welcome-text {
+    color: ds.$light-accent;
+
+    .cursor {
+      background-color: ds.$light-accent;
+    }
+  }
+
+  // Mission text for light mode
+  .instructions-container .mission-text {
+    color: ds.$light-accent-light;
+    text-shadow: none;
+  }
+
+  // Ghost → Solid button interaction (default light mode)
+  .action-buttons button,
+  .game-actions .start-mission.full-width {
+    background-color: transparent;
+    border-color: rgba(ds.$light-accent, 0.5);
+    color: ds.$light-accent;
+
+    &:hover:not(:disabled) {
+      background-color: ds.$light-accent;
+      color: ds.$light-bg-primary;
+      box-shadow: none;
+    }
+  }
+
+  .back-link,
+  .game-actions .secondary-action {
+    color: rgba(ds.$light-accent, 0.45);
+
+    &:hover {
+      color: ds.$light-accent;
+    }
+  }
+
+  // Touch hint illustrations for light mode
+  .touch-hint-joystick .th-base {
+    background: rgba(ds.$light-accent, 0.04);
+    border-color: rgba(ds.$light-accent, 0.2);
+  }
+
+  .touch-hint-joystick .th-stick {
+    background: rgba(ds.$light-accent, 0.25);
+    border-color: rgba(ds.$light-accent, 0.5);
+    box-shadow: none;
+  }
+
+  // aim joystick and action buttons use CSS var tokens — no day-mode override needed
+
+  .ta-btn {
+    // ta-btn uses var(--game-accent/aim-accent) — automatic in day-mode via :root overrides
+    background: rgba(ds.$light-accent, 0.04);
+  }
+
+  .th-pause-btn {
+    // th-pause-btn uses var(--game-panel-bg/accent) — automatic in day-mode via :root overrides
+    background: rgba(ds.$light-accent, 0.04);
+  }
+
+  .touch-hint-label,
+  .th-pause-label {
+    color: rgba(ds.$light-accent, 0.45);
+  }
+
+  // Star field adjustments for light mode - subtle dust particles
+  .star-field {
+    .star {
+      background-color: rgba(ds.$light-accent, 0.4);
+      box-shadow: none;
+    }
+
+    .asteroid {
+      background: radial-gradient(circle at 30% 30%, rgba(ds.$light-accent, 0.5) 0%, rgba(ds.$light-accent, 0.2) 100%);
+    }
+
+    .shooting-star {
+      background: linear-gradient(
+        90deg,
+        rgba(ds.$light-accent, 0) 0%,
+        rgba(ds.$light-accent, 0.4) 50%,
+        rgba(ds.$light-accent, 0) 100%
+      );
+    }
+
+    .saucer {
+      background: radial-gradient(
+        ellipse at center,
+        rgba(ds.$light-accent, 0.6) 0%,
+        rgba(ds.$light-accent, 0.4) 60%,
+        rgba(ds.$light-accent, 0.2) 100%
+      );
+      box-shadow: none;
+    }
+
+    &::after {
+      background: radial-gradient(circle at 55% 35%, rgba(ds.$light-accent, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+    }
+  }
+
+  // Step dots for light mode
+  .steps-header {
+    h3 {
+      color: ds.$light-accent;
+    }
+
+    .step-indicator .step-dot {
+      background-color: rgba(ds.$light-accent, 0.1);
+      border-color: rgba(ds.$light-accent, 0.3);
+
+      &.active {
+        background-color: ds.$light-accent;
+        box-shadow: none;
+      }
+
+      &:hover:not(.active) {
+        background-color: rgba(ds.$light-accent, 0.2);
+      }
+    }
+  }
+
+  // Tutorial arrows for light mode
+  .tutorial-arrow {
+    color: rgba(ds.$light-accent, 0.4);
+
+    &:hover:not(:disabled) {
+      color: ds.$light-accent;
+    }
+  }
+
+  // Labels for light mode
+  .mouse-label,
+  .key-label {
+    color: ds.$light-accent-light;
+  }
+
+  .instruction-desc {
+    color: ds.$light-accent;
+  }
+}
+
+// Dark mode (Night mode) - Solid → Ghost hover pattern
+:host-context(.night-mode) {
+  // Keyboard illustration colors for dark theme.
+  // key-bg/key-border: decorative key-cap surfaces (no token match — neutral dark blue-gray).
+  // key-highlight/key-escape-border: accent-family colors mapped to tokens.
+  --key-bg: rgba(40, 40, 50, 0.8); // Neutral dark key-cap — no token equivalent
+  --key-border: rgba(80, 130, 200, 0.8); // Mid blue key-cap edge — no token equivalent
+  --key-highlight: #{rgba(ds.$dark-accent, 0.6)};
+  --key-escape-bg: rgba(60, 40, 50, 0.8); // Neutral dark Escape cap — no token equivalent
+  --key-escape-border: #{rgba(ds.$dark-special, 0.8)};
+  --key-special-bg: rgba(50, 50, 60, 0.8); // Neutral dark Space/Shift cap — no token equivalent
+
+  // Solid → Ghost button interaction (night mode)
+  .action-buttons button,
+  .game-actions .start-mission.full-width {
+    background-color: var(--game-accent);
+    color: var(--game-bg-primary);
+    filter: brightness(0.85);
+
+    &:hover:not(:disabled) {
+      background-color: transparent;
+      color: var(--game-accent);
+      filter: brightness(1);
+    }
+  }
+}

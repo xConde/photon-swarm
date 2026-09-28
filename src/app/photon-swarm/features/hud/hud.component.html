@@ -1,0 +1,207 @@
+<!-- Main HUD Container -->
+<div class="hud-container" [class]="getHudClasses()">
+  <!-- FPS Warning (only when performance is poor) -->
+  @if (currentFPS > 0 && currentFPS < 30) {
+    <div class="fps-counter fps-warning" [style.color]="getFPSColor()">{{ currentFPS }} FPS</div>
+  }
+
+  <!-- Difficulty Badge (non-normal only) -->
+  @if (difficultyLabel) {
+    <div class="difficulty-badge" [style.color]="difficultyColor">{{ difficultyLabel }}</div>
+  }
+
+  <!-- Stats Pill — compact floating indicator -->
+  <div class="stats-pill" [class.critical-health]="healthPercentage < 25" [class.danger-health]="healthPercentage < 15">
+    <div class="pill-stat health-stat" [attr.aria-label]="'Health: ' + (health | number: '1.0-0')">
+      <span class="pill-icon health-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+          <path
+            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+          />
+        </svg>
+      </span>
+      <span class="health-bar" aria-hidden="true">
+        <span
+          class="health-bar-fill"
+          [class.low]="healthPercentage < 40"
+          [class.crit]="healthPercentage < 20"
+          [style.width.%]="healthPercentage"
+        ></span>
+      </span>
+      <span class="pill-value health-value" [class.health-low]="healthPercentage < 25" aria-hidden="true">{{
+        health | number: '1.0-0'
+      }}</span>
+    </div>
+    <div class="pill-divider" aria-hidden="true"></div>
+    <div class="pill-stat" [attr.aria-label]="'Wave: ' + currentWave">
+      <span class="pill-label" aria-hidden="true">WAVE</span>
+      <span class="pill-value" [class]="'wave-' + currentWaveType" aria-hidden="true">{{ currentWave }}</span>
+    </div>
+    <div class="pill-divider" aria-hidden="true"></div>
+    <div class="pill-stat" [attr.aria-label]="'Shards: ' + (shards | number: '1.0-0')">
+      <span class="pill-label" aria-hidden="true">SHARDS</span>
+      <span class="pill-value shards" aria-hidden="true">{{ shards | number: '1.0-0' }}</span>
+    </div>
+    @if (ascensionLevel > 0) {
+      <div class="pill-divider" aria-hidden="true"></div>
+      <div class="pill-stat ascension-stat" [attr.aria-label]="'Ascension level ' + ascensionLevel">
+        <span class="pill-label" aria-hidden="true">ASC</span>
+        <span class="pill-value ascension-value" aria-hidden="true">{{ ascensionLevel }}</span>
+      </div>
+    }
+
+    <div class="pill-divider ability-divider" aria-hidden="true"></div>
+    <div class="ability-cd-row" aria-label="Combat abilities">
+      <div
+        class="ability-slot"
+        [class.on-cooldown]="dashCooldownFraction > 0"
+        [attr.aria-label]="dashCooldownFraction > 0 ? 'Dash recharging' : 'Dash ready, Space key'"
+      >
+        <span class="ability-icon" [innerHTML]="abilityIcons['dash']" aria-hidden="true"></span>
+        <span class="ability-copy" aria-hidden="true"><strong>Dash</strong><small>Space</small></span>
+        @if (dashCooldownFraction > 0) {
+          <span class="ability-recharge" [style.width.%]="100 - dashCooldownFraction * 100"></span>
+        }
+      </div>
+
+      <div
+        class="ability-slot"
+        [class.on-cooldown]="parryCooldownFraction > 0"
+        [attr.aria-label]="parryCooldownFraction > 0 ? 'Parry recharging' : 'Parry ready, E key'"
+      >
+        <span class="ability-icon" [innerHTML]="abilityIcons['parry']" aria-hidden="true"></span>
+        <span class="ability-copy" aria-hidden="true"><strong>Parry</strong><small>E</small></span>
+        @if (parryCooldownFraction > 0) {
+          <span class="ability-recharge" [style.width.%]="100 - parryCooldownFraction * 100"></span>
+        }
+      </div>
+    </div>
+
+    <div class="pill-divider" aria-hidden="true"></div>
+    <button
+      class="mute-toggle"
+      [class.muted]="audioMuted()"
+      [attr.aria-pressed]="audioMuted()"
+      [attr.aria-label]="audioMuted() ? 'Unmute audio' : 'Mute audio'"
+      (mousedown)="$event.preventDefault()"
+      (click)="toggleAudioMute()"
+    >
+      @if (audioMuted()) {
+        <svg class="mute-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M4 9v6h3.2L12 19V5L7.2 9H4z" fill="currentColor" />
+          <path d="M16 9l5 6M21 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      } @else {
+        <svg class="mute-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M4 9v6h3.2L12 19V5L7.2 9H4z" fill="currentColor" />
+          <path
+            d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          />
+        </svg>
+      }
+    </button>
+  </div>
+
+  @if (encounterProgress; as encounter) {
+    <section
+      class="encounter-directive"
+      [class.timed]="encounter.remainingMs > 0"
+      aria-labelledby="encounter-directive-title"
+    >
+      <div class="directive-header">
+        <span class="directive-kicker">Active mission</span>
+        <span class="directive-wave">Wave {{ encounter.waveNumber }}</span>
+      </div>
+      <div class="directive-main">
+        <div>
+          <h2 id="encounter-directive-title" class="directive-title">{{ encounter.title }}</h2>
+          <div class="directive-brief">{{ encounter.brief }}</div>
+        </div>
+        <strong class="directive-counter">{{ encounterCounter }}</strong>
+      </div>
+      <div class="directive-footer">
+        <div class="directive-progress" aria-hidden="true">
+          <span [style.width.%]="encounterProgressPercent"></span>
+        </div>
+        <div class="directive-reward">
+          <span>On clear</span>
+          <strong>+{{ encounter.reward.shards }} shards</strong>
+          <strong>+{{ encounter.reward.xp }} XP</strong>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Faction standing strip (Honesty Fix #3) — hidden until any faction drifts off zero -->
+  <app-faction-standing-bar></app-faction-standing-bar>
+
+  <!-- Consumable Hotbar -->
+  @if (quickSlots.length > 0) {
+    <div class="consumable-hotbar">
+      @for (slot of quickSlots; track slot.id; let i = $index) {
+        @if (getSlotQuantity(slot.id) > 0) {
+          <div
+            class="consumable-slot"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="
+              slot.name + ' (' + getSlotQuantity(slot.id) + ' remaining)' + (isOnCooldown(slot) ? ' (on cooldown)' : '')
+            "
+            [attr.aria-disabled]="isOnCooldown(slot) || null"
+            [class.on-cooldown]="isOnCooldown(slot)"
+            (click)="useConsumable(slot.id)"
+            (keydown.enter)="useConsumable(slot.id)"
+            (keydown.space)="useConsumable(slot.id); $event.preventDefault()"
+          >
+            <span class="slot-key" aria-hidden="true">{{ i + 1 }}</span>
+            <span class="slot-icon"><i [class]="slot.icon"></i></span>
+            <span class="slot-qty">{{ getSlotQuantity(slot.id) }}</span>
+            @if (isOnCooldown(slot)) {
+              <svg class="cooldown-sweep" viewBox="0 0 36 36">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="16"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.3)"
+                  stroke-width="32"
+                  [attr.stroke-dasharray]="getCooldownProgress(slot) + ' 100.5'"
+                  transform="rotate(-90 18 18)"
+                />
+              </svg>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <!-- Active Effects — positioned below stats pill -->
+  @if (activeBuffs.length > 0) {
+    <div class="active-effects-strip">
+      @for (buff of activeBuffs; track buff.name) {
+        <div class="effect-tag">
+          <span class="buff-name">{{ buff.name }}</span>
+          @if (buff.remainingSeconds > 0) {
+            <span class="buff-timer">{{ buff.remainingSeconds }}</span>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Focus Fire indicator -->
+  @if (isFocusFiring) {
+    <div class="focus-fire-indicator" role="status" aria-label="Focus fire active">
+      <span class="focus-fire-key">Shift</span>
+      <span class="focus-fire-label">Focus fire</span>
+      <span class="focus-fire-stat focus-fire-stat--gain">+{{ focusFireDmgBonus }}% damage</span>
+      <span class="focus-fire-stat">-{{ focusFireRofPenalty }}% fire rate</span>
+      <span class="focus-fire-stat">-{{ focusFireSpeedPenalty }}% speed</span>
+    </div>
+  }
+</div>

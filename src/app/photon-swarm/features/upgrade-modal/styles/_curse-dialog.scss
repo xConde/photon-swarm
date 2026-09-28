@@ -1,0 +1,382 @@
+@use '../../../styles/design-system' as ds;
+
+// =============================================================================
+// Curse / Blessing Confirmation Dialog
+//
+// Detail state inside the refit terminal. Static registration marks carry the
+// anomaly/blessing signal without reintroducing the old full-width top stripe.
+// Curse  → --game-special (magenta)
+// Blessing → --game-tier-common (cyan / teal-light)
+// =============================================================================
+
+.curse-confirmation-dialog {
+  // Not absolutely positioned — flows naturally inside .upgrade-container
+  width: 100%;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  text-align: left;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.dialog-header {
+  position: relative;
+  padding: ds.$spacing-comfortable ds.$spacing-comfortable ds.$spacing-standard;
+  border-bottom: ds.$border-width solid var(--game-panel-border, rgba(255, 255, 255, 0.12));
+  background:
+    linear-gradient(
+        var(--dialog-accent-color, var(--game-special, #{ds.$dark-special})),
+        var(--dialog-accent-color, var(--game-special, #{ds.$dark-special}))
+      )
+      left 4px top 4px / 28px 1px no-repeat,
+    linear-gradient(
+        var(--dialog-accent-color, var(--game-special, #{ds.$dark-special})),
+        var(--dialog-accent-color, var(--game-special, #{ds.$dark-special}))
+      )
+      left 4px top 4px / 1px 9px no-repeat;
+
+  h3 {
+    margin: 0 0 ds.$spacing-tight 0;
+    font-size: ds.$text-xlarge;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+    text-transform: none;
+    color: var(--dialog-accent-color, var(--game-special, #{ds.$dark-special}));
+
+    @media (max-width: 768px) {
+      font-size: ds.$text-large;
+    }
+  }
+}
+
+// Title row: curse name + severity badge side by side
+.dialog-title-row {
+  display: flex;
+  align-items: center;
+  gap: ds.$spacing-standard;
+  flex-wrap: wrap;
+}
+
+.dialog-curse-name {
+  font-size: ds.$text-medium;
+  font-weight: ds.$weight-bold;
+  text-transform: uppercase;
+  letter-spacing: ds.$tracking-wide;
+  color: var(--game-text-primary, #{ds.$dark-text});
+}
+
+// Severity badge — inline pill, not a full row
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: ds.$spacing-micro ds.$spacing-standard;
+  border-radius: ds.$radius-small;
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-bold;
+  letter-spacing: ds.$tracking-wide;
+  text-transform: uppercase;
+
+  &.severity-low {
+    background-color: rgba(ds.$dark-success, 0.15);
+    color: ds.$dark-success;
+    border: ds.$border-width solid rgba(ds.$dark-success, 0.3);
+  }
+
+  &.severity-medium {
+    background-color: rgba(ds.$dark-risk-alt, 0.15);
+    color: ds.$dark-risk-alt;
+    border: ds.$border-width solid rgba(ds.$dark-risk-alt, 0.3);
+  }
+
+  &.severity-high {
+    background-color: rgba(ds.$dark-danger, 0.15);
+    color: ds.$dark-danger;
+    border: ds.$border-width solid rgba(ds.$dark-danger, 0.3);
+    text-shadow: 0 0 8px rgba(ds.$dark-danger, 0.5);
+  }
+}
+
+// ── Content ──────────────────────────────────────────────────────────────────
+
+.dialog-content {
+  padding: ds.$spacing-comfortable;
+
+  @media (max-width: 768px) {
+    padding: ds.$spacing-standard;
+  }
+}
+
+.curse-description {
+  margin: 0 0 ds.$spacing-comfortable 0;
+  font-size: ds.$text-base;
+  color: var(--game-text-secondary, rgba(ds.$dark-text, 0.85));
+  line-height: ds.$leading-relaxed;
+
+  @media (max-width: 768px) {
+    font-size: ds.$text-small;
+    margin-bottom: ds.$spacing-standard;
+  }
+}
+
+// Hidden-effect section — inline flow, no nested box/panel
+.hidden-effect-section {
+  display: flex;
+  align-items: center;
+  gap: ds.$spacing-standard;
+  flex-wrap: wrap;
+  padding: ds.$spacing-standard 0;
+  border-top: ds.$border-width dashed var(--game-panel-border, rgba(255, 255, 255, 0.12));
+}
+
+.hidden-effect-label {
+  font-size: ds.$text-small;
+  font-style: italic;
+  color: var(--game-text-secondary, rgba(ds.$dark-text, 0.6));
+  flex: 1;
+}
+
+.reveal-button {
+  background-color: rgba(ds.$dark-special, 0.12);
+  color: ds.$dark-special;
+  border: ds.$border-width solid rgba(ds.$dark-special, 0.5);
+  border-radius: ds.$radius-small;
+  padding: ds.$spacing-tight ds.$spacing-comfortable;
+  font-size: ds.$text-small;
+  cursor: pointer;
+  transition:
+    background-color ds.$animation-fast ds.$easing-standard,
+    border-color ds.$animation-fast ds.$easing-standard;
+  flex-shrink: 0;
+
+  // 44px touch target on mobile
+  @media (max-width: 768px) {
+    min-height: 44px;
+  }
+
+  &:hover {
+    background-color: rgba(ds.$dark-special, 0.22);
+    border-color: ds.$dark-special;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ds.$dark-special;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+// Revealed effect text
+.revealed-effect {
+  width: 100%;
+
+  p {
+    margin: 0 0 ds.$spacing-tight 0;
+    font-size: ds.$text-base;
+    color: var(--game-text-primary, #{ds.$dark-text});
+    line-height: ds.$leading-normal;
+  }
+
+  .secondary-effect {
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.75));
+    font-style: italic;
+    margin-top: ds.$spacing-tight;
+  }
+}
+
+.effect-label {
+  font-weight: ds.$weight-bold;
+  color: var(--dialog-accent-color, var(--game-special, #{ds.$dark-special}));
+  margin-right: ds.$spacing-micro;
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+
+.dialog-actions {
+  display: flex;
+  gap: ds.$spacing-standard;
+  padding: ds.$spacing-standard ds.$spacing-comfortable;
+  background-color: var(--game-panel-bg, rgba(0, 0, 0, 0.35));
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(255, 255, 255, 0.12));
+
+  button {
+    flex: 1;
+    padding: ds.$spacing-tight + 2px ds.$spacing-comfortable;
+    border-radius: ds.$radius-small;
+    font-size: ds.$text-base;
+    font-weight: ds.$weight-semibold;
+    cursor: pointer;
+    transition:
+      background-color ds.$animation-fast ds.$easing-standard,
+      border-color ds.$animation-fast ds.$easing-standard;
+
+    // 44px touch target on mobile
+    @media (max-width: 768px) {
+      min-height: 44px;
+    }
+
+    &.cancel-button {
+      background-color: var(--game-button-bg, rgba(255, 255, 255, 0.06));
+      color: var(--game-text-secondary, rgba(ds.$dark-text, 0.75));
+      border: ds.$border-width solid var(--game-button-border, rgba(255, 255, 255, 0.12));
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--game-panel-border, rgba(255, 255, 255, 0.5));
+        outline-offset: 2px;
+      }
+    }
+
+    &.confirm-button {
+      background-color: rgba(ds.$dark-special, 0.12);
+      color: ds.$dark-special;
+      border: ds.$border-width solid rgba(ds.$dark-special, 0.45);
+
+      &:hover {
+        background-color: rgba(ds.$dark-special, 0.22);
+        border-color: ds.$dark-special;
+      }
+
+      &:focus-visible {
+        outline: 2px solid ds.$dark-special;
+        outline-offset: 2px;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Per-type accent color
+// =============================================================================
+
+// Curse → magenta (--game-special)
+.dialog-curse {
+  --dialog-accent-color: var(--game-special, #{ds.$dark-special});
+}
+
+// Blessing → tier-common cyan / teal-light
+.dialog-blessing {
+  --dialog-accent-color: var(--game-tier-common, #{ds.$dark-tier-common});
+
+  .confirm-button {
+    background-color: rgba(ds.$dark-tier-common, 0.1) !important;
+    color: var(--game-tier-common, #{ds.$dark-tier-common}) !important;
+    border-color: rgba(ds.$dark-tier-common, 0.4) !important;
+
+    &:hover {
+      background-color: rgba(ds.$dark-tier-common, 0.2) !important;
+      border-color: var(--game-tier-common, #{ds.$dark-tier-common}) !important;
+    }
+  }
+}
+
+// =============================================================================
+// Light-mode (day-mode) overrides
+// =============================================================================
+
+:host-context(.day-mode) {
+  .dialog-header h3 {
+    color: var(--dialog-accent-color, var(--game-special, #{ds.$light-special}));
+  }
+
+  .dialog-curse-name {
+    color: ds.$light-text;
+  }
+
+  .severity-badge {
+    &.severity-low {
+      background-color: rgba(ds.$light-success, 0.12);
+      color: ds.$light-success;
+      border-color: rgba(ds.$light-success, 0.25);
+    }
+
+    &.severity-medium {
+      background-color: rgba(#b45309, 0.12); // Amber-700 — readable on light bg
+      color: #b45309;
+      border-color: rgba(#b45309, 0.25);
+    }
+
+    &.severity-high {
+      background-color: rgba(ds.$light-danger, 0.12);
+      color: ds.$light-danger;
+      border-color: rgba(ds.$light-danger, 0.25);
+      text-shadow: none;
+    }
+  }
+
+  .curse-description {
+    color: rgba(ds.$light-text, 0.8);
+  }
+
+  .hidden-effect-label {
+    color: rgba(ds.$light-text, 0.55);
+  }
+
+  .reveal-button {
+    background-color: rgba(ds.$light-special, 0.08);
+    color: ds.$light-special;
+    border-color: rgba(ds.$light-special, 0.35);
+
+    &:hover {
+      background-color: ds.$light-special;
+      color: ds.$light-bg-primary;
+      border-color: ds.$light-special;
+    }
+  }
+
+  .revealed-effect p {
+    color: ds.$light-text;
+  }
+
+  .revealed-effect .secondary-effect {
+    color: rgba(ds.$light-text, 0.65);
+  }
+
+  .effect-label {
+    color: var(--dialog-accent-color, var(--game-special, #{ds.$light-special}));
+  }
+
+  .dialog-actions {
+    background-color: color-mix(in srgb, var(--game-panel-border, #{rgba(ds.$light-accent, 0.2)}) 13%, transparent);
+    border-top-color: rgba(ds.$light-accent, 0.15);
+
+    .cancel-button {
+      background-color: rgba(ds.$light-accent, 0.06);
+      color: ds.$light-text;
+      border-color: rgba(ds.$light-accent, 0.2);
+
+      &:hover {
+        background-color: rgba(ds.$light-accent, 0.12);
+      }
+    }
+
+    .confirm-button {
+      background-color: rgba(ds.$light-special, 0.08) !important;
+      color: ds.$light-special !important;
+      border-color: rgba(ds.$light-special, 0.35) !important;
+
+      &:hover {
+        background-color: ds.$light-special !important;
+        color: ds.$light-bg-primary !important;
+        border-color: ds.$light-special !important;
+      }
+    }
+  }
+
+  // Blessing confirm button in day-mode
+  .dialog-blessing .confirm-button {
+    background-color: rgba(ds.$light-tier-common, 0.08) !important;
+    color: ds.$light-tier-common !important;
+    border-color: rgba(ds.$light-tier-common, 0.35) !important;
+
+    &:hover {
+      background-color: ds.$light-tier-common !important;
+      color: ds.$light-bg-primary !important;
+    }
+  }
+}

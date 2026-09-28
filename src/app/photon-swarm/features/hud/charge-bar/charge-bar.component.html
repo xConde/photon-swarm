@@ -1,0 +1,12 @@
+<div
+  class="charge-bar-container"
+  [class.state-empty]="!isHoldingCharge && displayedCharge < 5"
+  [class.state-charging]="!isHoldingCharge && displayedCharge >= 5 && displayedCharge < 95"
+  [class.state-charged]="!isHoldingCharge && displayedCharge >= 95"
+  [class.state-holding]="isHoldingCharge"
+  [attr.data-charge-type]="activeChargeType"
+>
+  <div class="charge-bar-track" [class.fire-drain]="fireDrain">
+    <div class="charge-bar-fill" [class.charge-full-pulse]="chargeFullPulse" [style.width.%]="displayedCharge"></div>
+  </div>
+</div>

@@ -1,0 +1,148 @@
+@use '../../styles/design-system' as ds;
+
+.virtual-joystick {
+  position: absolute;
+  display: none;
+  touch-action: none;
+  user-select: none;
+  z-index: ds.$z-touch-controls;
+  bottom: 30px;
+  bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+
+  &.visible {
+    display: block;
+  }
+
+  &.left {
+    left: 20px;
+    left: calc(20px + env(safe-area-inset-left, 0px));
+  }
+
+  &.right {
+    right: 20px;
+    right: calc(20px + env(safe-area-inset-right, 0px));
+  }
+}
+
+.joystick-base {
+  position: absolute;
+  inset: 0;
+  touch-action: none; // The element that receives joystick touches must not pan/zoom
+  // Idle: visible dark-glass ring so the stick is DISCOVERABLE. Literal fallbacks because the
+  // --game-* tokens don't resolve in this component's scope (emulated encapsulation) — without
+  // them the base rendered with no fill/border and the joystick was invisible ("can't move").
+  background: var(--game-button-bg, rgba(9, 15, 24, 0.6));
+  border: ds.$border-width-thick solid var(--game-panel-border, rgba(70, 224, 255, 0.45));
+  border-radius: 50%;
+  backdrop-filter: blur(var(--game-blur-subtle));
+  transition:
+    background ds.$animation-standard ds.$easing-standard,
+    border-color ds.$animation-standard ds.$easing-standard;
+
+  .active & {
+    background: color-mix(in srgb, var(--game-button-bg) 85%, var(--game-accent) 15%);
+    border-color: color-mix(in srgb, var(--game-accent) 50%, transparent);
+  }
+}
+
+.joystick-stick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  transition: transform 0.08s ease-out;
+  pointer-events: none;
+
+  // Movement type (cyan / --game-accent) — idle semi-transparent
+  .movement & {
+    background: color-mix(in srgb, var(--game-accent, #4fe9ff) 45%, transparent);
+    border: ds.$border-width-thick solid color-mix(in srgb, var(--game-accent, #4fe9ff) 70%, transparent);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--game-accent, #4fe9ff) 35%, transparent);
+    transition:
+      transform 0.08s ease-out,
+      background ds.$animation-standard ds.$easing-standard,
+      box-shadow ds.$animation-standard ds.$easing-standard;
+  }
+
+  // Aim type (--game-aim-accent) — idle semi-transparent
+  // --game-aim-accent = magenta/special in dark, dark-orchid in light; replaces raw rgba(255,0,128)
+  .aim & {
+    background: color-mix(in srgb, var(--game-aim-accent, #ff44ff) 45%, transparent);
+    border: ds.$border-width-thick solid color-mix(in srgb, var(--game-aim-accent, #ff44ff) 70%, transparent);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--game-aim-accent, #ff44ff) 35%, transparent);
+    transition:
+      transform 0.08s ease-out,
+      background ds.$animation-standard ds.$easing-standard,
+      box-shadow ds.$animation-standard ds.$easing-standard;
+  }
+
+  // Active: brighter, full opacity
+  .active & {
+    transition: none;
+  }
+
+  .active.movement & {
+    background: color-mix(in srgb, var(--game-accent) 75%, transparent);
+    border-color: color-mix(in srgb, var(--game-accent) 90%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--game-accent) 65%, transparent);
+  }
+
+  .active.aim & {
+    background: color-mix(in srgb, var(--game-aim-accent) 75%, transparent);
+    border-color: color-mix(in srgb, var(--game-aim-accent) 90%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--game-aim-accent) 65%, transparent);
+  }
+}
+
+// Aim stick: charging state — amber ring signals the burst is ready to release.
+// Matches the weapon-anchor warm accent (#fbbf24) from action-buttons.component.scss
+// (dark-glass + warm literal pattern; both float on the always-dark game canvas).
+.charging .joystick-base {
+  border-color: rgba(251, 191, 36, 0.85);
+  background: color-mix(in srgb, rgba(9, 15, 24, 0.82) 80%, rgba(251, 191, 36, 0.3) 20%);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.55);
+}
+
+// Tablet: larger sizes, more spacing from edges
+@media (min-width: #{ds.$grid-unit * 192}) {
+  // 768px
+  .virtual-joystick {
+    bottom: 40px;
+    bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+
+    &.left {
+      left: 32px;
+      left: calc(32px + env(safe-area-inset-left, 0px));
+    }
+
+    &.right {
+      right: 32px;
+      right: calc(32px + env(safe-area-inset-right, 0px));
+    }
+  }
+}
+
+// Landscape: smaller joystick, tighter spacing
+@media (orientation: landscape) and (max-height: 500px) {
+  .virtual-joystick {
+    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+
+    &.left {
+      left: 16px;
+      left: calc(16px + env(safe-area-inset-left, 0px));
+    }
+
+    &.right {
+      right: 16px;
+      right: calc(16px + env(safe-area-inset-right, 0px));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .joystick-stick {
+    transition: none;
+  }
+}

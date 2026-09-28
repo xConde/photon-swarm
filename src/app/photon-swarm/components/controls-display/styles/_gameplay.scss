@@ -1,0 +1,233 @@
+// Gameplay mode — full in-game controls with mouse, cooldowns, active states
+@use '../../../styles/design-system' as ds;
+@use 'shared' as shared;
+
+// ---------------------------------------------------------------------------
+// Gameplay mode — full in-game controls with mouse, cooldowns, active states
+// ---------------------------------------------------------------------------
+.controls-gameplay {
+  position: absolute;
+  bottom: calc(#{ds.$spacing-tight + 2px} + 8px); // +8px to clear the charge bar (6px) + 2px gap
+  right: ds.$spacing-tight + 2px;
+  pointer-events: none;
+  user-select: none;
+  box-sizing: border-box;
+
+  @include ds.glass-panel;
+  // glass-panel sets position: relative (for pseudo-element/overflow containment), which
+  // clobbers the position: absolute above — re-assert it so bottom/right anchor this legend
+  // to the game's bottom-right corner instead of collapsing into top-left document flow.
+  position: absolute;
+  backdrop-filter: blur(var(--game-blur-panel));
+  padding: ds.$spacing-tight;
+  opacity: 0.9;
+  font-size: ds.$text-small;
+
+  // Day-mode: light surface so the keyboard legend is readable on a bright background
+  :host-context(.day-mode) & {
+    background: linear-gradient(135deg, rgba(ds.$light-bg-primary, 0.95) 0%, rgba(ds.$light-bg-secondary, 0.95) 100%);
+    border-color: rgba(ds.$light-accent, 0.3);
+
+    // Key caps: sea-green (active = success colour) so keys pop on the light surface
+    .key {
+      color: ds.$light-success;
+      background-color: rgba(ds.$light-success, 0.08);
+      border-color: rgba(ds.$light-success, 0.4);
+
+      &.active {
+        color: ds.$light-success;
+        background-color: rgba(ds.$light-success, 0.18);
+        border-color: rgba(ds.$light-success, 0.7);
+      }
+    }
+
+    // Action labels: teal accent — readable on the cool-white surface
+    .action {
+      color: ds.$light-accent-light;
+    }
+  }
+
+  .controls-list {
+    display: flex;
+    flex-direction: column;
+    gap: ds.$spacing-micro - 2px;
+
+    // ------------------------------------------------------------------
+    // Key → action rows (mouse LMB/RMB + keyboard)
+    // ------------------------------------------------------------------
+    .control-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: ds.$spacing-tight;
+      min-width: 0;
+
+      &[data-category='movement'] {
+        order: 1;
+      }
+
+      &[data-category='special'] {
+        order: 5;
+
+        &:first-of-type {
+          margin-top: 2px;
+          padding-top: 2px;
+          border-top: ds.$border-width solid color-mix(in srgb, var(--game-panel-border) 40%, transparent);
+        }
+      }
+
+      &[data-category='interface'] {
+        order: 10;
+        margin-top: 2px;
+        padding-top: 2px;
+        border-top: ds.$border-width solid color-mix(in srgb, var(--game-panel-border) 40%, transparent);
+        font-size: ds.$text-xs;
+        opacity: 0.7;
+      }
+
+      .key {
+        @include shared.key-cap-base;
+        position: relative;
+        padding: ds.$spacing-micro ds.$spacing-tight;
+        min-width: 2.5rem;
+        max-width: 4rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        // Per-key width overrides — sizing only, no colour changes
+        &[data-key='SPACE'],
+        &[data-key='SHIFT'] {
+          padding: ds.$spacing-micro ds.$spacing-micro * 1.2;
+          max-width: 3.5rem;
+          min-width: 3rem;
+        }
+
+        &[data-key='LEFT CLICK'],
+        &[data-key='RIGHT CLICK'],
+        &[data-key='L-CLICK'],
+        &[data-key='R-CLICK'] {
+          font-size: ds.$text-xxs + 1px;
+          padding: ds.$spacing-micro ds.$spacing-micro * 1.6;
+          max-width: 6rem;
+          min-width: 5.5rem;
+        }
+
+        &[data-key='W/A/S/D'],
+        &[data-key='W/A/S...'] {
+          font-size: ds.$text-xxs + 1px;
+          padding: ds.$spacing-micro ds.$spacing-micro * 1.6;
+          max-width: 4.5rem;
+          min-width: 4rem;
+        }
+
+        // State: ready (explicitly unchanged — same as base, redundant but kept for specificity)
+        &.ready {
+          background-color: var(--game-button-bg);
+          border-color: var(--game-button-border);
+          color: var(--game-accent);
+        }
+
+        // State: cooldown — warning semantic
+        &.cooldown {
+          background-color: color-mix(in srgb, var(--game-warning) 15%, transparent);
+          border-color: color-mix(in srgb, var(--game-warning) 50%, transparent);
+          color: var(--game-warning);
+
+          .cooldown-overlay {
+            background: linear-gradient(
+              90deg,
+              color-mix(in srgb, var(--game-warning) 40%, transparent) 0%,
+              color-mix(in srgb, var(--game-warning) 20%, transparent) 100%
+            );
+          }
+        }
+
+        // State: active — accent fill (no always-on glow/pulse — glow is a hover/event signal)
+        &.active {
+          background-color: color-mix(in srgb, var(--game-accent) 20%, transparent);
+          border-color: color-mix(in srgb, var(--game-accent) 70%, transparent);
+          color: var(--game-accent);
+          box-shadow:
+            0 0 ds.$spacing-tight + 2px color-mix(in srgb, var(--game-accent) 40%, transparent),
+            inset 0 0 ds.$spacing-tight + 2px color-mix(in srgb, var(--game-accent) 10%, transparent);
+          transform: translateY(-1px) scale(1.02);
+        }
+
+        // State: flash — a momentary press pop. Brighter + a touch more scale than the sustained
+        // .active state, then decays over the flash window so each press lands with real feedback.
+        &.flash {
+          animation: key-press-flash ds.$animation-medium ds.$easing-out;
+        }
+
+        // SHIFT held = flight mode — subtle pulse is intentional (ongoing-state indicator, not at-rest)
+        &[data-key='SHIFT'].active {
+          animation: flight-pulse ds.$animation-loop ds.$easing-in-out infinite;
+        }
+
+        .cooldown-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          transition: width ds.$animation-micro ds.$easing-standard;
+          border-radius: inherit;
+          pointer-events: none;
+        }
+
+        .key-label {
+          position: relative;
+          z-index: ds.$z-content;
+        }
+      }
+
+      .action {
+        color: var(--game-text-muted);
+        font-size: ds.$text-micro;
+        font-weight: ds.$weight-regular;
+        text-align: right;
+        flex: 1;
+        min-width: 0;
+        transition: color ds.$animation-standard ds.$easing-standard;
+
+        // Action label brightens when its key is active or mid press-flash
+        .control-item:has(.key.active) &,
+        .control-item:has(.key.flash) & {
+          color: var(--game-text-secondary);
+        }
+      }
+    }
+  }
+}
+
+// Press-pop for the controls chips — a brighter momentary flare than the sustained .active,
+// decaying back to rest over the flash window. Driven by the component's isFlashing() signal.
+// Peak (0%): 60% accent fill, full-border accent, double-ring glow (outer 18px + inner 10px),
+// scale 1.18. Crisp snap at 30% (scale nearly settled) then long tail back to rest.
+@keyframes key-press-flash {
+  0% {
+    background-color: color-mix(in srgb, var(--game-accent, #00e5ff) 60%, transparent);
+    border-color: var(--game-accent, #00e5ff);
+    color: var(--game-accent, #00e5ff);
+    box-shadow:
+      0 0 18px color-mix(in srgb, var(--game-accent, #00e5ff) 85%, transparent),
+      0 0 6px color-mix(in srgb, var(--game-accent, #00e5ff) 60%, transparent),
+      inset 0 0 10px color-mix(in srgb, var(--game-accent, #00e5ff) 35%, transparent);
+    transform: translateY(-1px) scale(1.18);
+  }
+  30% {
+    background-color: color-mix(in srgb, var(--game-accent, #00e5ff) 35%, transparent);
+    border-color: color-mix(in srgb, var(--game-accent, #00e5ff) 85%, transparent);
+    box-shadow:
+      0 0 8px color-mix(in srgb, var(--game-accent, #00e5ff) 45%, transparent),
+      inset 0 0 5px color-mix(in srgb, var(--game-accent, #00e5ff) 15%, transparent);
+    transform: translateY(-1px) scale(1.04);
+  }
+  100% {
+    background-color: color-mix(in srgb, var(--game-accent, #00e5ff) 12%, transparent);
+    border-color: color-mix(in srgb, var(--game-accent, #00e5ff) 45%, transparent);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+    transform: translateY(0) scale(1);
+  }
+}

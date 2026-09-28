@@ -1,0 +1,222 @@
+<!-- src/app/sections/pages/projects/lazy-projects/photon-swarm/photon-swarm.component.html -->
+<div class="photon-swarm-container safe-area-padding" (contextmenu)="$event.preventDefault()">
+  <!-- projects-detail's own h1 (.launch-title) unmounts once the demo launches —
+       this page needs its own for a11y/SEO structure while the embed is live. -->
+  <h1 class="sr-only">Photon Swarm</h1>
+  <canvas
+    #gameCanvas
+    role="application"
+    tabindex="0"
+    aria-label="Photon Swarm: 2D space combat arena. WASD or arrow keys to move, mouse or J/K to fire, ESC for menu. Game state is rendered to canvas and not exposed to assistive tech."
+  ></canvas>
+
+  <!--
+    Screen-reader announcement channel. Run-state events (level-up, death,
+    zone transitions, boss spawn) are pushed into this polite live region
+    so SR users get parity with the canvas-only feedback sighted players
+    receive. .sr-only keeps the node visually invisible.
+  -->
+  <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+    {{ announcement() }}
+  </div>
+
+  <!-- XP Progress Bar (top edge) — hide on the end screen too, like the rest of the HUD -->
+  @if (!showIntro && !showEnd) {
+    <app-xp-bar [upgradeModalOpen]="showUpgrade"></app-xp-bar>
+  }
+
+  <!-- Charge Bar (bottom edge) — hide on the end screen too -->
+  @if (!showIntro && !showEnd) {
+    <app-charge-bar></app-charge-bar>
+  }
+
+  <!-- Intensity Milestone Flash -->
+  @if (!showIntro && gameStarted) {
+    <app-intensity-milestone></app-intensity-milestone>
+  }
+
+  <!-- Semi-transparent overlay for when modals are open -->
+  @if (isModalOpen && !showIntro && !isGameOver) {
+    <div class="game-overlay"></div>
+  }
+
+  @if (!showIntro && !showEnd) {
+    <div class="hud-wrapper" [class.dimmed]="isModalOpen">
+      <app-hud></app-hud>
+      <app-zone-progress></app-zone-progress>
+    </div>
+  }
+
+  <!-- Visual Feedback Components -->
+  @if (!showIntro && gameStarted) {
+    <app-absorption-feed></app-absorption-feed>
+    <app-upgrade-notifications></app-upgrade-notifications>
+    <app-wave-announcement></app-wave-announcement>
+    <app-zone-announcement></app-zone-announcement>
+    <app-zone-complete></app-zone-complete>
+    <app-zone-locked-warning></app-zone-locked-warning>
+    <app-cache-discovered></app-cache-discovered>
+    <app-zone-gate-tooltip></app-zone-gate-tooltip>
+  }
+
+  <!-- Moved debug console to end to ensure it renders above everything else -->
+
+  <!-- Debug Toggle Indicator -->
+  @if (!showDebugConsole && debugModeEnabled) {
+    <div class="debug-indicator">
+      <span>🔧 Debug Mode: Press F12</span>
+    </div>
+  }
+
+  <!-- Control pause overlay to fit within boundaries -->
+  <!-- Keep backdrop visible when paused, but hide content when submenus are open -->
+  @if (isPaused && !showUpgrade && !showEnd && !showIntro) {
+    <div class="game-overlay-fill">
+      <div
+        #pauseDialog
+        class="pause-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Game paused"
+        style="overflow: hidden; max-height: 100%"
+      >
+        <!-- Only show pause content when no submenu is open -->
+        @if (!showSettings && !showShop && !showEnemyGuideModal) {
+          <div class="pause-content">
+            <h2>PAUSED</h2>
+            <div class="pause-menu">
+              <button class="menu-btn resume-btn" (click)="resumeGame()">
+                <span class="btn-icon"><i class="fas fa-play"></i></span>
+                <span class="btn-text">Resume</span>
+              </button>
+              <button class="menu-btn shop-btn" (click)="toggleShop()">
+                <span class="btn-icon"><i class="fas fa-shopping-cart"></i></span>
+                <span class="btn-text">Shop</span>
+              </button>
+
+              <button class="menu-btn settings-btn" (click)="toggleSettings()">
+                <span class="btn-icon"><i class="fas fa-cog"></i></span>
+                <span class="btn-text">Settings</span>
+              </button>
+              <button class="menu-btn guide-btn" (click)="showEnemyGuideModal = true">
+                <span class="btn-icon"><i class="fas fa-book"></i></span>
+                <span class="btn-text">Enemy Guide</span>
+              </button>
+              <button class="menu-btn save-btn" (click)="saveAndQuit()">
+                <span class="btn-icon"><i class="fas fa-save"></i></span>
+                <span class="btn-text">Save &amp; Quit</span>
+              </button>
+            </div>
+            <!-- Run Stats Summary -->
+            <div class="pause-stats">
+              <div class="pause-stats-grid">
+                <div class="pause-stat">
+                  <span class="pause-stat-label">Level</span>
+                  <span class="pause-stat-value">{{ currentLevel }}</span>
+                </div>
+                <div class="pause-stat">
+                  <span class="pause-stat-label">Kills</span>
+                  <span class="pause-stat-value">{{ gameState?.kills || 0 }}</span>
+                </div>
+                <div class="pause-stat">
+                  <span class="pause-stat-label">Best Streak</span>
+                  <span class="pause-stat-value">{{ intensityMaxStreak }}</span>
+                </div>
+                <div class="pause-stat">
+                  <span class="pause-stat-label">Peak Intensity</span>
+                  <span class="pause-stat-value">{{ intensityPeak }}</span>
+                </div>
+              </div>
+            </div>
+            <!-- Only show pause controls when no sub-modal is open -->
+            @if (!showSettings && !showShop && !showEnemyGuideModal) {
+              <app-controls-display displayMode="pause-menu"> </app-controls-display>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (showIntro) {
+    <app-intro-screen
+      (startGame)="startGame($event)"
+      (continueGame)="loadSavedGame()"
+      (resumeRun)="resumeFromCheckpoint()"
+    >
+    </app-intro-screen>
+  }
+
+  <!-- Upgrade Modal -->
+  @if (showUpgrade) {
+    <app-upgrade-modal
+      [upgradeOptions]="rewardOptions"
+      (upgradeChosen)="onUpgradeChosen()"
+      (curseConfirmationVisible)="setCurseConfirmation($event)"
+    >
+    </app-upgrade-modal>
+  }
+
+  @if (showEnd) {
+    <app-end-screen [stats]="gameStats!" (restart)="onRestart()" (ascend)="onAscend()"> </app-end-screen>
+  }
+
+  @if (showShop) {
+    <app-shop [isVisible]="showShop" (close)="toggleShop()"> </app-shop>
+  }
+
+  @if (showEnemyGuideModal) {
+    <app-enemy-guide [playerLevel]="currentLevel" (close)="showEnemyGuideModal = false" class="game-overlay-fill">
+    </app-enemy-guide>
+  }
+
+  <!-- Add Settings Component -->
+  @if (showSettings) {
+    <app-settings [isVisible]="showSettings" (close)="toggleSettings()"> </app-settings>
+  }
+
+  <!-- Game controls display - only show during active gameplay (desktop only) -->
+  @if (!showIntro && !showUpgrade && !showEnd && !showShop && !isPaused) {
+    <app-controls-display displayMode="gameplay" [controls]="gameControls" [class.dimmed]="isModalOpen">
+    </app-controls-display>
+  }
+
+  <!-- Mobile touch controls - joysticks + action buttons (gated on touch capability) -->
+  @if (showVirtualControls && !showIntro && !showUpgrade && !showEnd && !isPaused && gameStarted) {
+    <app-virtual-joystick
+      type="movement"
+      position="left"
+      (joystickChange)="onJoystickChange($event)"
+    ></app-virtual-joystick>
+    <app-virtual-joystick
+      type="aim"
+      position="right"
+      (joystickChange)="onJoystickChange($event)"
+      (stickPress)="onActionButton({ action: 'discharge', pressed: $event.pressed })"
+    ></app-virtual-joystick>
+    <app-action-buttons
+      [weaponMode]="weaponMode"
+      [secondaryActive]="secondaryActionActive"
+      [parryCooldown]="parryCooldownFraction"
+      [mapOpen]="showMap"
+      (actionPress)="onActionButton($event)"
+    ></app-action-buttons>
+  }
+
+  <!-- Map overlay component. The minimap stays during dimmable modals (upgrade/shop/pause/etc.)
+       and dims to match the rest of the HUD — only fully hidden on the intro + end screens.
+       Previously it vanished on every modal while the stats pill + zone panel stayed, which read
+       as inconsistent. -->
+  <app-map
+    [isVisible]="showMap"
+    [class.dimmed]="isModalOpen"
+    [hideForModal]="showIntro || showEnd"
+    (close)="toggleMap()"
+  >
+  </app-map>
+
+  <!-- Debug Console - Moved to END to render ABOVE everything including death screen -->
+  @if (showDebugConsole) {
+    <app-debug-console class="debug-overlay"></app-debug-console>
+  }
+</div>

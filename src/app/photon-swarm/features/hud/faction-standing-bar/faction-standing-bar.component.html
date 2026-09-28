@@ -1,0 +1,25 @@
+@if (hasAnyDrift()) {
+  <div class="faction-standing-bar" role="group" aria-label="Faction standings">
+    @for (standing of standings(); track trackByFactionId($index, standing)) {
+      <div
+        class="faction-chip"
+        [class.allied]="standing.relationship === 'allied'"
+        [class.hostile]="standing.relationship === 'hostile'"
+        [class.neutral]="standing.relationship === 'neutral'"
+        [attr.aria-label]="standing.name + ', ' + standing.relationship + ', standing ' + standing.standing"
+      >
+        <span class="faction-dot" [style.background-color]="standing.color" aria-hidden="true"></span>
+        <span class="faction-name">{{ shortLabel(standing.name) }}</span>
+        <span class="faction-value">{{ standing.standing }}</span>
+        <span class="faction-meter" aria-hidden="true">
+          <span class="faction-meter-center"></span>
+          <span
+            class="faction-meter-fill"
+            [style.left.%]="meterOffset(standing.standing)"
+            [style.width.%]="meterFraction(standing.standing)"
+          ></span>
+        </span>
+      </div>
+    }
+  </div>
+}

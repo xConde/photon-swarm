@@ -1,0 +1,488 @@
+@use '../../styles/design-system' as ds;
+
+// Face-cluster button sizes — the WEAPON anchor is the largest (primary), the 4 ability
+// face buttons are uniform. Laid out as a tight, symmetric controller-style diamond.
+$anchor-size: 60px;
+$sat-size: 48px;
+$sat-size-tablet: 54px;
+$anchor-size-tablet: 66px;
+
+// Dark-glass button chrome. These touch controls float on the ALWAYS-dark game canvas in
+// BOTH themes (like the overlay modals), so the chrome is fixed dark glass with a bright
+// accent — not theme-switched --game-* tokens, which resolve to faint teal / dark slate and
+// vanish against the canvas (the old "fighting for air" look). Fixed literals guarantee the
+// buttons read as solid buttons and the icons stay visible in light mode too.
+$btn-bg: rgba(9, 15, 24, 0.82);
+$btn-blur: blur(3px);
+$btn-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+
+// Cyan accent (satellites + utilities) — bright enough to pop on the dark glass.
+$accent: #4fe9ff;
+$accent-border: rgba(70, 224, 255, 0.5);
+$accent-fill: rgba(70, 224, 255, 0.2);
+$accent-glow: rgba(70, 224, 255, 0.55);
+$accent-muted: rgba(150, 225, 245, 0.7);
+
+// Weapon-mode accents — fixed warm hues so the live weapon reads at a glance on the dark
+// canvas (a theme-switched slate would blend in). Beam → amber, Shot → orange.
+$weapon-beam-color: #fbbf24;
+$weapon-beam-border: rgba(245, 158, 11, 0.6);
+$weapon-beam-glow: rgba(245, 158, 11, 0.45);
+$weapon-shot-color: #ff8a3d;
+$weapon-shot-border: rgba(255, 120, 40, 0.6);
+$weapon-shot-glow: rgba(255, 120, 40, 0.45);
+
+// Never render the touch controls on a desktop (precise pointer + hover) — even when the
+// browser reports touch support (touchscreen laptop, or a desktop browser that exposes touch),
+// which was making the touch cluster leak on top of the keyboard legend. Mouse/keyboard users
+// get the keyboard legend instead.
+:host {
+  @media (hover: hover) and (pointer: fine) {
+    display: none;
+  }
+}
+
+// ===== Pause — top entry to the pause menu =====
+// Top-center on wide layouts (tablet / landscape). On phones (≤768px) the centered slot
+// collides with the stats pill, which grows with its numbers (HP / wave / shards) — the
+// opaque pause chrome rendered ON TOP of the pill text and read as clipped ("WAVE 0 SHAR…").
+// There it moves beside the minimap instead (see the media overrides below).
+.pause-btn {
+  position: absolute;
+  // Clear the 14px XP bar — 22px (8px spacing-tight + 14px bar) matches the minimap
+  // and stats-pill clearance convention.
+  top: calc(22px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; // WCAG 2.5.5 touch target
+  height: 44px;
+  padding: 0;
+  border: 1px solid $accent-border;
+  border-radius: 50%;
+  background: $btn-bg;
+  backdrop-filter: $btn-blur;
+  box-shadow: $btn-shadow;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: ds.$z-touch-controls;
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease;
+
+  .pause-bars {
+    display: flex;
+    gap: 4px;
+
+    &::before,
+    &::after {
+      content: '';
+      width: 4px;
+      height: 15px;
+      background: $accent;
+      border-radius: 1px;
+    }
+  }
+
+  &:active {
+    background: $accent-fill;
+    border-color: $accent;
+  }
+}
+
+// ===== Map — top-left utility (kept out of the combat cluster) =====
+.utility-btn {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 44px; // WCAG 2.5.5 touch target
+  height: 44px;
+  padding: 0;
+  border: 1px solid $accent-border;
+  border-radius: 50%;
+  background: $btn-bg;
+  backdrop-filter: $btn-blur;
+  box-shadow: $btn-shadow;
+  color: $accent-muted; // slightly dimmer than combat buttons → reads as secondary
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  z-index: ds.$z-touch-controls;
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease;
+
+  // Size the container (a real template element); the injected SVG is width/height:100%.
+  // Scoped `.btn-icon svg` cannot reach [innerHTML] content under emulated encapsulation.
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+  }
+
+  .btn-label {
+    font-size: 7px;
+    line-height: 1;
+    margin-top: 2px;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &.active,
+  &:active {
+    background: $accent-fill;
+    border-color: $accent;
+    color: $accent;
+  }
+}
+
+// Map utility button — bottom-left, centered ABOVE the movement joystick (portrait base
+// 100px at left 20 / bottom 30). The old top-left slot fought the HUD's growing left
+// column (stats pill → effect chips → FOCUS pill → faction bar) and ended up overlapping
+// the active-effects strip; the bottom-left band belongs to the controls layer and keeps
+// the utility under the left thumb, mirroring the right-side cluster.
+.map-btn {
+  left: calc(48px + env(safe-area-inset-left, 0px)); // 20 + (100 − 44) / 2
+  bottom: calc(144px + env(safe-area-inset-bottom, 0px)); // 30 + 100 + 14
+}
+
+// Phones (≤768px): the centered pause slot collides with the growing stats pill — park the
+// pause button beside the minimap instead. The minimap extents are single-sourced in the
+// design system so this clearance tracks map.component.scss exactly.
+@media (max-width: 768px) {
+  .pause-btn {
+    left: auto;
+    transform: none;
+    // minimap right inset (4px) + minimap width + 8px gap
+    right: calc(4px + #{ds.$minimap-size-tablet-sm} + 8px + env(safe-area-inset-right, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .pause-btn {
+    right: calc(4px + #{ds.$minimap-size-phone} + 8px + env(safe-area-inset-right, 0px));
+  }
+}
+
+// ===== Controller-style face-button cluster =====
+// A tight, SYMMETRIC T of the ability buttons (Auto left, Burst right, Dash top-center)
+// with the larger WEAPON button as the primary directly below — like a gamepad's face
+// buttons + a main action. Parry lives separately at bottom-center between the joysticks
+// (reactive defense, reachable by either thumb), which also shrinks this cluster's
+// playfield intrusion.
+.thumb-arc {
+  position: absolute;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  // Weapon bottom edge lands ~186px above the viewport floor so the cluster clears the
+  // right aim joystick that rests in the bottom-right corner (preserves the ~185px clearance).
+  bottom: calc(180px + env(safe-area-inset-bottom, 0px));
+  // Width reduced to 150px now that the top-center Dash slot is removed (Dash moved to right
+  // point; top slot is gone). Height shrinks from 170 to 150 accordingly.
+  width: 150px;
+  height: 150px;
+  z-index: ds.$z-touch-controls;
+  touch-action: none;
+}
+
+.arc-btn {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: $sat-size;
+  height: $sat-size;
+  padding: 0;
+  border: 1.5px solid $accent-border;
+  border-radius: 50%;
+  background: $btn-bg;
+  backdrop-filter: $btn-blur;
+  box-shadow: $btn-shadow;
+  color: $accent;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease,
+    transform 0.08s ease,
+    box-shadow 0.1s ease;
+
+  // Size the container; the injected SVG fills it via width/height:100% (scoped
+  // `.btn-icon svg` cannot reach [innerHTML] content under emulated encapsulation).
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  &.active {
+    background: $accent-fill;
+    border-color: $accent;
+    box-shadow:
+      $btn-shadow,
+      0 0 12px $accent-glow;
+    transform: scale(0.92);
+  }
+}
+
+// Cluster positions (right / bottom within the 150×150 container). Burst removed — it
+// moved to the aim-stick press gesture. Layout is now a left-right pair above the WEAPON
+// anchor: [Focus] at left point, [Dash] at right point.
+//   [Focus]       [Dash]
+//        [WEAPON]
+.arc-anchor {
+  right: 45px; // centred (150-60)/2
+  bottom: 6px;
+  width: $anchor-size;
+  height: $anchor-size;
+
+  .btn-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.arc-dash {
+  // right point (former Burst slot)
+  right: 25px;
+  bottom: 96px;
+}
+
+.arc-focus {
+  // left point
+  right: 77px;
+  bottom: 96px;
+}
+
+// ===== Parry — bottom-center between the joysticks =====
+// The reactive defense sits where EITHER thumb can flick to it; the joysticks own the
+// corners (bottom 30px, ~110px wide), so the center band is free. Shows a recovery ring
+// while on cooldown (--cooldown: 1 → just used, 0 → ready).
+.parry-btn {
+  left: 50%;
+  bottom: calc(34px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+
+  .btn-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  &.active {
+    transform: translateX(-50%) scale(0.92);
+  }
+
+  &.on-cooldown {
+    color: $accent-muted;
+    border-color: rgba(70, 224, 255, 0.22);
+
+    .btn-icon,
+    .btn-label {
+      opacity: 0.45;
+    }
+
+    // Recovery ring: sweeps clockwise as the cooldown elapses; full circle = ready.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient($accent calc((1 - var(--cooldown, 0)) * 360deg), rgba(70, 224, 255, 0.12) 0);
+      // Punch out the middle so only a 3px ring remains.
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      pointer-events: none;
+    }
+  }
+}
+
+.btn-label {
+  font-size: 8px;
+  line-height: 1;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Weapon toggle (anchor): always-on warm accent so the live weapon reads at a glance.
+// Beam mode → amber; Shot mode → orange.
+.weapon-toggle {
+  color: $weapon-beam-color;
+  border-color: $weapon-beam-border;
+  box-shadow:
+    $btn-shadow,
+    0 0 12px $weapon-beam-glow;
+
+  .btn-label {
+    opacity: 1;
+  }
+
+  &.mode-shot {
+    color: $weapon-shot-color;
+    border-color: $weapon-shot-border;
+    box-shadow:
+      $btn-shadow,
+      0 0 12px $weapon-shot-glow;
+  }
+
+  &.active {
+    transform: scale(0.94);
+    background: rgba(245, 158, 11, 0.18);
+    box-shadow:
+      $btn-shadow,
+      0 0 14px $weapon-beam-color;
+
+    &.mode-shot {
+      background: rgba(255, 120, 40, 0.18);
+      box-shadow:
+        $btn-shadow,
+        0 0 14px $weapon-shot-color;
+    }
+  }
+}
+
+// (Burst button removed — burst is now triggered by holding the aim stick still and releasing.
+// The burst-charge-pulse animation lived here; the aim joystick shows the amber ring glow
+// instead while charging. No CSS needed in this file for that.)
+
+// ===== Tablet — larger buttons, same left-right pair =====
+@media (min-width: 768px) and (max-width: 1366px) {
+  .thumb-arc {
+    // Height reduced from 190 to 168: top slot removed; tallest satellite (96+54+margin) ~168px.
+    width: 168px;
+    height: 168px;
+    right: calc(22px + env(safe-area-inset-right, 0px));
+    bottom: calc(180px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .arc-btn {
+    width: $sat-size-tablet;
+    height: $sat-size-tablet;
+
+    .btn-icon {
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  .arc-anchor {
+    width: $anchor-size-tablet;
+    height: $anchor-size-tablet;
+    right: 51px; // centred (168-66)/2
+    bottom: 8px;
+
+    .btn-icon {
+      width: 31px;
+      height: 31px;
+    }
+  }
+
+  .arc-dash {
+    // right point (former Burst slot)
+    right: 24px;
+    bottom: 104px;
+  }
+
+  .arc-focus {
+    right: 90px;
+    bottom: 104px;
+  }
+
+  .parry-btn {
+    width: 62px;
+    height: 62px;
+    bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+
+    .btn-icon {
+      width: 29px;
+      height: 29px;
+    }
+  }
+
+  .btn-label {
+    font-size: 9px;
+  }
+
+  .utility-btn {
+    width: 48px;
+    height: 48px;
+
+    .btn-icon {
+      width: 21px;
+      height: 21px;
+    }
+  }
+
+  // Above the tablet movement joystick (base 130 at left 32 / bottom 40), centered.
+  .map-btn {
+    left: calc(73px + env(safe-area-inset-left, 0px)); // 32 + (130 − 48) / 2
+    bottom: calc(184px + env(safe-area-inset-bottom, 0px)); // 40 + 130 + 14
+  }
+}
+
+// ===== Short landscape (phones held sideways) =====
+// Compressed diamond anchored at the lower-right corner. Declared AFTER the tablet rule so it
+// wins for landscape phones.
+@media (orientation: landscape) and (max-height: 500px) {
+  .thumb-arc {
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    // Height reduced from 140 to 122: top Dash slot removed; tallest satellite at bottom:70
+    // plus 46px height plus ~6px margin = ~122px.
+    width: 122px;
+    height: 122px;
+  }
+
+  .arc-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .arc-anchor {
+    width: 54px;
+    height: 54px;
+    right: 34px; // centred (122-54)/2
+    bottom: 4px;
+  }
+
+  // Compressed left-right pair (Dash at right point, Focus at left point).
+  .arc-dash {
+    // right point (former Burst slot)
+    right: 30px;
+    bottom: 70px;
+  }
+
+  .arc-focus {
+    right: 76px;
+    bottom: 70px;
+  }
+
+  .parry-btn {
+    width: 52px;
+    height: 52px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+
+  // Above the landscape movement joystick (base 90 at left 16 / bottom 16), centered.
+  .map-btn {
+    left: calc(39px + env(safe-area-inset-left, 0px)); // 16 + (90 − 44) / 2
+    bottom: calc(116px + env(safe-area-inset-bottom, 0px)); // 16 + 90 + 10
+  }
+}

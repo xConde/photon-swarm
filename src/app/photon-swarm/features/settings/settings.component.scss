@@ -1,0 +1,512 @@
+@use '../../styles/design-system' as ds;
+
+/* Theme-aware settings component following Contact page patterns */
+
+:host {
+  display: block;
+}
+
+.settings-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;
+  max-width: calc(100vw - 32px);
+  max-height: min(84vh, 820px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  @include ds.instrument-panel(
+    var(--game-accent, #{ds.$dark-accent}),
+    var(--game-bg-overlay, rgba(0, 20, 40, 0.92)),
+    16px
+  );
+  backdrop-filter: blur(var(--game-blur-panel, 6px));
+  padding: ds.$spacing-comfortable ds.$spacing-generous;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  z-index: ds.$z-modal;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  * {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  h2 {
+    margin: 2px 0 ds.$spacing-comfortable 0;
+    font-size: ds.$text-xlarge;
+    color: var(--game-text-primary, #{ds.$dark-text});
+    text-align: left;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-tight;
+    text-transform: none;
+  }
+
+  .close-button {
+    position: absolute;
+    top: ds.$spacing-standard;
+    right: ds.$spacing-standard;
+    background: none;
+    border: none;
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+    font-size: ds.$text-xlarge;
+    cursor: pointer;
+    transition: color ds.$animation-fast ds.$easing-standard;
+    padding: ds.$spacing-micro;
+    line-height: ds.$leading-none;
+    border-radius: ds.$radius-small;
+    // WCAG 2.5.5: 44px touch target
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+      outline-offset: 2px;
+      color: var(--game-accent, #{ds.$dark-accent});
+    }
+  }
+}
+
+.settings-console {
+  display: flex;
+  align-items: center;
+  gap: ds.$spacing-tight;
+  color: var(--game-accent, #{ds.$dark-accent});
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: ds.$text-micro;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.settings-scope {
+  color: var(--game-text-muted);
+  letter-spacing: 0.08em;
+}
+
+.settings-separator {
+  color: var(--game-panel-border);
+}
+
+.settings-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    'aim feedback'
+    'accessibility audio';
+  gap: ds.$spacing-tight;
+}
+
+.settings-group {
+  align-self: start;
+  min-width: 0;
+  padding: ds.$spacing-standard;
+  background: color-mix(in srgb, var(--game-bg-secondary) 56%, transparent);
+  border: 0;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.2));
+  border-radius: 0;
+
+  h3 {
+    margin: 0 0 ds.$spacing-tight;
+    color: var(--game-accent, #{ds.$dark-accent});
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+    text-transform: uppercase;
+    font-family: 'Space Mono', ds.$font-mono;
+  }
+
+  &--aim {
+    grid-area: aim;
+  }
+
+  &--feedback {
+    grid-area: feedback;
+  }
+
+  &--accessibility {
+    grid-area: accessibility;
+  }
+
+  &--audio {
+    grid-area: audio;
+  }
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: ds.$spacing-micro;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  label,
+  > span {
+    color: var(--game-text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-regular;
+  }
+
+  &--stacked {
+    align-items: stretch;
+    flex-direction: column;
+    gap: ds.$spacing-micro;
+  }
+
+  &--touch {
+    display: none;
+  }
+
+  .setting-control {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: ds.$spacing-micro;
+
+    output {
+      width: 36px;
+      color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+      font-family: ds.$font-mono;
+      font-size: ds.$text-micro;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+  }
+
+  .slider {
+    width: 112px;
+    height: 3px;
+    background: var(--settings-slider-track, rgba(255, 255, 255, 0.1));
+    border-radius: ds.$radius-xs;
+    outline: none;
+    -webkit-appearance: none;
+    // Touch hit area: pad the input to ≥44px tall but keep the painted track at 3px —
+    // background-clip restricts the track fill to the content box (WCAG 2.5.5).
+    padding: 21px 0;
+    background-clip: content-box;
+    box-sizing: content-box;
+
+    &:focus-visible {
+      box-shadow:
+        0 0 0 2px var(--game-bg-overlay, rgba(0, 20, 40, 0.9)),
+        0 0 0 4px var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: ds.$spacing-standard;
+      height: ds.$spacing-standard;
+      background: var(--game-accent, #{ds.$dark-accent});
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background ds.$animation-fast ds.$easing-standard;
+
+      &:hover {
+        background: var(--game-accent, #{ds.$dark-accent});
+      }
+    }
+
+    &::-moz-range-thumb {
+      width: ds.$spacing-standard;
+      height: ds.$spacing-standard;
+      background: var(--game-accent, #{ds.$dark-accent});
+      cursor: pointer;
+      border-radius: 50%;
+      border: none;
+
+      &:hover {
+        background: var(--game-accent, #{ds.$dark-accent});
+      }
+    }
+  }
+
+  .select-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 ds.$spacing-tight;
+    background: transparent;
+    border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+    color: var(--game-text-primary, #{ds.$dark-text});
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-regular;
+    border-radius: ds.$radius-small;
+    cursor: pointer;
+    transition: border-color ds.$animation-fast ds.$easing-standard;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+      outline-offset: 2px;
+    }
+  }
+
+  .toggle-btn {
+    width: 60px;
+    height: 28px;
+    min-height: 44px;
+    background: transparent;
+    border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-regular;
+    border-radius: ds.$radius-small;
+    cursor: pointer;
+    transition: all ds.$animation-fast ds.$easing-standard;
+
+    // Active: solid accent fill + contrasting dark text so label is readable
+    &.active {
+      background: var(--game-accent, #{ds.$dark-accent});
+      border-color: var(--game-accent, #{ds.$dark-accent});
+      color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+    }
+
+    &:hover {
+      border-color: var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ===== CONTROLS / KEY BINDINGS SECTION =====
+
+.controls-section {
+  margin-top: ds.$spacing-standard;
+  padding-top: ds.$spacing-standard;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+
+  h3 {
+    margin: 0 0 ds.$spacing-tight 0;
+    font-size: ds.$text-base;
+    color: var(--game-accent, #{ds.$dark-accent});
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+    text-transform: uppercase;
+    font-family: 'Space Mono', ds.$font-mono;
+  }
+
+  .conflict-warning {
+    margin-bottom: ds.$spacing-tight;
+    padding: ds.$spacing-micro ds.$spacing-tight;
+    font-size: ds.$text-small;
+    color: var(--game-danger, #{ds.$dark-danger});
+    background: color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 10%, transparent);
+    border: ds.$border-width solid color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 30%, transparent);
+    border-radius: ds.$radius-small;
+    text-align: center;
+  }
+
+  .keybind-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 56px;
+    row-gap: ds.$spacing-micro;
+  }
+
+  .keybind-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: ds.$spacing-standard;
+    padding: ds.$spacing-micro 0;
+  }
+
+  .keybind-label {
+    color: var(--game-text-secondary, rgba(255, 255, 255, 0.7));
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-regular;
+  }
+
+  .keybind-btn {
+    min-width: 72px;
+    padding: ds.$spacing-micro ds.$spacing-tight;
+    background: transparent;
+    border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+    color: var(--game-text-primary, #{ds.$dark-text});
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-regular;
+    font-family: ds.$font-mono;
+    text-align: center;
+    border-radius: ds.$radius-small;
+    cursor: pointer;
+    transition: all ds.$animation-fast ds.$easing-standard;
+    letter-spacing: ds.$tracking-wide;
+
+    &:hover {
+      border-color: var(--game-accent, #{ds.$dark-accent});
+      color: var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+      outline-offset: 2px;
+    }
+
+    &.rebinding {
+      border-color: var(--game-accent, #{ds.$dark-accent});
+      color: var(--game-accent, #{ds.$dark-accent});
+      background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 12%, transparent);
+      animation: rebind-pulse 1s ease-in-out infinite;
+    }
+  }
+
+  .keybind-reset {
+    display: inline-block;
+    margin-top: ds.$spacing-tight;
+  }
+}
+
+@keyframes rebind-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Hide keyboard-only controls/keybindings section on touch devices
+@media (pointer: coarse) {
+  // Keyboard rebinding + the mouse-sensitivity slider are desktop-only affordances —
+  // hide them on touch where there is no keyboard or mouse to configure.
+  .controls-section,
+  .setting-row--pointer {
+    display: none;
+  }
+
+  .setting-row--touch {
+    display: flex;
+  }
+}
+
+.reset-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: ds.$spacing-micro;
+  border: 0;
+  border-radius: ds.$radius-xs;
+  background: transparent;
+  color: var(--game-text-muted);
+  font-size: ds.$text-small;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color ds.$animation-fast ds.$easing-standard;
+
+  &:hover {
+    color: var(--game-text-secondary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+    outline-offset: 2px;
+    color: var(--game-text-secondary);
+  }
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: ds.$spacing-standard;
+  padding-top: ds.$spacing-standard;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+
+  .btn-done {
+    min-height: 44px; // WCAG 2.5.5 touch target
+    padding: ds.$spacing-tight ds.$spacing-generous;
+    background: transparent;
+    border: ds.$border-width solid var(--game-accent, #{ds.$dark-accent});
+    color: var(--game-accent, #{ds.$dark-accent});
+    border-radius: ds.$radius-small;
+    cursor: pointer;
+    transition: all ds.$animation-fast ds.$easing-standard;
+    font-size: ds.$text-caption;
+    font-weight: ds.$weight-regular;
+    letter-spacing: ds.$tracking-wide;
+
+    &:hover {
+      // Solid accent fill: readable label (inverted to bg-primary) guaranteed
+      background: var(--game-accent, #{ds.$dark-accent});
+      color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+      box-shadow: 0 0 8px var(--game-accent, #{ds.$dark-accent});
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+      outline-offset: 2px;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}
+
+// ===== THEME-SPECIFIC OVERRIDES =====
+
+// Light mode (Day mode) — slider track tint (only non-var fallback needed)
+:host-context(.day-mode) {
+  --settings-slider-track: #{rgba(ds.$light-accent, 0.15)};
+
+  // Toggle active: solid accent (dark-slate) fill + light bg text for contrast
+  .toggle-btn.active {
+    background: var(--game-accent, #{ds.$light-accent});
+    border-color: var(--game-accent, #{ds.$light-accent});
+    color: var(--game-bg-primary, #{ds.$light-bg-primary});
+  }
+
+  // Done button hover: same solid pattern for light mode
+  .btn-done:hover {
+    background: var(--game-accent, #{ds.$light-accent});
+    color: var(--game-bg-primary, #{ds.$light-bg-primary});
+    box-shadow: 0 0 8px var(--game-accent, #{ds.$light-accent});
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-container {
+    width: calc(100vw - 20px);
+    max-width: none;
+    max-height: 88vh;
+    padding: ds.$spacing-standard;
+  }
+
+  .settings-panel {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'aim'
+      'feedback'
+      'accessibility'
+      'audio';
+  }
+
+  .controls-section .keybind-list {
+    grid-template-columns: 1fr;
+  }
+}

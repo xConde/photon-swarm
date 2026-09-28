@@ -1,0 +1,192 @@
+@use '../../../styles/design-system' as ds;
+
+// ===== TOUCH-DEVICE OVERRIDES =====
+
+// Touch hint: hidden by default (desktop), shown on touch devices
+.touch-hint {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: ds.$spacing-standard;
+  padding-block: ds.$spacing-tight ds.$spacing-micro;
+  animation: fadeIn ds.$animation-slow ds.$easing-standard;
+}
+
+// On coarse-pointer (touch) devices, hide keyboard/mouse diagrams —
+// they are desktop-only affordances irrelevant to touch users.
+// Touch hints (.touch-hint) are shown instead.
+@media (pointer: coarse) {
+  .keyboard-visual,
+  .mouse-visual,
+  .keyboard-mouse-container,
+  .key-stack-container {
+    display: none;
+  }
+
+  .touch-hint {
+    display: flex;
+  }
+}
+
+.touch-hint-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ds.$spacing-generous;
+
+  &--row {
+    gap: ds.$spacing-major;
+  }
+}
+
+.touch-hint-label {
+  font-size: ds.$text-small;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.55));
+  text-align: center;
+  line-height: ds.$leading-snug;
+  letter-spacing: ds.$tracking-wide;
+}
+
+// Per-button effect descriptions for touch combat tutorial.
+// Mirrors the desktop key-label semantics (Dash/Parry/Burst/Focus/Weapon copy)
+// at a smaller, more muted size so it's supplemental, not competing.
+.touch-hint-effects {
+  font-size: ds.$text-micro;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.42));
+  text-align: center;
+  line-height: ds.$leading-snug;
+  letter-spacing: ds.$tracking-normal;
+  max-width: 340px; // keep it from sprawling on wide screens
+}
+
+// Mini joystick illustration (purely decorative)
+.touch-hint-joystick {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+
+  // Literal fallbacks: --game-* tokens do not resolve in this component's scope, so a bare
+  // color-mix(... var(--game-accent) ...) collapses to an INVALID color and the circle
+  // renders nothing (the old empty-joystick bug).
+  .th-base {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--game-panel-bg, rgba(0, 10, 20, 0.95));
+    border: 2px solid color-mix(in srgb, var(--game-accent, #4fe9ff) 35%, transparent);
+    backdrop-filter: blur(var(--game-blur-subtle, 2px));
+  }
+
+  .th-stick {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: color-mix(in srgb, var(--game-accent, #4fe9ff) 60%, transparent);
+    border: 2px solid color-mix(in srgb, var(--game-accent, #4fe9ff) 80%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--game-accent, #4fe9ff) 45%, transparent);
+  }
+
+  &.aim {
+    .th-base {
+      border-color: color-mix(in srgb, var(--game-aim-accent, #ff44ff) 35%, transparent);
+    }
+
+    .th-stick.aim-stick {
+      background: color-mix(in srgb, var(--game-aim-accent, #ff44ff) 60%, transparent);
+      border-color: color-mix(in srgb, var(--game-aim-accent, #ff44ff) 80%, transparent);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--game-aim-accent, #ff44ff) 45%, transparent);
+    }
+  }
+}
+
+// ===== Control-icon chips (Combat + Utility steps) =====
+// Mirror the in-game touch buttons so the tutorial teaches the EXACT icons. Fixed dark-glass
+// chrome + bright accent (these sit on the dark intro card and stay legible in both themes,
+// like the in-game controls — theme-switched tokens would render faint/invisible).
+.th-chip-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  flex-wrap: wrap; // safety on very narrow screens; sized to fit five in one row at ~390px
+}
+
+.th-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+}
+
+.th-chip-icon {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 9px; // insets the width/height:100% injected SVG to ~20px
+  border-radius: 50%;
+  background: rgba(9, 15, 24, 0.82);
+  border: 1.5px solid rgba(70, 224, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  color: #4fe9ff;
+
+  // Pause chip: two bars instead of an SVG (matches the in-game pause button).
+  &--pause {
+    padding: 0;
+
+    .th-pause-bars {
+      display: flex;
+      gap: 4px;
+
+      &::before,
+      &::after {
+        content: '';
+        width: 4px;
+        height: 16px;
+        border-radius: 1px;
+        background: currentColor;
+      }
+    }
+  }
+}
+
+// Weapon chip — warm amber accent so it reads as the primary/live-weapon button.
+.th-chip--weapon .th-chip-icon {
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #fbbf24;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.45),
+    0 0 10px rgba(245, 158, 11, 0.35);
+}
+
+.th-chip-name {
+  font-size: ds.$text-micro;
+  font-family: ds.$font-mono;
+  color: rgba(255, 255, 255, 0.72); // night: light on the dark card
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+// Day mode: the intro card is light, so chip names + hint label need dark text.
+:host-context(.day-mode) {
+  .th-chip-name {
+    color: rgba(30, 41, 59, 0.78);
+  }
+
+  .touch-hint-label {
+    color: rgba(30, 41, 59, 0.72);
+  }
+
+  .touch-hint-effects {
+    color: rgba(30, 41, 59, 0.55);
+  }
+}

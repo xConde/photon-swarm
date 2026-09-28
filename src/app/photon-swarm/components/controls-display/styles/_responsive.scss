@@ -1,0 +1,94 @@
+// Responsive / media queries
+@use '../../../styles/design-system' as ds;
+
+// Media queries for different screen sizes
+@media (max-width: 768px) {
+  .controls-container {
+    bottom: ds.$spacing-tight + 2px;
+    right: ds.$spacing-tight + 2px;
+    padding: ds.$spacing-tight;
+    font-size: ds.$text-micro;
+  }
+
+  .controls-list .control-item {
+    gap: ds.$spacing-micro * 1.5;
+
+    .key {
+      min-width: 3rem;
+      font-size: ds.$text-xs;
+      padding: ds.$spacing-micro * 0.75 ds.$spacing-micro * 1.5;
+
+      &[data-key='SPACE'],
+      &[data-key='SHIFT'] {
+        min-width: 3rem;
+        max-width: 3.5rem;
+        font-size: ds.$text-xxs + 1px;
+      }
+
+      &[data-key='LEFT CLICK'],
+      &[data-key='RIGHT CLICK'],
+      &[data-key='L-CLICK'],
+      &[data-key='R-CLICK'] {
+        min-width: 5rem;
+        max-width: 5.5rem;
+        font-size: ds.$text-xxs + 1px;
+      }
+    }
+
+    .action {
+      font-size: ds.$text-xs;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .controls-container {
+    bottom: calc(#{ds.$spacing-tight + 2px} + env(safe-area-inset-bottom));
+    right: ds.$spacing-tight + 2px;
+    border-radius: ds.$radius-xs;
+    padding: ds.$spacing-micro ds.$spacing-tight;
+    max-width: 55%;
+    font-size: ds.$text-xs;
+
+    .mouse-controls-section {
+      .mini-mouse .mouse-body {
+        width: 21px;
+        height: 32px;
+      }
+
+      .mouse-labels .mouse-action {
+        font-size: ds.$text-xxs + 1px;
+      }
+    }
+  }
+
+  .controls-list .control-item {
+    gap: ds.$spacing-micro;
+
+    .key {
+      min-width: 2.5rem;
+      font-size: ds.$text-xxs + 1px;
+      padding: ds.$spacing-micro * 0.5 ds.$spacing-micro;
+
+      &[data-key='SPACE'],
+      &[data-key='SHIFT'] {
+        min-width: 2.8rem;
+        max-width: 3rem;
+        font-size: ds.$text-xxs;
+      }
+
+      &[data-key='LEFT CLICK'],
+      &[data-key='RIGHT CLICK'],
+      &[data-key='L-CLICK'],
+      &[data-key='R-CLICK'] {
+        min-width: 4.5rem;
+        max-width: 5rem;
+        font-size: ds.$text-xxs;
+      }
+    }
+
+    .action {
+      font-size: ds.$text-xxs + 1px;
+    }
+  }
+}

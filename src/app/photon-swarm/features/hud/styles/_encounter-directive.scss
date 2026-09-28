@@ -1,0 +1,184 @@
+@use '../../../styles/design-system' as ds;
+
+.encounter-directive {
+  --directive-accent: var(--game-accent);
+
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  width: clamp(360px, 38vw, 520px);
+  padding: 10px 14px 11px;
+  transform: translateX(-50%);
+  color: var(--game-text-primary);
+  background: var(--game-bg-overlay);
+  border: 1px solid color-mix(in srgb, var(--directive-accent) 30%, transparent);
+  border-top: 2px solid color-mix(in srgb, var(--directive-accent) 72%, transparent);
+  border-radius: ds.$radius-small;
+  pointer-events: none;
+  z-index: 1;
+
+  &.timed {
+    --directive-accent: var(--game-warning);
+  }
+}
+
+.directive-header,
+.directive-main,
+.directive-footer,
+.directive-reward {
+  display: flex;
+  align-items: center;
+}
+
+.directive-header {
+  justify-content: space-between;
+  gap: 8px;
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.directive-kicker {
+  color: var(--directive-accent);
+  font-weight: ds.$weight-bold;
+}
+
+.directive-wave {
+  color: var(--game-text-muted);
+}
+
+.directive-main {
+  justify-content: space-between;
+  gap: ds.$spacing-standard;
+  margin-top: 5px;
+}
+
+.directive-title {
+  margin: 0;
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: ds.$text-caption;
+  font-weight: ds.$weight-bold;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.directive-brief {
+  margin-top: 2px;
+  color: var(--game-text-secondary);
+  font-size: ds.$text-micro;
+  line-height: 1.35;
+}
+
+.directive-counter {
+  flex-shrink: 0;
+  color: var(--directive-accent);
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: ds.$text-base;
+  font-variant-numeric: tabular-nums;
+}
+
+.directive-footer {
+  gap: ds.$spacing-standard;
+  margin-top: 8px;
+}
+
+.directive-progress {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--game-text-primary) 12%, transparent);
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--directive-accent);
+    transition: width 180ms linear;
+  }
+}
+
+.directive-reward {
+  flex-shrink: 0;
+  gap: 7px;
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: 10px;
+  white-space: nowrap;
+
+  span {
+    color: var(--game-text-muted);
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--game-special);
+    font-weight: ds.$weight-semibold;
+  }
+}
+
+@media (max-width: 900px) {
+  .encounter-directive {
+    width: min(380px, calc(100% - 280px));
+  }
+
+  .directive-reward span {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .encounter-directive {
+    box-sizing: border-box;
+    top: calc(
+      22px + var(--game-minimap-size-tablet-sm, #{ds.$minimap-size-tablet-sm}) +
+        var(--game-mobile-hud-gap, #{ds.$mobile-hud-gap})
+    );
+    left: 8px;
+    width: calc(
+      100% - var(--game-mobile-sector-width-tablet, #{ds.$mobile-sector-width-tablet}) - var(
+          --game-mobile-hud-gap,
+          #{ds.$mobile-hud-gap}
+        ) -
+        14px
+    );
+    min-height: var(--game-mobile-hud-row-height, #{ds.$mobile-hud-row-height});
+    padding: 7px 8px 8px;
+    transform: none;
+  }
+
+  .directive-brief,
+  .directive-reward {
+    display: none;
+  }
+
+  .directive-footer {
+    margin-top: 5px;
+  }
+
+  .directive-main > div {
+    min-width: 0;
+  }
+
+  .directive-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .encounter-directive {
+    top: calc(
+      22px + var(--game-minimap-size-phone, #{ds.$minimap-size-phone}) +
+        var(--game-mobile-hud-gap, #{ds.$mobile-hud-gap})
+    );
+    width: calc(
+      100% - var(--game-mobile-sector-width-phone, #{ds.$mobile-sector-width-phone}) - var(
+          --game-mobile-hud-gap,
+          #{ds.$mobile-hud-gap}
+        ) -
+        14px
+    );
+  }
+}

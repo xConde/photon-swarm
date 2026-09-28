@@ -1,0 +1,303 @@
+@use '../../styles/design-system' as ds;
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--game-bg-primary) 64%, transparent);
+  z-index: ds.$z-modal;
+}
+
+.modal-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 760px;
+  max-width: calc(100vw - 24px);
+  max-height: 85dvh;
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
+  @include ds.instrument-panel(var(--game-accent), var(--game-bg-overlay), 16px);
+  padding: ds.$spacing-generous;
+  backdrop-filter: blur(var(--game-blur-panel, 6px));
+  color: var(--game-text-primary);
+  z-index: ds.$z-modal + 1;
+
+  &.compact-roster {
+    width: 460px;
+  }
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  h3 {
+    margin: 0;
+    color: var(--game-text-primary);
+    font-size: ds.$text-xlarge;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+  }
+}
+
+.roster-count {
+  color: var(--game-text-muted);
+  font-family: ds.$font-mono;
+  font-size: ds.$text-micro;
+  letter-spacing: 0.05em;
+}
+
+header .close {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: ds.$radius-small;
+  background: none;
+  color: var(--game-text-muted);
+  font-size: ds.$text-xlarge;
+  cursor: pointer;
+  transition: color ds.$animation-fast ds.$easing-standard;
+
+  &:hover {
+    color: var(--game-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent);
+    outline-offset: 2px;
+    color: var(--game-accent);
+  }
+}
+
+.enemy-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: ds.$spacing-standard;
+  margin-top: ds.$spacing-comfortable;
+}
+
+.modal-window.compact-roster .enemy-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.threat-low {
+  --threat: var(--game-success);
+}
+
+.threat-med {
+  --threat: var(--game-warning);
+}
+
+.threat-high {
+  --threat: var(--game-danger);
+}
+
+.threat-boss {
+  --threat: var(--game-special);
+}
+
+.enemy-entry {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: start;
+  gap: ds.$spacing-standard;
+  padding: ds.$spacing-standard;
+  background: color-mix(in srgb, var(--game-bg-secondary) 64%, transparent);
+  border: 1px solid color-mix(in srgb, var(--threat) 24%, transparent);
+  border-top-color: color-mix(in srgb, var(--threat) 62%, transparent);
+  border-radius: ds.$radius-small;
+
+  &.threat-boss {
+    grid-column: 1 / -1;
+  }
+}
+
+.portrait {
+  display: flex;
+  flex-direction: column;
+  gap: ds.$spacing-tight;
+}
+
+.portrait canvas {
+  width: 88px;
+  height: 88px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--threat) 54%, transparent);
+  border-radius: ds.$radius-small;
+  background:
+    radial-gradient(circle at center, color-mix(in srgb, var(--threat) 12%, transparent), transparent 68%),
+    color-mix(in srgb, var(--game-bg-primary) 22%, transparent);
+}
+
+.threat-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.threat-label {
+  color: var(--threat);
+  font-family: ds.$font-mono;
+  font-size: 10px;
+  font-weight: ds.$weight-bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.threat-meter {
+  display: flex;
+  gap: 2px;
+
+  i {
+    width: 8px;
+    height: 3px;
+    background: color-mix(in srgb, var(--threat) 16%, transparent);
+
+    &.on {
+      background: var(--threat);
+    }
+  }
+}
+
+.info {
+  min-width: 0;
+}
+
+.entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: ds.$spacing-tight;
+
+  strong {
+    color: var(--game-text-primary);
+    font-size: ds.$text-base;
+    font-weight: ds.$weight-semibold;
+    line-height: 1.15;
+  }
+}
+
+.enemy-role {
+  flex-shrink: 0;
+  color: var(--threat);
+  font-family: ds.$font-mono;
+  font-size: 10px;
+  font-weight: ds.$weight-bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.enemy-entry p {
+  margin: 5px 0 0;
+  color: var(--game-text-secondary);
+  font-size: ds.$text-small;
+  line-height: ds.$leading-snug;
+}
+
+.combat-read {
+  margin: 9px 0 0;
+  padding-top: 7px;
+  border-top: 1px solid color-mix(in srgb, var(--game-text-primary) 10%, transparent);
+
+  div {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 6px;
+
+    & + div {
+      margin-top: 5px;
+    }
+  }
+
+  dt,
+  dd {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  dt {
+    color: var(--threat);
+    font-family: ds.$font-mono;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  dd {
+    color: var(--game-text-secondary);
+  }
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin-top: 9px;
+}
+
+.stat {
+  color: var(--game-text-primary);
+  font-family: ds.$font-mono;
+  font-size: 10px;
+  font-weight: ds.$weight-bold;
+  white-space: nowrap;
+
+  em {
+    margin-right: 3px;
+    color: var(--game-text-muted);
+    font-size: 9px;
+    font-style: normal;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (max-width: 720px) {
+  .modal-window {
+    width: 620px;
+    padding: ds.$spacing-standard;
+  }
+
+  .enemy-list {
+    grid-template-columns: 1fr;
+  }
+
+  .enemy-entry.threat-boss {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .enemy-entry {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: ds.$spacing-tight;
+    padding: ds.$spacing-tight;
+  }
+
+  .portrait canvas {
+    width: 70px;
+    height: 70px;
+  }
+
+  .roster-count {
+    max-width: 250px;
+  }
+
+  .combat-read div {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+}

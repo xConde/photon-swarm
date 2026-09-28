@@ -1,0 +1,62 @@
+<div class="modal-backdrop" (click)="onBackdropClick()"></div>
+<div
+  class="modal-window"
+  [class.compact-roster]="unlocked.length === 1"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="enemy-guide-heading"
+>
+  <header>
+    <div class="title-block">
+      <h3 id="enemy-guide-heading">Enemy Guide</h3>
+      <span class="roster-count">Field reads, tells, and counters · {{ unlocked.length }} encountered</span>
+    </div>
+    <button class="close" aria-label="Close enemy guide" (click)="onBackdropClick()">×</button>
+  </header>
+
+  <div class="enemy-list">
+    @for (e of unlocked; track e.type) {
+      @let tier = threatTier(e);
+      <div class="enemy-entry" [class]="tier.cls">
+        <div class="portrait">
+          <canvas #enemyCanvas width="88" height="88" aria-hidden="true"></canvas>
+          <span class="threat-indicator" [attr.aria-label]="'Threat level: ' + tier.label">
+            <span class="threat-label">{{ tier.label }}</span>
+            <span class="threat-meter" aria-hidden="true">
+              @for (seg of [1, 2, 3, 4]; track seg) {
+                <i [class.on]="seg <= tier.level"></i>
+              }
+            </span>
+          </span>
+        </div>
+        <div class="info">
+          <div class="entry-head">
+            <strong>{{ e.name }}</strong>
+            <span class="enemy-role">{{ e.role }}</span>
+          </div>
+          <p>{{ e.description }}</p>
+          <dl class="combat-read">
+            <div>
+              <dt>Watch for</dt>
+              <dd>{{ e.tell }}</dd>
+            </div>
+            <div>
+              <dt>Response</dt>
+              <dd>{{ e.counter }}</dd>
+            </div>
+          </dl>
+          <div class="stat-row">
+            <span class="stat"><em>HP</em>{{ e.health }}</span>
+            <span class="stat"><em>SPD</em>{{ e.speed }}</span>
+            <span class="stat"><em>XP</em>{{ e.xpValue }}</span>
+            <span class="stat"><em>LVL</em>{{ e.minLevel }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Controls display positioned outside modal -->
+<app-controls-display [controls]="[{ key: 'ESC', action: 'Close' }]" displayMode="modal-hint" position="bottom-right">
+</app-controls-display>

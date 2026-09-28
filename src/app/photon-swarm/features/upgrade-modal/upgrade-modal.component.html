@@ -1,0 +1,262 @@
+<!-- src/app/sections/pages/projects/lazy-projects/photon-swarm/features/upgrade-modal/upgrade-modal.component.html -->
+<div class="modal-overlay" (mousedown)="$event.stopPropagation()" aria-hidden="true"></div>
+<div
+  class="upgrade-container"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="selectedCurse ? 'upgrade-detail-heading' : 'upgrade-heading'"
+  (mousedown)="$event.stopPropagation()"
+>
+  <!-- Main header — hidden when curse/blessing confirmation dialog is active -->
+  @if (!selectedCurse) {
+    <header class="upgrade-header">
+      <span class="upgrade-console">{{ selectionConsole }}</span>
+      <h2 id="upgrade-heading">{{ selectionTitle }}</h2>
+      <span class="upgrade-count">{{ selectionCount }}</span>
+      @if (selectionNote) {
+        <p class="upgrade-deck-note">{{ selectionNote }}</p>
+      }
+      @if (canReroll) {
+        <button class="reroll-button" type="button" (click)="rerollOptions()">
+          Redraw signals <span>{{ rerollsRemaining }} left</span>
+        </button>
+      }
+    </header>
+  }
+
+  <!-- Regular upgrade selection -->
+  @if (!selectedCurse) {
+    @if (applicationError) {
+      <p class="upgrade-application-error" role="alert">{{ applicationError }}</p>
+    }
+    <div class="upgrade-options">
+      @for (o of options; track o.id; let slotIndex = $index) {
+        <div
+          class="upgrade-card"
+          [ngClass]="{
+            'core-card': o.rarity === 'core',
+            'beam-core-card': o.category === 'beam-core',
+            'beam-core-lance': o.id === 'beam_core_lance',
+            'beam-core-prism': o.id === 'beam_core_prism',
+            'beam-core-arc': o.id === 'beam_core_arc',
+            'relic-card': o.category === 'relic',
+            'route-card': o.category === 'route',
+            'anomaly-card': o.category === 'anomaly',
+            'route-azure': o.id === 'route_azure_bastion',
+            'route-verdant': o.id === 'route_verdant_rift',
+            'rarity-common': o.rarity === 'common' && o.type !== 'curse' && o.type !== 'blessing',
+            'rarity-uncommon': o.rarity === 'uncommon' && o.type !== 'curse' && o.type !== 'blessing',
+            'rarity-rare': o.rarity === 'rare' && o.type !== 'curse' && o.type !== 'blessing',
+            'rarity-epic': o.rarity === 'epic' && o.type !== 'curse' && o.type !== 'blessing',
+            'rarity-legendary': o.rarity === 'legendary' && o.type !== 'curse' && o.type !== 'blessing',
+            'curse-card': o.type === 'curse',
+            'blessing-card': o.type === 'blessing',
+            'curse-severity-low': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'low',
+            'curse-severity-medium': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'medium',
+            'curse-severity-high': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'high',
+            'application-failed': isApplicationFailed(o),
+          }"
+          role="button"
+          [attr.tabindex]="isApplicationFailed(o) ? -1 : 0"
+          [attr.aria-disabled]="isApplicationFailed(o) ? 'true' : null"
+          [attr.aria-label]="
+            o.name +
+            ': ' +
+            o.description +
+            (o.tradeoff ? '. Tradeoff: ' + o.tradeoff : '') +
+            (isApplicationFailed(o) ? '. Unavailable after an application error.' : '')
+          "
+          (click)="chooseUpgrade(o)"
+          (keydown.enter)="chooseUpgrade(o)"
+          (keydown.space)="chooseUpgrade(o); $event.preventDefault()"
+        >
+          <!-- Classification strip: plain equipment data, not a floating badge. -->
+          <div class="card-top-row">
+            @if (o.category === 'beam-core') {
+              <span class="classification">BEAM CORE</span>
+            } @else if (o.category === 'relic') {
+              <span class="classification">RELIC</span>
+            } @else if (o.category === 'route') {
+              <span class="classification">ROUTE</span>
+            } @else if (o.category === 'anomaly') {
+              <span class="classification">ANOMALY</span>
+            } @else if (o.rarity === 'core') {
+              <span class="classification">CORE</span>
+            } @else if (o.type === 'curse' || o.type === 'blessing') {
+              <span class="classification" [ngClass]="'rarity-' + o.type">
+                {{ o.type === 'curse' ? 'ANOMALY' : 'BLESSING' }}
+              </span>
+            } @else {
+              <span class="classification">{{ o.rarity }}</span>
+            }
+            <span class="card-slot" aria-hidden="true">0{{ slotIndex + 1 }}</span>
+          </div>
+
+          @if ((o.category === 'relic' || o.category === 'route' || o.category === 'anomaly') && o.designation) {
+            <div class="artifact-designation">{{ o.designation }}</div>
+          }
+
+          @if (o.category === 'beam-core') {
+            <div class="core-blueprint" aria-hidden="true">
+              <span class="core-designation">{{ o.designation }}</span>
+              <div class="emitter-pattern">
+                @if (o.id === 'beam_core_lance') {
+                  <i class="emitter-origin"></i><i class="beam-line beam-line--lance"></i>
+                } @else if (o.id === 'beam_core_prism') {
+                  <i class="emitter-origin"></i><i class="beam-line beam-line--prism beam-line--high"></i
+                  ><i class="beam-line beam-line--prism"></i><i class="beam-line beam-line--prism beam-line--low"></i>
+                } @else {
+                  <i class="emitter-origin"></i><i class="arc-node arc-node--one"></i
+                  ><i class="arc-node arc-node--two"></i><i class="arc-node arc-node--three"></i
+                  ><i class="beam-line beam-line--arc arc-leg--one"></i
+                  ><i class="beam-line beam-line--arc arc-leg--two"></i
+                  ><i class="beam-line beam-line--arc arc-leg--three"></i>
+                }
+              </div>
+            </div>
+          } @else if (o.rarity === 'core') {
+            <div class="card-hero">
+              <span class="core-benefit">{{ getCoreBenefit(o) }}</span>
+              <span class="core-icon" [innerHTML]="getCoreIcon(o)"></span>
+            </div>
+          } @else if (getStatPreview(o); as preview) {
+            <div class="card-hero card-hero--stat">
+              <span class="core-benefit stat-change">{{ preview.change }}</span>
+              <span class="hero-caption">projected output</span>
+            </div>
+          }
+          <h3
+            [ngClass]="{
+              'core-title': o.rarity === 'core',
+              'curse-title': o.type === 'curse',
+              'blessing-title': o.type === 'blessing',
+              'curse-low': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'low',
+              'curse-medium': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'medium',
+              'curse-high': (o.type === 'curse' || o.type === 'blessing') && o.severity === 'high',
+            }"
+          >
+            {{ o.name }}
+          </h3>
+          @if (getBuildContext(o); as buildContext) {
+            <span class="build-context">{{ buildContext }}</span>
+          }
+          @if (o.rarity === 'core') {
+            <p class="core-description">{{ formatDescription(o.description) }}</p>
+          }
+          @if (o.rarity !== 'core') {
+            <p>{{ formatDescription(o.description) }}</p>
+          }
+          @if (o.signature && o.category === 'beam-core') {
+            <dl class="core-doctrine">
+              <div>
+                <dt>Firing pattern</dt>
+                <dd>{{ o.signature }}</dd>
+              </div>
+              <div class="core-tradeoff">
+                <dt>Tradeoff</dt>
+                <dd>{{ o.tradeoff }}</dd>
+              </div>
+            </dl>
+          } @else if (o.signature) {
+            <div class="mutation-doctrine">
+              <span>{{ o.signature }}</span>
+              @if (o.tradeoff) {
+                <small>{{ o.tradeoff }}</small>
+              }
+            </div>
+          }
+          @if (o.buildTags?.length) {
+            <div class="build-tags" aria-label="Build tags">
+              @for (tag of o.buildTags; track tag) {
+                <span>{{ tag }}</span>
+              }
+            </div>
+          }
+          @if (isApplicationFailed(o)) {
+            <span class="application-failed-label">Unavailable</span>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Curse/Blessing Confirmation Dialog — ONE clean panel, no nesting -->
+  @if (selectedCurse) {
+    <div
+      class="curse-confirmation-dialog"
+      [class.dialog-curse]="selectedCurse.type === 'curse'"
+      [class.dialog-blessing]="selectedCurse.type === 'blessing'"
+    >
+      <div class="dialog-header">
+        <h3 id="upgrade-detail-heading">
+          {{ selectedCurse.type === 'curse' ? 'Anomaly Detected' : 'Blessing Discovered' }}
+        </h3>
+        <div class="dialog-title-row">
+          <span class="dialog-curse-name">{{ selectedCurse.name }}</span>
+          <span class="severity-badge" [ngClass]="'severity-' + (selectedCurse.severity ?? 'low')">
+            {{ selectedCurse.type === 'curse' ? 'SEVERITY' : 'POTENCY' }}
+            {{ selectedCurse.severity?.toUpperCase() }}
+          </span>
+        </div>
+      </div>
+
+      <div class="dialog-content">
+        <!-- Description -->
+        <p class="curse-description">{{ formatDescription(selectedCurse.description) }}</p>
+
+        <!-- Hidden effect — only offered when one actually exists. Most blessings/curses state
+             their full effect in the description above, so the paid "reveal" must not show an
+             empty "Primary Effect:" (which it did for e.g. Quickening). -->
+        @if (selectedCurse.hiddenEffect) {
+          <div class="hidden-effect-section">
+            @if (!showHiddenEffect) {
+              <span class="hidden-effect-label">
+                {{ selectedCurse.type === 'curse' ? 'Hidden effect detected' : 'Secondary effect detected' }}
+              </span>
+              <button class="reveal-button" (click)="revealSelectedHiddenEffect()">
+                Reveal ({{ calculateRevealCost() }} shards)
+              </button>
+            }
+            @if (showHiddenEffect) {
+              <div class="revealed-effect">
+                <p>
+                  <span class="effect-label"
+                    >{{ selectedCurse.type === 'curse' ? 'Primary Anomaly' : 'Primary Effect' }}:</span
+                  >
+                  {{ selectedCurse.hiddenEffect }}
+                </p>
+                @if (selectedCurse.hiddenDescription) {
+                  <p class="secondary-effect">
+                    <span class="effect-label"
+                      >{{ selectedCurse.type === 'curse' ? 'Secondary Anomaly' : 'Secondary Effect' }}:</span
+                    >
+                    {{ selectedCurse.hiddenDescription }}
+                  </p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="dialog-actions">
+        <button class="cancel-button" (click)="cancelDetailSelection()">Back</button>
+        <button class="confirm-button" (click)="confirmCurseFromDetail()">
+          {{ selectedCurse.type === 'curse' ? 'Accept Anomaly' : 'Accept Blessing' }}
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Controls hint (hidden on touch devices via controls-display scss) -->
+<app-controls-display
+  [controls]="[
+    { key: 'ESC', action: 'Back from Detail' },
+    { key: 'ENTER', action: 'Select Upgrade' },
+    { key: 'TAB', action: 'Navigate Options' },
+  ]"
+  displayMode="modal-hint"
+  position="bottom-right"
+>
+</app-controls-display>

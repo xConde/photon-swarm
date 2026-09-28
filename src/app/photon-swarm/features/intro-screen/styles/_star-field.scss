@@ -1,0 +1,262 @@
+@use '../../../styles/design-system' as ds;
+
+.star-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  .star {
+    position: absolute;
+    width: var(--sz);
+    height: var(--sz);
+    // Fallback to the literal cyan: --game-accent is NOT defined in the intro's scope
+    // (the design-system's :root block gets emulation-scoped away), so without a fallback
+    // the dark-mode stars render transparent and vanish. The day-mode override below uses
+    // a literal too, so both themes are now reliable regardless of token resolution.
+    background-color: var(--game-accent, #{ds.$dark-accent});
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkle linear infinite;
+  }
+
+  .asteroid {
+    position: absolute;
+    inline-size: clamp(0.25rem, 1vw, 0.5rem);
+    block-size: clamp(0.25rem, 1vw, 0.5rem);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, ds.$gray-light 0%, ds.$gray-medium 40%, ds.$gray-dark 100%);
+    animation-duration: inherit;
+    animation-name: wobble;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    &.h-dir {
+      animation: fly-h linear infinite;
+    }
+    &.v-dir {
+      animation: fly-v linear infinite;
+    }
+    &.free {
+      animation: fly-free linear infinite;
+    }
+  }
+
+  .shooting-star {
+    position: absolute;
+    width: 4rem;
+    height: 2px;
+    // Legitimate literal: pure-white streaks are the natural star particle look;
+    // a themed color would not read as "star" against the space background.
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    filter: blur(1px);
+    animation: shoot 2s linear forwards;
+  }
+
+  .impact-flash {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    margin-top: -1rem;
+    margin-left: -1rem;
+    border-radius: 50%;
+    // Legitimate literal: impact flash is a physics event (white hot); themed color
+    // would not read as an explosion. Day-mode override in :host-context targets this.
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.1) 70%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    animation: flashFade 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+
+  .debris-piece {
+    position: absolute;
+    width: var(--sz, 0.15rem);
+    height: var(--sz, 0.15rem);
+    border-radius: 50%;
+    // Legitimate literal: debris is neutral gray rock/metal; not a UI accent color.
+    background: rgba(200, 200, 200, 0.9);
+    box-shadow: 0 0 3px currentColor;
+    animation: debrisMove 1.5s linear forwards;
+    pointer-events: none;
+  }
+
+  .saucer {
+    position: absolute;
+    width: 2rem;
+    height: 1rem;
+    // Legitimate literal: saucer glow is cyan-blue alien craft; themed accent would
+    // not read as "UFO" against the space background. Day-mode override below.
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 255, 255, 0.9) 0%,
+      rgba(0, 150, 255, 0.7) 60%,
+      rgba(0, 100, 255, 0.4) 100%
+    );
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+    animation: saucerFly linear forwards;
+    pointer-events: none;
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes wobble {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes fly-h {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(110vmax);
+  }
+}
+
+@keyframes fly-v {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(110vmax);
+  }
+}
+
+@keyframes fly-free {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  10% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+
+@keyframes shoot {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-120vw);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-3rem, 2.5rem);
+  }
+}
+
+.star-field::after {
+  /* nebula vignette */
+  content: '';
+  position: absolute;
+  inset: -20%;
+  // Legitimate literal: dark-mode nebula — deep navy gradient stop that reads as space depth.
+  // Day-mode counterpart is overridden in :host-context(.day-mode) .star-field::after.
+  background: radial-gradient(circle at 55% 35%, rgba(0, 60, 100, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+  animation: drift 120s linear infinite;
+  pointer-events: none;
+}
+
+/* Reduce motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .star-field .star,
+  .star-field .asteroid,
+  .star-field .shooting-star,
+  .cursor.blink {
+    animation: none !important;
+  }
+}
+
+@keyframes flashFade {
+  0% {
+    opacity: 1;
+    transform: scale(0.2);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes debrisMove {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+  }
+}
+
+@keyframes saucerFly {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(110vw) translateY(-10vh) rotate(10deg);
+  }
+  100% {
+    transform: translateX(220vw) translateY(5vh) rotate(-5deg);
+  }
+}

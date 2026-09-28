@@ -1,0 +1,54 @@
+@use '../../../styles/design-system' as ds;
+
+// === ZONE BREAKDOWN ===
+.zone-breakdown {
+  margin-bottom: ds.$spacing-tight;
+  padding-top: ds.$spacing-tight;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+}
+
+.section-title {
+  font-size: ds.$text-xs;
+  font-weight: ds.$weight-medium;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  text-transform: uppercase;
+  letter-spacing: ds.$tracking-wide;
+  margin: 0 0 ds.$spacing-micro 0;
+}
+
+.zone-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ds.$spacing-micro ds.$spacing-tight;
+  background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 2%, transparent);
+  border-radius: ds.$radius-base;
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  margin-bottom: ds.$spacing-micro;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.zone-name {
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-medium;
+}
+
+.zone-cleared-badge {
+  font-size: ds.$text-xs;
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 15%, transparent);
+  padding: 1px ds.$spacing-tight;
+  border-radius: ds.$radius-xs;
+  margin-left: ds.$spacing-tight;
+  letter-spacing: ds.$tracking-wide;
+  font-family: ds.$font-mono;
+}
+
+.zone-detail {
+  font-size: ds.$text-xs;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  font-variant-numeric: tabular-nums;
+}

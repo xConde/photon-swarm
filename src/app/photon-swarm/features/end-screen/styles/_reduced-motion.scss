@@ -1,0 +1,25 @@
+// =============================================================================
+// REDUCED MOTION
+// =============================================================================
+@media (prefers-reduced-motion: reduce) {
+  .end-screen-container,
+  .end-screen-content {
+    animation: none;
+  }
+
+  .restart-btn {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .ascend-btn {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

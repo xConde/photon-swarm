@@ -1,0 +1,107 @@
+@if (isVisible) {
+  <!-- Pause: top-center utility -->
+  <button
+    class="pause-btn"
+    (touchstart)="onPress('pause', $event)"
+    (touchend)="onRelease('pause', $event)"
+    (touchcancel)="onRelease('pause', $event)"
+    aria-label="Pause"
+  >
+    <span class="pause-bars" aria-hidden="true"></span>
+  </button>
+
+  <!-- Map: top-left utility button (kept out of the combat cluster). Stays lit while the
+       Automap overlay is open ([mapOpen]) — the press-flash alone left the button reading
+       "closed" with the map on screen, and the aria-label lied ("Open Map"). -->
+  <button
+    class="utility-btn map-btn"
+    [class.active]="mapOpen || activeButtons['map']"
+    [attr.aria-pressed]="mapOpen"
+    (touchstart)="onPress('map', $event)"
+    (touchend)="onRelease('map', $event)"
+    (touchcancel)="onRelease('map', $event)"
+    [attr.aria-label]="mapOpen ? 'Close Map' : 'Open Map'"
+  >
+    <span class="btn-icon" [innerHTML]="icons['map']" aria-hidden="true"></span>
+    <span class="btn-label">Map</span>
+  </button>
+
+  <!-- Combat cluster + parry hide while the Automap overlay is open: they sit below the
+       modal in z-order, so they poked through around its edges ("buttons showing through
+       map"). The joysticks stay (the game keeps running, Diablo-style) and the Map +
+       Pause utilities stay so the overlay can be dismissed. -->
+  @if (!mapOpen) {
+    <!-- Unified right-thumb action arc.
+       One coherent cluster fanning around the bottom-right thumb pivot: the WEAPON
+       toggle is the large anchor at thumb rest; Dash / Parry / Burst / Focus fan up
+       and to the left as equal satellites. Replaces the old split diamond + floating
+       secondary strip ("scattered, fighting for air"). -->
+    <div class="thumb-arc">
+      <!-- WEAPON anchor: shows the mode the tap SWITCHES TO (beam active → offers Shot,
+         shot active → offers Beam). A button labeled with the current mode read as a lie
+         ("beam is on and it says Beam"); buttons describe what they DO. The warm accent
+         color matches the offered mode (amber = beam, orange = shot). -->
+      <button
+        class="arc-btn arc-anchor weapon-toggle"
+        [class.active]="activeButtons['toggleShooting']"
+        [class.mode-shot]="weaponMode === 'beam'"
+        (touchstart)="onPress('toggleShooting', $event)"
+        (touchend)="onRelease('toggleShooting', $event)"
+        (touchcancel)="onRelease('toggleShooting', $event)"
+        [attr.aria-label]="weaponMode === 'beam' ? 'Switch weapon to Shot (projectiles)' : 'Switch weapon to Beam'"
+      >
+        <span
+          class="btn-icon"
+          [innerHTML]="weaponMode === 'beam' ? icons['weapon-shot'] : icons['weapon-beam']"
+          aria-hidden="true"
+        ></span>
+        <span class="btn-label">{{ weaponMode === 'beam' ? 'Shot' : 'Beam' }}</span>
+      </button>
+
+      <!-- DASH: right point (most-used escape — Burst button slot, freed up by stick-press gesture) -->
+      <button
+        class="arc-btn arc-dash"
+        [class.active]="activeButtons['dash']"
+        (touchstart)="onPress('dash', $event)"
+        (touchend)="onRelease('dash', $event)"
+        (touchcancel)="onRelease('dash', $event)"
+        aria-label="Dash"
+      >
+        <span class="btn-icon" [innerHTML]="icons['dash']" aria-hidden="true"></span>
+        <span class="btn-label">Dash</span>
+      </button>
+
+      <!-- FOCUS: shot mode only — auto-targets the nearest enemy.
+           In beam mode the auto-sweep is the default idle behaviour; showing this button
+           there would offer a no-op and mislead the player. -->
+      @if (weaponMode === 'shot') {
+        <button
+          class="arc-btn arc-focus"
+          [class.active]="secondaryActive"
+          (touchstart)="onFocusFirePress($event)"
+          aria-label="Toggle Focus Fire"
+        >
+          <span class="btn-icon" [innerHTML]="icons['focus']" aria-hidden="true"></span>
+          <span class="btn-label">Focus</span>
+        </button>
+      }
+    </div>
+
+    <!-- PARRY: bottom-center between the two joysticks — the reactive defense lives where
+       either thumb can reach it. Shows a recovery ring + dims while on cooldown. -->
+    <button
+      class="arc-btn parry-btn"
+      [class.active]="activeButtons['parry']"
+      [class.on-cooldown]="parryCooldown > 0"
+      [style.--cooldown]="parryCooldown"
+      [attr.aria-disabled]="parryCooldown > 0"
+      (touchstart)="onPress('parry', $event)"
+      (touchend)="onRelease('parry', $event)"
+      (touchcancel)="onRelease('parry', $event)"
+      aria-label="Parry"
+    >
+      <span class="btn-icon" [innerHTML]="icons['parry']" aria-hidden="true"></span>
+      <span class="btn-label">Parry</span>
+    </button>
+  }
+}

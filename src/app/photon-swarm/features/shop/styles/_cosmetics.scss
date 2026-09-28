@@ -1,0 +1,342 @@
+@use '../../../styles/design-system' as ds;
+
+/* Cosmetics styling - now used for both cosmetics and upgrades */
+.cosmetics-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+}
+
+.cosmetic-filters {
+  display: flex;
+  margin-bottom: ds.$spacing-comfortable;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+
+  .filter-button {
+    background: none;
+    border: ds.$border-width solid var(--game-panel-border, rgba(ds.$dark-accent, 0.3));
+    border-radius: ds.$radius-base;
+    padding: ds.$spacing-tight ds.$spacing-standard;
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.7));
+    font-size: ds.$text-base;
+    cursor: pointer;
+    transition: all ds.$animation-standard ds.$easing-standard;
+    margin-right: ds.$spacing-standard;
+    margin-bottom: ds.$spacing-micro;
+
+    @media (max-width: 600px) {
+      padding: ds.$spacing-micro ds.$spacing-tight;
+      font-size: ds.$text-small;
+      margin-right: ds.$spacing-tight;
+    }
+
+    @media (pointer: coarse) {
+      min-height: 44px;
+    }
+
+    // Hover: solid accent fill + contrasting text for legibility
+    &:hover {
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+      border-color: var(--game-accent, ds.$dark-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+      border-color: var(--game-accent, ds.$dark-accent);
+    }
+
+    // Active: solid accent fill so it's clearly distinguished from inactive
+    &.active {
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+      border-color: var(--game-accent, ds.$dark-accent);
+      font-weight: ds.$weight-semibold;
+    }
+  }
+}
+
+.cosmetic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  // Rows must be content-sized: with the default `auto` rows WebKit compresses them to FIT
+  // the height-constrained scroll box instead of overflowing it — cards squashed to ~57px,
+  // the title (only min-size:0 child, overflow:hidden) collapsed to 0 and the footer was
+  // clipped. max-content rows restore content-sized cards + real scrolling.
+  grid-auto-rows: max-content;
+  gap: ds.$spacing-tight;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  // No explicit max-height: the parent .cosmetics-container (flex:1/min-height:0)
+  // constrains the grid. The modal itself has a fixed height so this is stable.
+  padding-right: ds.$spacing-tight;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 480px) {
+    gap: ds.$spacing-micro;
+    padding-right: 0;
+  }
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--shop-scrollbar-track, rgba(0, 0, 0, 0.3));
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--game-accent, ds.$dark-accent);
+    border-radius: ds.$radius-small;
+  }
+}
+
+.cosmetic-item {
+  position: relative;
+  // Canonical card surface: --game-panel-bg with 1px border + radius-medium
+  background-color: var(--game-panel-bg, rgba(0, 10, 20, 0.95));
+  border: ds.$border-width solid var(--game-panel-border, rgba(ds.$dark-accent, 0.3));
+  border-radius: ds.$radius-medium;
+  padding: ds.$spacing-tight ds.$spacing-standard;
+  transition: all ds.$animation-standard ds.$easing-standard;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+
+  &:hover:not(.disabled) {
+    transform: translateY(-2px);
+    border-color: var(--game-accent, ds.$dark-accent);
+    // ONE subtle glow — no multi-layer neon
+    box-shadow: 0 4px ds.$spacing-comfortable var(--game-glow-color, rgba(ds.$dark-accent, 0.15));
+  }
+
+  &:focus-visible:not(.disabled) {
+    outline: 2px solid var(--game-accent, ds.$dark-accent);
+    outline-offset: 2px;
+    border-color: var(--game-accent, ds.$dark-accent);
+  }
+
+  // Active cosmetic: success border tint only (no glow)
+  &.active {
+    border-color: var(--game-success, ds.$dark-success);
+    background-color: rgba(ds.$dark-success, 0.04);
+  }
+
+  // Affordable: subtle success tint — border + very light bg, NO outer glow
+  &.affordable {
+    border-color: var(--game-success, ds.$dark-success);
+    background-color: rgba(ds.$dark-success, 0.04);
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--game-panel-border, rgba(ds.$dark-accent, 0.3));
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: ds.$spacing-micro ds.$spacing-tight;
+  }
+
+  // Status chip — canonical corner badge; uses --game-* tokens throughout
+  .status-chip {
+    position: absolute;
+    top: 0;
+    right: 0;
+    // Default: shard/special colour
+    color: var(--game-special, ds.$dark-special);
+    font-weight: ds.$weight-bold;
+    font-size: ds.$text-micro;
+    background-color: rgba(ds.$dark-special, 0.08);
+    padding: 2px ds.$spacing-tight;
+    border-radius: 0 ds.$radius-medium 0 ds.$radius-base;
+    border: ds.$border-width solid rgba(ds.$dark-special, 0.25);
+    transition: all ds.$animation-fast ds.$easing-standard;
+    z-index: 5;
+    white-space: nowrap;
+
+    &.active,
+    &.max-level {
+      color: var(--game-success, ds.$dark-success);
+      background-color: rgba(ds.$dark-success, 0.08);
+      border-color: rgba(ds.$dark-success, 0.25);
+    }
+
+    &.activate {
+      color: var(--game-accent, ds.$dark-accent);
+      background-color: rgba(ds.$dark-accent, 0.08);
+      border-color: rgba(ds.$dark-accent, 0.25);
+    }
+  }
+
+  .cosmetic-preview {
+    width: 44px;
+    height: 44px;
+    border-radius: ds.$radius-small;
+    margin-right: ds.$spacing-tight;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--shop-preview-bg, rgba(0, 0, 0, 0.3));
+
+    @media (max-width: 480px) {
+      width: 36px;
+      height: 36px;
+    }
+
+    .color-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: ds.$radius-small;
+    }
+
+    .icon-preview {
+      font-size: ds.$text-xlarge;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .shape-preview,
+    .accessory-preview {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--game-accent, ds.$dark-accent);
+
+      svg {
+        width: 80%;
+        height: 80%;
+      }
+    }
+
+    .shape-preview {
+      color: var(--game-text-primary, ds.$dark-text);
+    }
+
+    .accessory-preview {
+      svg {
+        filter: drop-shadow(0 0 2px var(--shop-accessory-glow, rgba(ds.$dark-text, 0.5)));
+      }
+    }
+  }
+
+  .cosmetic-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 0;
+    min-width: 0;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: ds.$spacing-micro;
+      color: var(--game-accent, ds.$dark-accent);
+      font-size: ds.$text-base;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    p {
+      color: var(--shop-item-desc, ds.$dark-item-desc);
+      font-size: ds.$text-small;
+      margin-top: 0;
+      margin-bottom: ds.$spacing-tight;
+    }
+
+    .cost-button {
+      color: var(--game-special, ds.$dark-special);
+      font-weight: ds.$weight-bold;
+      font-size: ds.$text-base;
+      background-color: rgba(ds.$dark-special, 0.1);
+      padding: ds.$spacing-micro ds.$spacing-tight;
+      border-radius: ds.$radius-small;
+      display: inline-block;
+      cursor: pointer;
+      border: ds.$border-width solid rgba(ds.$dark-special, 0.3);
+      transition: all ds.$animation-fast ds.$easing-standard;
+      align-self: flex-start;
+      margin-top: auto;
+
+      // Hover: solid special fill + dark contrasting text
+      &:hover {
+        background-color: var(--game-special, ds.$dark-special);
+        color: ds.$dark-bg-primary;
+        border-color: var(--game-special, ds.$dark-special);
+        transform: scale(1.05);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--game-special, ds.$dark-special);
+        outline-offset: 2px;
+        background-color: var(--game-special, ds.$dark-special);
+        color: ds.$dark-bg-primary;
+      }
+    }
+
+    .activate-button {
+      // Ghost: transparent bg + accent border so it reads as a button at rest
+      background-color: transparent;
+      color: var(--game-accent, ds.$dark-accent);
+      border: ds.$border-width solid var(--game-accent, ds.$dark-accent);
+      border-radius: ds.$radius-small;
+      padding: ds.$spacing-tight ds.$spacing-standard;
+      cursor: pointer;
+      transition: all ds.$animation-standard ds.$easing-standard;
+      font-size: ds.$text-base;
+      align-self: flex-start;
+      margin-top: auto;
+
+      // Hover: solid accent fill + dark contrasting text
+      &:hover {
+        background-color: var(--game-accent, ds.$dark-accent);
+        color: var(--game-bg-primary, ds.$dark-bg-primary);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--game-accent, ds.$dark-accent);
+        outline-offset: 2px;
+        background-color: var(--game-accent, ds.$dark-accent);
+        color: var(--game-bg-primary, ds.$dark-bg-primary);
+      }
+    }
+
+    .active-label {
+      color: var(--shop-item-active-border, ds.$dark-success);
+      font-size: ds.$text-base;
+      font-weight: ds.$weight-bold;
+      background-color: var(--shop-active-chip-bg, rgba(ds.$dark-success, 0.1));
+      padding: ds.$spacing-micro ds.$spacing-tight;
+      border-radius: ds.$radius-small;
+      display: inline-block;
+      border: ds.$border-width solid var(--shop-active-chip-border, rgba(ds.$dark-success, 0.3));
+      align-self: flex-start;
+      margin-top: auto;
+    }
+  }
+}

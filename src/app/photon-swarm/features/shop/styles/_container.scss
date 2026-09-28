@@ -1,0 +1,107 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: block;
+}
+
+.shop-container {
+  position: absolute;
+  // A fixed equipment-bay height keeps category changes stable without stretching
+  // short inventories into a nearly full-screen empty panel.
+  top: 50%;
+  bottom: auto;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: min(720px, calc(100% - 32px));
+  max-width: 92vw;
+  max-height: none;
+  @include ds.instrument-panel(
+    var(--game-accent, #{ds.$dark-accent}),
+    var(--game-bg-overlay, rgba(0, 20, 40, 0.92)),
+    16px
+  );
+  backdrop-filter: blur(var(--game-blur-panel, 6px));
+  padding: ds.$spacing-comfortable;
+  color: var(--game-text-primary, ds.$dark-text);
+  z-index: ds.$z-modal;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  @media (max-width: 600px) {
+    top: 5vh;
+    bottom: 5vh;
+    height: auto;
+    max-height: 88vh;
+    transform: translateX(-50%);
+    padding: ds.$spacing-tight ds.$spacing-standard;
+  }
+
+  @media (max-width: 480px) {
+    top: 3vh;
+    bottom: 3vh;
+    max-height: 93vh;
+    padding: ds.$spacing-micro ds.$spacing-tight;
+  }
+
+  * {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: ds.$spacing-standard;
+    // Canonical modal header: $text-xlarge, $weight-semibold, $tracking-wide, mixed case
+    font-size: ds.$text-xlarge;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+    text-transform: none;
+    color: var(--game-text-primary, ds.$dark-text);
+    flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      font-size: ds.$text-large;
+      margin-bottom: ds.$spacing-tight;
+    }
+  }
+
+  .close-button {
+    position: absolute;
+    top: ds.$spacing-standard;
+    right: ds.$spacing-standard;
+    background: none;
+    border: none;
+    // Canonical: muted at rest, accent on hover (matches settings + enemy-guide)
+    color: var(--game-text-muted, rgba(ds.$dark-text, 0.5));
+    font-size: ds.$text-xlarge;
+    cursor: pointer;
+    transition: color ds.$animation-fast ds.$easing-standard;
+    border-radius: ds.$radius-small;
+    padding: ds.$spacing-micro;
+    line-height: ds.$leading-none;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: var(--game-accent, ds.$dark-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+      color: var(--game-accent, ds.$dark-accent);
+    }
+  }
+}

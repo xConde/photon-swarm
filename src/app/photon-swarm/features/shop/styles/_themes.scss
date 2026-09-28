@@ -1,0 +1,120 @@
+@use '../../../styles/design-system' as ds;
+
+// ===== THEME-SPECIFIC OVERRIDES =====
+
+// Light mode (Day mode) — Cool Slate aesthetic
+:host-context(.day-mode) {
+  // Minimal light-mode overrides — most color comes from --game-* tokens in .day-mode
+  --shop-affordable-bg: #{rgba(ds.$light-success, 0.04)};
+
+  .shop-header .shards-display {
+    color: ds.$light-special;
+  }
+
+  .shop-tabs .tab-button {
+    color: ds.$light-accent-light;
+
+    // Hover/focus: solid fill on light mode — use dark-slate for contrast. Mirror focus to
+    // hover so keyboard focus doesn't fall through to the dark-mode base fallback.
+    &:hover,
+    &:focus-visible {
+      background-color: ds.$light-accent;
+      color: ds.$light-bg-primary;
+    }
+
+    &.active {
+      color: ds.$light-accent;
+      background-color: transparent;
+
+      &:hover,
+      &:focus-visible {
+        background-color: rgba(ds.$light-accent, 0.1);
+        color: ds.$light-accent;
+      }
+
+      &::after {
+        background-color: ds.$light-accent;
+      }
+    }
+  }
+
+  .cosmetic-filters .filter-button {
+    color: ds.$light-accent-light;
+
+    // Hover: solid fill on light mode
+    &:hover {
+      background-color: ds.$light-accent;
+      color: ds.$light-bg-primary;
+      border-color: ds.$light-accent;
+    }
+
+    // Active: solid fill, clearly selected
+    &.active {
+      background-color: ds.$light-accent;
+      color: ds.$light-bg-primary;
+      border-color: ds.$light-accent;
+    }
+  }
+
+  .cosmetic-item {
+    // Light-mode card surface: use slate panel tint (cyan 0.06 is invisible on white)
+    background-color: rgba(71, 85, 105, 0.05);
+    border-color: rgba(71, 85, 105, 0.2);
+
+    &.active,
+    &.affordable {
+      background-color: rgba(ds.$light-success, 0.04);
+      border-color: ds.$light-success;
+    }
+
+    &:hover:not(.disabled) {
+      border-color: ds.$light-accent-light;
+      box-shadow: 0 2px ds.$spacing-standard rgba(71, 85, 105, 0.1);
+    }
+
+    .status-chip {
+      background-color: rgba(ds.$light-special, 0.08);
+      border-color: rgba(ds.$light-special, 0.25);
+      color: ds.$light-special;
+
+      &.active,
+      &.max-level {
+        color: ds.$light-success;
+        background-color: rgba(ds.$light-success, 0.08);
+        border-color: rgba(ds.$light-success, 0.25);
+      }
+
+      &.activate {
+        color: ds.$light-accent;
+        background-color: rgba(ds.$light-accent, 0.08);
+        border-color: rgba(ds.$light-accent, 0.25);
+      }
+    }
+
+    .cosmetic-info h3 {
+      color: ds.$light-text;
+    }
+  }
+
+  .upgrade-item {
+    background-color: rgba(71, 85, 105, 0.05);
+    border-color: rgba(71, 85, 105, 0.2);
+
+    &.affordable {
+      background-color: rgba(ds.$light-success, 0.04);
+      border-color: ds.$light-success;
+    }
+
+    .upgrade-name {
+      color: ds.$light-text;
+    }
+
+    .upgrade-desc {
+      color: rgba(ds.$light-text, 0.7);
+    }
+
+    .upgrade-preview {
+      color: ds.$light-success;
+    }
+  }
+}

@@ -1,0 +1,40 @@
+@use '../../../styles/design-system' as ds;
+
+// === STATS CONTAINER ===
+.stats-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ds.$spacing-micro;
+  margin-bottom: ds.$spacing-tight;
+}
+
+// === STAT ITEMS ===
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ds.$spacing-tight ds.$spacing-standard;
+  background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 3%, transparent);
+  border-radius: ds.$radius-base;
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  transition: background ds.$animation-fast ds.$easing-standard;
+
+  &:hover {
+    background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 5%, transparent);
+  }
+}
+
+.stat-label {
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-medium;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  text-transform: uppercase;
+  letter-spacing: ds.$tracking-wide;
+}
+
+.stat-value {
+  font-size: ds.$text-large;
+  font-weight: ds.$weight-bold;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,244 @@
+@use '../../../styles/design-system' as ds;
+
+// ─── Stats Pill ────────────────────────────────────────────────────────────────
+.stats-pill {
+  position: absolute;
+  top: ds.$spacing-tight + 14px; // Clear the 14px XP bar — same offset as minimap
+  left: ds.$spacing-tight;
+  display: flex;
+  align-items: center;
+  gap: ds.$spacing-tight;
+  padding: ds.$spacing-micro ds.$spacing-tight; // 4px 8px — tight, no background fill
+  // Opacity ≥0.75 so white text clears WCAG AA (4.5:1) even on the lightest bg.
+  // The bg is dark in both dark AND day modes — pill text is always forced white below.
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(var(--game-blur-subtle, 2px));
+  border: 1px solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: ds.$radius-xs; // 2px — technical feel
+  pointer-events: auto;
+  z-index: 1;
+  min-height: 28px; // Ensure pill has consistent height
+
+  &.critical-health {
+    border-color: var(--game-danger, #{ds.$dark-danger});
+    animation: pill-critical-pulse 1s ease-in-out infinite;
+  }
+
+  &.danger-health {
+    border-color: var(--game-danger, #{ds.$dark-danger});
+    animation: pill-danger-pulse 0.6s ease-in-out infinite;
+  }
+
+  @media (max-width: 768px) {
+    box-sizing: border-box;
+    max-width: calc(100% - var(--game-minimap-size-tablet-sm, #{ds.$minimap-size-tablet-sm}) - 20px);
+    padding: 3px 7px;
+    gap: 5px;
+    min-height: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-pill {
+    max-width: calc(100% - var(--game-minimap-size-phone, #{ds.$minimap-size-phone}) - 20px);
+  }
+
+  .ascension-stat .pill-label {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-pill {
+    padding: 2px 6px;
+    gap: 3px;
+  }
+
+  .pill-divider {
+    height: 12px;
+  }
+}
+
+.pill-icon {
+  font-size: ds.$text-base;
+  color: var(--game-success, #{ds.$dark-success});
+  font-weight: ds.$weight-bold;
+  line-height: 1;
+}
+
+.pill-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--game-panel-border, rgba(0, 255, 255, 0.3));
+}
+
+.pill-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+
+  &.ascension-stat {
+    color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  }
+}
+
+.pill-label {
+  font-family: ds.$font-mono;
+  font-size: ds.$text-micro; // 11px
+  // Force white: pill bg is rgba(0,0,0,0.75) in both modes → ratio ≥4.5:1 on any bg.
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: ds.$tracking-wide;
+
+  // Tablet font bump (769–1024px)
+  @media (min-width: 769px) and (max-width: 1024px) {
+    font-size: ds.$text-small; // 12px
+  }
+}
+
+.pill-value {
+  font-family: ds.$font-mono;
+  font-size: ds.$text-small; // 12px — dense, readable
+  font-variant-numeric: tabular-nums;
+  // Force white: pill bg is rgba(0,0,0,0.75) in both modes → ratio ≥4.5:1 on any bg.
+  color: #ffffff;
+  font-weight: ds.$weight-semibold;
+
+  // Tablet font bump (769–1024px)
+  @media (min-width: 769px) and (max-width: 1024px) {
+    font-size: ds.$text-caption; // 13px
+  }
+
+  &.shards {
+    color: var(--game-special, #{ds.$dark-special});
+  }
+
+  &.health-value {
+    color: var(--game-success, #{ds.$dark-success});
+  }
+
+  &.health-low {
+    color: var(--game-danger, #{ds.$dark-danger});
+  }
+
+  &.ascension-value {
+    color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  }
+
+  // Wave type colors — semantic only, no decorative glow or animation
+  &.wave-normal {
+    color: var(--game-wave-normal, #{ds.$dark-wave-normal});
+  }
+
+  &.wave-swarm {
+    color: var(--game-wave-swarm, #{ds.$dark-wave-swarm});
+  }
+
+  &.wave-elite {
+    color: var(--game-wave-elite, #{ds.$dark-wave-elite});
+  }
+}
+
+// ─── Health: icon + mini bar + number (reads as a status gauge, not a bare count) ───
+.health-stat {
+  gap: 5px;
+}
+
+.health-icon {
+  // Heart follows the health state colour (matches the value + bar) instead of a fixed red.
+  color: var(--game-success, #{ds.$dark-success});
+
+  .stats-pill.critical-health & {
+    color: var(--game-danger, #{ds.$dark-danger});
+  }
+}
+
+.health-bar {
+  position: relative;
+  width: 42px;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  flex-shrink: 0;
+
+  @media (max-width: 640px) {
+    width: 32px;
+  }
+}
+
+.health-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--game-success, #{ds.$dark-success});
+  transition:
+    width ds.$animation-medium ds.$easing-out,
+    background-color ds.$animation-medium ds.$easing-standard;
+
+  &.low {
+    background: var(--game-warning, #{ds.$dark-warning});
+  }
+  &.crit {
+    background: var(--game-danger, #{ds.$dark-danger});
+  }
+}
+
+// ─── Mute Toggle — compact instrument button, matches .ability-slot treatment ───
+.mute-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 38%, transparent);
+  border-radius: ds.$radius-xs;
+  background: color-mix(in srgb, var(--game-text-primary) 4%, transparent);
+  color: var(--game-accent, #{ds.$dark-accent});
+  cursor: pointer;
+  transition:
+    border-color ds.$animation-fast ds.$easing-standard,
+    color ds.$animation-fast ds.$easing-standard;
+
+  &:hover {
+    border-color: var(--game-accent, #{ds.$dark-accent});
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+    outline-offset: 2px;
+  }
+
+  &.muted {
+    color: var(--game-text-muted);
+    border-color: color-mix(in srgb, var(--game-text-primary) 16%, transparent);
+  }
+}
+
+.mute-icon {
+  display: block;
+}
+
+@keyframes pill-critical-pulse {
+  0%,
+  100% {
+    border-color: var(--game-danger, #{ds.$dark-danger});
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 30%, transparent);
+  }
+}
+
+@keyframes pill-danger-pulse {
+  0%,
+  100% {
+    border-color: var(--game-danger, #{ds.$dark-danger});
+    opacity: 1;
+  }
+  50% {
+    border-color: color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 50%, transparent);
+    opacity: 0.7;
+  }
+}

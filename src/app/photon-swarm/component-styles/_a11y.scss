@@ -1,0 +1,36 @@
+// =============================================================================
+// Screen-Reader Live Region (visually hidden, accessibility-tree visible)
+// WCAG-compliant pattern: stays in the a11y tree (NOT display:none /
+// visibility:hidden) but renders nothing visually. Used for the run-state
+// aria-live channel that mirrors canvas-only feedback for SR users.
+// =============================================================================
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// =============================================================================
+// Reduced Motion Accessibility
+// Disables animations for users who prefer reduced motion
+// =============================================================================
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  // Disable starfield animation
+  .photon-swarm-container::after {
+    animation: none !important;
+  }
+}

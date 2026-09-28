@@ -1,0 +1,57 @@
+@use '../../../styles/design-system' as ds;
+
+.core-card {
+  --upgrade-rarity-color: var(--game-accent, #{ds.$dark-accent});
+
+  p {
+    display: none;
+
+    &.core-description {
+      display: block;
+      margin-top: 7px;
+      color: var(--upgrade-card-text, rgba(ds.$dark-text, 0.62));
+      font-size: ds.$text-small;
+      font-style: normal;
+    }
+  }
+}
+
+.core-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 4px;
+  flex: 0 0 auto;
+  color: var(--upgrade-rarity-color);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.core-benefit {
+  color: var(--upgrade-rarity-color);
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: 26px;
+  font-weight: ds.$weight-black;
+  letter-spacing: ds.$tracking-tight;
+  line-height: ds.$leading-none;
+}
+
+@media (max-width: 600px) {
+  .core-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .core-benefit {
+    font-size: ds.$text-medium;
+  }
+
+  .core-card p.core-description {
+    font-size: ds.$text-caption;
+  }
+}

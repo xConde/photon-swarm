@@ -1,0 +1,71 @@
+@use '../styles/design-system' as ds;
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes starfield {
+  from {
+    background-position:
+      0 0,
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -600px 600px,
+      -300px 300px,
+      300px -300px;
+  }
+}
+
+/* Safe area padding for mobile devices with notches */
+.safe-area-padding {
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0)
+    env(safe-area-inset-left, 0);
+}
+
+.debug-overlay {
+  position: absolute;
+  top: ds.$spacing-tight;
+  right: ds.$spacing-tight;
+  z-index: ds.$z-content + 5;
+  pointer-events: auto;
+}
+
+// Debug mode banner (visible when debug is enabled but console is hidden)
+.debug-indicator {
+  position: absolute;
+  bottom: ds.$spacing-comfortable;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: ds.$z-content + 5;
+  pointer-events: none;
+  padding: ds.$spacing-micro ds.$spacing-standard;
+  background: var(--game-button-bg, rgba(0, 40, 60, 0.6));
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: ds.$radius-small;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  font-family: ds.$font-mono;
+  font-size: ds.$text-micro;
+  letter-spacing: ds.$tracking-wide;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}

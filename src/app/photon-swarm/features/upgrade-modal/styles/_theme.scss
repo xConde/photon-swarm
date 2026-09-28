@@ -1,0 +1,43 @@
+@use '../../../styles/design-system' as ds;
+
+// Blessing/anomaly hues stay stable between themes because they communicate
+// gameplay meaning. Neutral surfaces and core systems adapt to the day palette.
+:host-context(.day-mode) {
+  --game-bg-overlay: rgba(248, 250, 252, 0.97);
+  --game-accent: #{ds.$light-accent};
+  --game-text-primary: #{ds.$light-text};
+  --game-text-secondary: #{rgba(ds.$light-text, 0.72)};
+  --game-text-muted: #{rgba(ds.$light-text, 0.52)};
+  --upgrade-overlay-bg: rgba(71, 85, 105, 0.4);
+  --upgrade-card-bg: #{ds.$light-bg-secondary};
+  --upgrade-card-text: #{rgba(ds.$light-text, 0.68)};
+  --upgrade-secondary-border: rgba(71, 85, 105, 0.2);
+
+  .upgrade-card {
+    border-color: color-mix(in srgb, var(--upgrade-rarity-color) 38%, transparent);
+  }
+
+  .core-card {
+    --upgrade-rarity-color: #{ds.$light-accent};
+  }
+
+  .curse-title {
+    color: ds.$light-danger;
+  }
+
+  .blessing-title {
+    color: ds.$light-success;
+
+    &.curse-low {
+      color: ds.$light-tier-common;
+    }
+
+    &.curse-medium {
+      color: ds.$light-tier-rare;
+    }
+
+    &.curse-high {
+      color: ds.$light-tier-epic;
+    }
+  }
+}

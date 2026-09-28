@@ -1,0 +1,170 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: contents;
+}
+
+// ─── Faction Standing Bar ────────────────────────────────────────────────────
+// Sits under the stats-pill in the top-left HUD column.
+// Each chip = identity dot + short name + numeric standing.
+// Only visible once any faction has drifted off zero.
+
+.faction-standing-bar {
+  position: absolute;
+  // Below XP bar (14px) + stats-pill top offset (8px) + pill height (28px) + 6px gap
+  top: 56px;
+  left: ds.$spacing-tight;
+  display: flex;
+  flex-wrap: nowrap; // Single row — no wrapping onto the play field
+  gap: 3px;
+  pointer-events: none;
+  z-index: 1;
+
+  @media (max-width: 640px) {
+    top: 50px;
+    gap: 2px;
+  }
+}
+
+// ─── Chip surface — shared pill language ────────────────────────────────────
+// Background/border/radius matches the stats-pill surface so all HUD pills
+// read as one family. The literal fallback covers the edge case where
+// --game-panel-border resolves empty in a shallow Angular scope.
+
+.faction-chip {
+  position: relative; // anchors the standing meter at the chip's bottom edge
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  // Uniform fixed padding — prevents chips from reading different widths
+  // when one value is "-100" vs "0". Extra bottom room clears the standing meter.
+  padding: 2px 5px 5px;
+  // Dark semi-transparent surface — matches stats-pill / effect-tag language.
+  // Literal fallback ensures visible background if token is missing.
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(var(--game-blur-subtle, 2px));
+  border: 1px solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: ds.$radius-xs; // 2px — same as stats-pill
+  font-family: ds.$font-mono;
+  // text-micro (11px) is the floor for HUD labels — maintains legibility
+  font-size: ds.$text-micro;
+  // Tighter tracking so all four chips fit on one row at most viewports
+  letter-spacing: 0.02em;
+  line-height: 1;
+  // Enforce uniform chip height — prevents chips from varying by content
+  min-height: 18px;
+  color: var(--game-text-primary, #ffffff);
+
+  // ── Relationship tint — border only, not background fill ──────────────
+  // Restrained: a tinted border carries the status without overwhelming.
+  // 55% opacity keeps it readable without neon-glow heaviness.
+  &.allied {
+    border-color: color-mix(in srgb, var(--game-success, #00ff88) 55%, transparent);
+    color: var(--game-success, #00ff88);
+  }
+
+  &.hostile {
+    border-color: color-mix(in srgb, var(--game-danger, #ff3366) 55%, transparent);
+    color: var(--game-danger, #ff3366);
+  }
+
+  &.neutral {
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  }
+}
+
+// ─── Faction identity dot ────────────────────────────────────────────────────
+.faction-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 6px; // Prevent dot from shrinking under flex pressure
+}
+
+// ─── Short name — first word of the king name (e.g. "Crimson", "Azure") ──────
+// shortLabel() returns the first word (everything before the first space), so the
+// two-word king names ("Crimson King" → "Crimson") render as 5–7 chars.
+// At 11px mono, 7 chars ≈ 7 × 6.6px ≈ 46px — max-width: 52px leaves a
+// 6px margin so all four names render without truncation on desktop.
+// Mobile (≤480px) hides the name entirely via the rule below, so the
+// max-width only matters at ≥481px where 52px is comfortably available.
+.faction-name {
+  font-weight: ds.$weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  max-width: 52px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ─── Standing value — tabular so numbers align across chips ──────────────────
+.faction-value {
+  font-variant-numeric: tabular-nums;
+  // Slightly muted — value is secondary to the name+dot identity pair
+  opacity: 0.9;
+  // Min-width for 4 chars ("-100") at 11px mono ≈ 26px — prevents layout jump
+  min-width: 18px;
+  text-align: right;
+}
+
+// ─── Standing meter — diverging bar at the chip's bottom edge ────────────────
+// Centre = 0; the fill grows right (allied) or left (hostile) by |standing|, so the
+// number is backed by a visual gauge. Fill uses currentColor (the relationship tint).
+.faction-meter {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 1px;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.faction-meter-center {
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 1px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-50%);
+}
+
+.faction-meter-fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 1px;
+  background: currentColor;
+  transition:
+    left ds.$animation-medium ds.$easing-out,
+    width ds.$animation-medium ds.$easing-out;
+}
+
+// ─── Phone: collapse name, show dot+value only ───────────────────────────────
+@media (max-width: 480px) {
+  .faction-name {
+    display: none;
+  }
+
+  // Remove name's max-width gap; dot+value is already compact
+  .faction-chip {
+    gap: 2px;
+    padding: 2px 4px;
+  }
+}
+
+// ─── Day-mode: re-assert white chip text ──────────────────────────────────────
+// The chip surface is hardcoded dark (rgba(0,0,0,0.65)), but --game-text-primary
+// cascades to dark slate in day-mode, making text invisible. Re-assert light text
+// so labels remain readable on the dark chip in both themes.
+:host-context(.day-mode) {
+  .faction-chip {
+    color: #ffffff;
+
+    &.neutral {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+}

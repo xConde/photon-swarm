@@ -1,0 +1,36 @@
+@use '../../../styles/design-system' as ds;
+
+// FPS Counter - shown only as a performance warning (< 30 FPS)
+.fps-counter {
+  position: absolute;
+  top: 215px; // Under minimap (200px minimap + 10px top + 5px gap)
+  right: ds.$spacing-standard; // Aligned with right edge
+  font-family: ds.$font-mono;
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-bold;
+  text-shadow: 0 0 ds.$spacing-micro rgba(0, 0, 0, 0.8);
+  z-index: ds.$z-content;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    top: 145px; // Scaled minimap (~130px) + gap
+    right: ds.$spacing-tight;
+    font-size: ds.$text-micro;
+  }
+
+  // Warning state: red pulse to signal degraded performance
+  &.fps-warning {
+    color: var(--game-danger, #{ds.$dark-danger}) !important;
+    animation: fps-warning-pulse 1s ease-in-out infinite;
+  }
+}
+
+@keyframes fps-warning-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}

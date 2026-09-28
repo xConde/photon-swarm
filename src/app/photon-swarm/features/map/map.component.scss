@@ -1,0 +1,343 @@
+/* Theme-aware map component */
+
+@use '../../styles/design-system' as ds;
+
+:host {
+  display: block;
+}
+
+// Dim the minimap to match the .hud-wrapper.dimmed (0.7) when a dimmable modal is open,
+// so the top-right minimap fades in step with the stats pill + zone panel instead of vanishing.
+:host(.dimmed) {
+  opacity: 0.7;
+  transition: opacity ds.$animation-standard ds.$easing-standard;
+}
+
+// Map Modal - Centered semi-transparent container
+.map-modal-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; // Allow game to continue behind
+  z-index: ds.$z-overlay * 5;
+}
+
+.map-modal {
+  position: relative;
+  width: 500px; // Fixed size — the layout is intentionally "Automap" style
+  height: 500px;
+  @include ds.instrument-panel(var(--game-accent), var(--game-bg-overlay), 14px);
+  backdrop-filter: blur(var(--game-blur-panel));
+  padding: ds.$spacing-tight;
+  pointer-events: auto; // Modal itself blocks clicks
+  animation: mapFadeIn ds.$animation-fast ds.$easing-standard;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 ds.$spacing-generous - 4px rgba(0, 0, 0, 0.8); // depth
+
+  h2 {
+    margin: 0 0 ds.$spacing-tight 0;
+    font-size: ds.$text-xlarge; // canonical: $text-xlarge (24px) for modal header
+    // canonical: $weight-semibold $tracking-wide Mixed-Case
+    color: var(--game-accent);
+    text-align: center;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: ds.$tracking-wide;
+    // Mixed case per canonical — "Automap" not "AUTOMAP"
+    text-transform: none;
+  }
+
+  .map-canvas {
+    flex: 1;
+    width: 100%;
+    height: 100%; // Explicit height
+    min-height: 0; // Allow flexbox to shrink
+    max-height: 420px; // Max height to ensure it doesn't overflow
+    border: ds.$border-width solid var(--game-panel-border);
+    border-radius: ds.$radius-xs;
+    background: color-mix(in srgb, var(--game-bg-primary) 30%, transparent); // Slight background
+    display: block; // Ensure canvas is block level
+  }
+
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 10px;
+    margin-top: ds.$spacing-tight;
+    padding: ds.$spacing-tight ds.$spacing-tight 0;
+    border-top: ds.$border-width solid var(--game-panel-border);
+    overflow: hidden;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      color: var(--game-text-muted, rgba(255, 255, 255, 0.6));
+      font-size: 10px;
+      white-space: nowrap;
+
+      // Legend colors stay consistent for gameplay clarity
+      .legend-color {
+        width: ds.$spacing-standard;
+        height: ds.$spacing-standard;
+        border-radius: ds.$radius-xs;
+
+        &.player {
+          background: ds.$dark-success;
+          box-shadow: 0 0 ds.$spacing-micro ds.$dark-success;
+        }
+
+        &.elite {
+          background: ds.$dark-warning;
+          box-shadow: 0 0 ds.$spacing-micro ds.$dark-warning;
+        }
+
+        &.boss {
+          background: ds.$dark-special;
+          box-shadow: 0 0 ds.$spacing-micro ds.$dark-special;
+        }
+
+        &.powerup {
+          background: ds.$dark-powerup;
+          box-shadow: 0 0 ds.$spacing-micro ds.$dark-powerup;
+        }
+
+        // Faction brand colors — sourced from the --game-faction-N design tokens
+        // (config/faction-identity.config.ts, mirrored onto the photon-swarm game host
+        // in component-styles/_host-root.scss). The host also carries a
+        // :host-context(.day-mode) override, so these inherit the right per-theme value
+        // and need no override in the day-mode block below.
+        &.faction-crimson {
+          background: var(--game-faction-1);
+        }
+
+        &.faction-azure {
+          background: var(--game-faction-2);
+        }
+
+        &.faction-verdant {
+          background: var(--game-faction-3);
+        }
+
+        &.faction-shadow {
+          background: var(--game-faction-4);
+        }
+      }
+    }
+  }
+}
+
+// Minimap Styles
+.minimap-container {
+  position: absolute;
+  top: ds.$spacing-tight + 14px; // Clear the 14px XP bar
+  right: ds.$spacing-tight;
+  width: clamp(120px, 18vw, 180px);
+  height: clamp(120px, 18vw, 180px);
+  z-index: ds.$z-overlay * 4;
+  pointer-events: none;
+  // box-shadow instead of filter:drop-shadow on the canvas — drop-shadow composites
+  // every non-transparent pixel every frame (per-pixel GPU work); box-shadow is painted
+  // once at layout time and cached by the compositor.
+  box-shadow: 0 0 ds.$spacing-tight rgba(0, 0, 0, 0.5);
+  transition: opacity ds.$animation-medium ds.$easing-standard;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: ds.$radius-small;
+  }
+
+  .minimap-border {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border: ds.$border-width solid var(--game-panel-border);
+    border-radius: ds.$radius-base;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      // Outer ring is the panel-border at very low opacity
+      border: ds.$border-width solid color-mix(in srgb, var(--game-panel-border) 33%, transparent);
+      border-radius: ds.$radius-medium;
+    }
+
+    // Shimmer: dark mode only, NOT infinite — restrained-neon principle.
+    // 3 iterations ≈ 9s then stops so it reads as a boot-up signal, not ambient noise.
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg,
+        transparent 0%,
+        color-mix(in srgb, var(--game-accent) 5%, transparent) 50%,
+        transparent 100%
+      );
+      border-radius: ds.$radius-base;
+      animation: shimmer 3s ease-in-out 3; // finite: 3 iterations
+    }
+  }
+}
+
+// Animations
+@keyframes mapFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .map-modal {
+    width: 400px;
+    height: 400px;
+  }
+
+  // 481–768px (the 480-rule below doesn't reach here): the base clamp(120px,18vw,180px)
+  // stayed 120–138px, which (a) sat on the top HUD and (b) its bottom overlapped the
+  // zone-progress badge. Scale it down + clear the 14px XP bar.
+  .minimap-container {
+    top: ds.$spacing-tight + 14px;
+    right: ds.$spacing-micro;
+    width: var(--game-minimap-size-tablet-sm, #{ds.$minimap-size-tablet-sm});
+    height: var(--game-minimap-size-tablet-sm, #{ds.$minimap-size-tablet-sm});
+  }
+}
+
+@media (max-width: 480px) {
+  .map-modal {
+    width: 320px;
+    height: 320px;
+    // Prevent zero-margin bleed on exactly-320px viewports (e.g. iPhone SE)
+    max-width: calc(100% - 16px);
+  }
+
+  .minimap-container {
+    // Clear the 14px XP bar at the top (the base top did this; the old mobile override
+    // reset it to 4px and the minimap sat ON the XP bar).
+    top: ds.$spacing-tight + 14px;
+    right: ds.$spacing-micro;
+    // Override clamp floor — on a 390px viewport 18vw≈70px but the base
+    // clamp(120px, …) floors at 120px (~31% of screen). Lower the floor
+    // so the minimap scales down to ~84px and reclaims screen real-estate
+    // without breaking readability. Desktop size is unaffected (this
+    // breakpoint only fires at ≤480px).
+    width: var(--game-minimap-size-phone, #{ds.$minimap-size-phone});
+    height: var(--game-minimap-size-phone, #{ds.$minimap-size-phone});
+  }
+}
+
+// Short landscape (phone sideways): viewport width is large so the vw-based clamp
+// above floors at 120px again. Scale by viewport HEIGHT instead so the minimap stays
+// small and the top-right has room for the zone panel + joystick.
+@media (orientation: landscape) and (max-height: 500px) {
+  .minimap-container {
+    top: ds.$spacing-tight + 14px; // clear the XP bar
+    right: ds.$spacing-micro;
+    width: clamp(72px, 22vh, 100px);
+    height: clamp(72px, 22vh, 100px);
+  }
+}
+
+// ===== THEME-SPECIFIC OVERRIDES =====
+
+// Light mode (Day mode) - Cool slate foundation
+:host-context(.day-mode) {
+  // Map modal - canonical panel tokens handle theming automatically via var(--game-*)
+  // Only override the canvas colors which don't have global token equivalents.
+  .map-modal {
+    box-shadow: 0 ds.$spacing-micro calc(#{ds.$spacing-generous} - 4px) rgba(71, 85, 105, 0.15);
+
+    .map-canvas {
+      background: rgba(71, 85, 105, 0.06); // Subtle slate
+    }
+
+    .map-legend .legend-item {
+      color: rgba(51, 65, 85, 0.75); // Slate-700 — dark text on light bg
+    }
+  }
+
+  // Minimap - no shimmer in light mode (shimmer is already finite; belt+suspenders)
+  .minimap-border {
+    &::after {
+      animation: none;
+    }
+  }
+
+  // Legend colors - clear colors for gameplay clarity on slate background
+  .map-legend .legend-item .legend-color {
+    &.player {
+      background: ds.$light-success;
+      box-shadow: 0 0 ds.$spacing-micro rgba(ds.$light-success, 0.5);
+    }
+
+    &.elite {
+      background: ds.$light-warning;
+      box-shadow: 0 0 ds.$spacing-micro rgba(ds.$light-warning, 0.5);
+    }
+
+    &.boss {
+      background: ds.$light-danger;
+      box-shadow: 0 0 ds.$spacing-micro rgba(ds.$light-danger, 0.5);
+    }
+
+    &.powerup {
+      background: ds.$light-powerup;
+      box-shadow: 0 0 ds.$spacing-micro rgba(ds.$light-powerup, 0.5);
+    }
+
+    // No .faction-* overrides here: the base rules above consume var(--game-faction-N),
+    // and component-styles/_theme-light.scss redefines those tokens to their
+    // WCAG-contrasted light values under :host-context(.day-mode) on the photon-swarm
+    // host, an ancestor of this component. The values inherit down, so the swap happens
+    // automatically — the same mechanism --game-accent uses elsewhere in this file.
+    // The override has to come from the host: a bare `.day-mode` selector inside a
+    // component stylesheet is scoped to `.day-mode[_ngcontent-x]` and never matches.
+  }
+}
+
+// Dark mode (Night mode) - subtle accent reinforcement only
+:host-context(.night-mode) {
+  .map-modal {
+    box-shadow: 0 0 ds.$spacing-major rgba(0, 0, 0, 0.9);
+  }
+
+  .minimap-border {
+    border-color: color-mix(in srgb, var(--game-panel-border) 40%, transparent);
+  }
+}

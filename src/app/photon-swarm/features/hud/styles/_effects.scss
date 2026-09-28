@@ -1,0 +1,53 @@
+@use '../../../styles/design-system' as ds;
+
+// ─── Active Effects Strip (below stats pill) ────────────────────────────────
+.active-effects-strip {
+  position: absolute;
+  // Below XP bar (14px) + stats pill (~40px) + the faction-standing bar that #215
+  // inserted at top:56px (~18px tall) + gap — otherwise active buffs (e.g. "XP +3")
+  // render on top of the faction chips.
+  top: ds.$spacing-tight + 14px + 44px + 16px;
+  left: ds.$spacing-tight;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 300px;
+  z-index: 1;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    max-width: 140px; // Keep tight to left edge on mobile — preserve play field
+    gap: 3px;
+    // The .focus-fire-indicator is repositioned to top:72px on mobile (~18px tall).
+    // Push the effects strip below it so they don't overlap.
+    top: 96px;
+  }
+}
+
+.effect-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: ds.$spacing-micro;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(var(--game-blur-subtle, 2px));
+  border: 1px solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  color: var(--game-text-primary, #ffffff);
+  border-radius: ds.$radius-xs;
+  font-family: ds.$font-mono;
+  font-size: ds.$text-micro;
+  font-weight: ds.$weight-semibold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  .buff-name {
+    opacity: 0.9;
+  }
+
+  .buff-timer {
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-bold;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,107 @@
+@use '../../../styles/design-system' as ds;
+
+.relic-card,
+.route-card,
+.anomaly-card {
+  min-height: 310px;
+
+  .artifact-designation {
+    min-height: 62px;
+    margin-top: 9px;
+    padding: 11px 0;
+    display: flex;
+    align-items: flex-end;
+    color: var(--upgrade-rarity-color);
+    border-block: 1px solid color-mix(in srgb, var(--upgrade-rarity-color) 19%, transparent);
+    font-family: 'Space Mono', ds.$font-mono;
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.1em;
+  }
+}
+
+.anomaly-card {
+  --upgrade-rarity-color: #ff7a63;
+  min-height: 330px;
+  background:
+    radial-gradient(circle at 88% 14%, rgba(255, 122, 99, 0.14) 0 2px, transparent 3px),
+    linear-gradient(135deg, transparent 0 68%, rgba(255, 122, 99, 0.045) 68% 70%, transparent 70%),
+    var(--upgrade-card-bg, #0b111b);
+
+  .classification::after {
+    content: ' / CONTRACT';
+  }
+
+  .artifact-designation {
+    min-height: 70px;
+    font-size: ds.$text-base;
+  }
+
+  .mutation-doctrine {
+    border-color: color-mix(in srgb, var(--upgrade-rarity-color) 35%, transparent);
+
+    small::before {
+      content: 'PRESSURE  ';
+      color: var(--upgrade-rarity-color);
+      font-style: normal;
+      font-weight: ds.$weight-bold;
+    }
+  }
+}
+
+.relic-card {
+  --upgrade-rarity-color: #e8c879;
+  background:
+    radial-gradient(circle at 82% 19%, rgba(232, 200, 121, 0.09) 0 2px, transparent 3px),
+    radial-gradient(circle at 76% 27%, rgba(232, 200, 121, 0.06) 0 1px, transparent 2px),
+    var(--upgrade-card-bg, #0b111b);
+
+  .classification::after {
+    content: ' / RECOVERED';
+  }
+}
+
+.route-card {
+  --upgrade-rarity-color: #8fc7ff;
+  min-height: 330px;
+  background:
+    linear-gradient(
+      24deg,
+      transparent 0 46%,
+      color-mix(in srgb, var(--upgrade-rarity-color) 8%, transparent) 47% 48%,
+      transparent 49%
+    ),
+    linear-gradient(
+      -18deg,
+      transparent 0 61%,
+      color-mix(in srgb, var(--upgrade-rarity-color) 6%, transparent) 62% 63%,
+      transparent 64%
+    ),
+    var(--upgrade-card-bg, #0b111b);
+
+  &.route-verdant {
+    --upgrade-rarity-color: #63dda3;
+  }
+
+  .classification::after {
+    content: ' / ONE WAY';
+  }
+
+  .artifact-designation {
+    min-height: 76px;
+    font-size: ds.$text-base;
+  }
+}
+
+@media (max-width: 600px) {
+  .relic-card,
+  .route-card,
+  .anomaly-card {
+    min-height: 0;
+
+    .artifact-designation {
+      min-height: 42px;
+      padding: 7px 0;
+    }
+  }
+}

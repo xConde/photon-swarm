@@ -1,0 +1,168 @@
+@use '../../../styles/design-system' as ds;
+
+// Consumables specific styles
+.consumable-grid {
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+
+  .consumable-item {
+    position: relative;
+    padding: ds.$spacing-standard ds.$spacing-comfortable;
+    flex-direction: row;
+    align-items: center;
+    gap: ds.$spacing-comfortable;
+
+    @media (max-width: 600px) {
+      padding: ds.$spacing-tight ds.$spacing-standard;
+      gap: ds.$spacing-standard;
+    }
+
+    .consumable-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      order: -1;
+
+      i {
+        font-size: 1.25rem;
+        color: var(--game-accent, ds.$dark-accent);
+      }
+
+      @media (max-width: 480px) {
+        width: 36px;
+        height: 36px;
+
+        i {
+          font-size: 1rem;
+        }
+      }
+    }
+
+    .consumable-actions {
+      display: flex;
+      flex-direction: column;
+      gap: ds.$spacing-micro;
+      flex-shrink: 0;
+      order: 2;
+      margin-left: auto;
+
+      button {
+        padding: ds.$spacing-micro ds.$spacing-tight;
+        // Base button: ghost with accent border; solid fill on hover for legibility
+        background: transparent;
+        border: ds.$border-width solid var(--game-accent, ds.$dark-accent);
+        color: var(--game-accent, ds.$dark-accent);
+        border-radius: ds.$radius-small;
+        cursor: pointer;
+        transition: all ds.$animation-standard ds.$easing-standard;
+        font-size: ds.$text-small;
+        min-width: 64px;
+
+        @media (max-width: 480px) {
+          min-width: 56px;
+          font-size: ds.$text-micro;
+        }
+
+        // Hover: solid accent fill + dark contrasting text
+        &:hover:not(:disabled) {
+          background: var(--game-accent, ds.$dark-accent);
+          color: var(--game-bg-primary, ds.$dark-bg-primary);
+          border-color: var(--game-accent, ds.$dark-accent);
+        }
+
+        &:focus-visible:not(:disabled) {
+          outline: 2px solid var(--game-accent, ds.$dark-accent);
+          outline-offset: 2px;
+          background: var(--game-accent, ds.$dark-accent);
+          color: var(--game-bg-primary, ds.$dark-bg-primary);
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        &.buy-button {
+          border-color: var(--game-success, ds.$dark-success);
+          color: var(--game-success, ds.$dark-success);
+
+          // Hover: solid success fill + dark contrasting text
+          &:hover:not(:disabled) {
+            background: var(--game-success, ds.$dark-success);
+            color: ds.$dark-bg-primary;
+            border-color: var(--game-success, ds.$dark-success);
+          }
+
+          &:focus-visible:not(:disabled) {
+            outline-color: var(--game-success, ds.$dark-success);
+            background: var(--game-success, ds.$dark-success);
+            color: ds.$dark-bg-primary;
+          }
+        }
+
+        &.use-button {
+          border-color: var(--game-warning, ds.$dark-warning);
+          color: var(--game-warning, ds.$dark-warning);
+
+          // Hover: solid warning fill + dark contrasting text
+          &:hover:not(:disabled) {
+            background: var(--game-warning, ds.$dark-warning);
+            color: ds.$dark-bg-primary;
+            border-color: var(--game-warning, ds.$dark-warning);
+          }
+
+          &:focus-visible:not(:disabled) {
+            outline-color: var(--game-warning, ds.$dark-warning);
+            background: var(--game-warning, ds.$dark-warning);
+            color: ds.$dark-bg-primary;
+          }
+        }
+      }
+    }
+
+    // Quantity badge: success-tint, consistent with upgrade-footer badges
+    .quantity {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(ds.$dark-success, 0.08);
+      border: ds.$border-width solid rgba(ds.$dark-success, 0.25);
+      color: var(--game-success, ds.$dark-success);
+      padding: 2px ds.$spacing-tight;
+      border-radius: 0 ds.$radius-medium 0 ds.$radius-base;
+      font-size: ds.$text-micro;
+      font-weight: ds.$weight-bold;
+    }
+
+    .cosmetic-info {
+      min-height: auto;
+      flex: 1;
+
+      h3 {
+        font-size: ds.$text-base;
+        margin-bottom: ds.$spacing-micro;
+      }
+
+      p {
+        font-size: ds.$text-small;
+        margin-bottom: ds.$spacing-tight;
+      }
+    }
+
+    .duration,
+    .cooldown {
+      font-size: ds.$text-micro;
+      color: var(--game-text-muted, rgba(ds.$dark-text, 0.5));
+      margin: 0;
+    }
+
+    .cooldown {
+      color: var(--game-warning, ds.$dark-warning);
+      opacity: 0.7;
+    }
+  }
+}

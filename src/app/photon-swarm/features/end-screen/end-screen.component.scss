@@ -1,0 +1,17 @@
+/* End Screen - Canonical modal surface, full token coverage */
+/* Following Design Principles: Precision & Density, minimal but impactful */
+
+@use './styles/host';
+@use './styles/container';
+@use './styles/title';
+@use './styles/stats';
+@use './styles/zone-breakdown';
+@use './styles/run-build';
+@use './styles/personal-bests';
+@use './styles/health-bar';
+@use './styles/end-message';
+@use './styles/ascension';
+@use './styles/buttons';
+@use './styles/animations';
+@use './styles/light-mode';
+@use './styles/reduced-motion';

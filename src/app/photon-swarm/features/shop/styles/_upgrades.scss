@@ -1,0 +1,139 @@
+@use '../../../styles/design-system' as ds;
+
+.module-brief {
+  display: flex;
+  align-items: baseline;
+  gap: ds.$spacing-standard;
+  margin-bottom: ds.$spacing-standard;
+  padding: ds.$spacing-tight 0;
+  color: var(--game-text-secondary, rgba(ds.$dark-text, 0.7));
+  font-size: ds.$text-small;
+  border-bottom: ds.$border-width solid var(--game-panel-border, rgba(ds.$dark-accent, 0.22));
+
+  &__label {
+    color: var(--game-accent, ds.$dark-accent);
+    font-family: ds.$font-mono;
+    font-size: ds.$text-micro;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+}
+
+.upgrade-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upgrade-item {
+  appearance: none;
+  width: 100%;
+  min-height: 150px;
+  flex-direction: column;
+  align-items: stretch;
+  padding: ds.$spacing-standard;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-top-width: 2px;
+
+  &:hover:not(.disabled, .mounted) {
+    background-color: var(--game-panel-bg, rgba(0, 10, 20, 0.95));
+    border-top-color: var(--game-accent, ds.$dark-accent);
+  }
+
+  &.affordable {
+    border-color: var(--game-success, ds.$dark-success);
+    border-top-width: 2px;
+    background-color: var(--shop-affordable-bg, rgba(ds.$dark-success, 0.035));
+  }
+
+  &.mounted {
+    border-color: var(--game-accent, ds.$dark-accent);
+    background: linear-gradient(135deg, rgba(ds.$dark-accent, 0.09), rgba(ds.$dark-accent, 0.015) 55%);
+    cursor: default;
+  }
+
+  .upgrade-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 18px;
+    margin-bottom: ds.$spacing-tight;
+  }
+
+  .module-role,
+  .module-unlocked,
+  .module-currency {
+    font-family: ds.$font-mono;
+    font-size: ds.$text-micro;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .module-role {
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.62));
+  }
+
+  .module-unlocked {
+    color: var(--game-success, ds.$dark-success);
+  }
+
+  .upgrade-name {
+    margin: 0 0 4px;
+    color: var(--game-accent, ds.$dark-accent);
+    font-size: ds.$text-base;
+    font-weight: ds.$weight-semibold;
+  }
+
+  .upgrade-desc {
+    margin: 0 0 ds.$spacing-tight;
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.72));
+    font-size: ds.$text-small;
+    line-height: ds.$leading-relaxed;
+  }
+
+  .upgrade-preview {
+    margin: 0 0 ds.$spacing-standard;
+    color: var(--game-text, ds.$dark-text);
+    font-family: ds.$font-mono;
+    font-size: ds.$text-small;
+  }
+
+  .upgrade-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ds.$spacing-tight;
+    margin-top: auto;
+    padding-top: ds.$spacing-tight;
+    border-top: ds.$border-width solid var(--game-panel-border, rgba(ds.$dark-accent, 0.18));
+  }
+
+  .module-action {
+    color: var(--game-special, ds.$dark-special);
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-bold;
+
+    &--mounted {
+      color: var(--game-accent, ds.$dark-accent);
+    }
+  }
+
+  .module-currency {
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.52));
+  }
+}
+
+@media (max-width: 600px) {
+  .module-brief {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}

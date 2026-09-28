@@ -1,0 +1,23 @@
+<div
+  class="virtual-joystick"
+  [class.left]="position === 'left'"
+  [class.right]="position === 'right'"
+  [class.movement]="type === 'movement'"
+  [class.aim]="type === 'aim'"
+  [class.active]="isActive"
+  [class.visible]="isVisible"
+  [class.charging]="isCharging"
+  [style.width.px]="baseSize"
+  [style.height.px]="baseSize"
+  #joystickBase
+>
+  <div class="joystick-base"></div>
+
+  <div
+    class="joystick-stick"
+    [style.width.px]="stickSize"
+    [style.height.px]="stickSize"
+    [style.transform]="stickTransform"
+    #joystickStick
+  ></div>
+</div>

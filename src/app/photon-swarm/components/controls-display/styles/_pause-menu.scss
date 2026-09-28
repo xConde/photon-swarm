@@ -1,0 +1,63 @@
+// Pause menu mode — controls for pause menu
+@use '../../../styles/design-system' as ds;
+@use 'shared' as shared;
+
+// ---------------------------------------------------------------------------
+// Pause menu mode — controls for pause menu
+// ---------------------------------------------------------------------------
+.controls-pause-menu {
+  position: absolute;
+  bottom: ds.$spacing-tight + 2px;
+  right: ds.$spacing-tight + 2px;
+  pointer-events: none;
+  user-select: none;
+
+  @include ds.glass-panel;
+  position: absolute; // re-assert: glass-panel sets position:relative, which would unpin this from bottom-right
+  backdrop-filter: blur(var(--game-blur-panel));
+  padding: ds.$spacing-tight + 2px;
+
+  // Day-mode: light surface so the pause-menu legend is readable on a bright background
+  :host-context(.day-mode) & {
+    background: linear-gradient(135deg, rgba(ds.$light-bg-primary, 0.95) 0%, rgba(ds.$light-bg-secondary, 0.95) 100%);
+    border-color: rgba(ds.$light-accent, 0.3);
+  }
+
+  // Hide on small screens (no keyboard available)
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  .controls-list {
+    display: flex;
+    flex-direction: column;
+    gap: ds.$spacing-micro + 1px;
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: ds.$spacing-tight + 2px;
+
+      .key {
+        @include shared.key-hint-cap;
+
+        // Key caps: sea-green so keys pop on the light surface
+        :host-context(.day-mode) & {
+          color: ds.$light-success;
+          background-color: rgba(ds.$light-success, 0.08);
+          border-color: rgba(ds.$light-success, 0.4);
+        }
+      }
+
+      .action {
+        @include shared.key-hint-action;
+
+        // Action labels: teal accent — readable on the cool-white surface
+        :host-context(.day-mode) & {
+          color: ds.$light-accent-light;
+        }
+      }
+    }
+  }
+}

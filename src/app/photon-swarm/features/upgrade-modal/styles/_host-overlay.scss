@@ -1,0 +1,49 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: block;
+}
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--upgrade-overlay-bg, rgba(0, 0, 0, 0.7));
+  z-index: ds.$z-modal + 1000; // Above HUD (z-index: 100-1000)
+}
+
+.upgrade-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;
+  max-width: calc(100% - ds.$spacing-standard * 2);
+  padding: 22px 24px 24px;
+  @include ds.instrument-panel(
+    var(--game-accent, #{ds.$dark-accent}),
+    var(--game-bg-overlay, rgba(0, 20, 40, 0.94)),
+    16px
+  );
+  backdrop-filter: blur(var(--game-blur-panel, 6px));
+  color: var(--game-text-primary, #{ds.$dark-text});
+  font-family: ds.$font-primary;
+  z-index: ds.$z-modal + 1001; // Above overlay
+  user-select: none;
+
+  // ── Mobile: content-height panel centered in viewport ──
+  @media (max-width: 768px) {
+    top: 50%;
+    right: ds.$spacing-standard;
+    bottom: auto;
+    left: ds.$spacing-standard;
+    transform: translateY(-50%);
+    width: auto;
+    max-width: none;
+    max-height: 90dvh; // Never exceed the game canvas area
+    padding: ds.$spacing-standard;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}

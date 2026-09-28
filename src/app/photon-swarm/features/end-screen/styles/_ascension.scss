@@ -1,0 +1,129 @@
+@use '../../../styles/design-system' as ds;
+
+// === ASCENSION BADGE ===
+.ascension-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ds.$spacing-standard;
+  margin-bottom: ds.$spacing-tight;
+  padding: ds.$spacing-tight ds.$spacing-standard;
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 8%, transparent);
+  border: ds.$border-width solid
+    color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 15%, transparent);
+  border-radius: ds.$radius-base;
+}
+
+.ascension-label {
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-medium;
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: ds.$tracking-wide;
+}
+
+.ascension-value {
+  font-size: ds.$text-large;
+  font-weight: ds.$weight-bold;
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  font-variant-numeric: tabular-nums;
+}
+
+// === ASCENSION PANEL ===
+.ascension-panel {
+  margin-bottom: ds.$spacing-tight;
+  padding: ds.$spacing-tight;
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 5%, transparent);
+  border: ds.$border-width solid
+    color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 12%, transparent);
+  border-radius: ds.$radius-base;
+  text-align: center;
+}
+
+// Active-this-run summary: shown only when ascensionLevel > 0
+.ascension-active-bonuses {
+  margin-bottom: ds.$spacing-tight;
+  padding: ds.$spacing-micro ds.$spacing-tight ds.$spacing-tight;
+  text-align: center;
+
+  .bonus-label {
+    display: block;
+    margin-bottom: ds.$spacing-micro;
+    font-size: ds.$text-micro;
+    font-weight: ds.$weight-medium;
+    color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+    opacity: 0.55;
+    text-transform: uppercase;
+    letter-spacing: ds.$tracking-wide;
+  }
+}
+
+.ascension-available {
+  margin: 0 0 ds.$spacing-tight 0;
+  font-size: ds.$text-medium;
+  font-weight: ds.$weight-bold;
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  letter-spacing: ds.$tracking-tight;
+}
+
+.ascension-desc {
+  margin: 0 0 ds.$spacing-standard 0;
+  font-size: ds.$text-small;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.bonus-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: ds.$spacing-micro;
+  margin-bottom: ds.$spacing-tight;
+}
+
+.bonus-item {
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-medium;
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  opacity: 0.8;
+  padding: ds.$spacing-micro ds.$spacing-tight;
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 6%, transparent);
+  border-radius: ds.$radius-xs;
+  font-variant-numeric: tabular-nums;
+}
+
+// ascend-btn: ghost style by default; hover fills with a SOLID fallback so the label
+// stays readable even when --game-ascension-gold is not yet resolved.
+.ascend-btn {
+  background: color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 12%, transparent);
+  color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+  border: ds.$border-width-thick solid
+    color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 30%, transparent);
+  border-radius: ds.$radius-base;
+  padding: ds.$spacing-tight ds.$spacing-generous;
+  font-size: ds.$text-medium;
+  font-weight: ds.$weight-semibold;
+  letter-spacing: ds.$tracking-wide;
+  cursor: pointer;
+  transition: all ds.$animation-standard ds.$easing-standard;
+  min-width: 140px;
+  min-height: 44px; // WCAG 2.5.5 touch target
+
+  &:hover {
+    // Solid gold fill with dark text ensures the label reads clearly in both themes.
+    background: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+    color: #{ds.$dark-bg-primary};
+    border-color: var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+    transform: translateY(-2px);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--game-ascension-gold, #{ds.$dark-ascension-gold}) 40%, transparent);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-ascension-gold, #{ds.$dark-ascension-gold});
+    outline-offset: 2px;
+  }
+}

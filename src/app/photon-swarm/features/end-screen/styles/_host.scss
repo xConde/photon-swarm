@@ -1,0 +1,6 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: block;
+  user-select: none;
+}

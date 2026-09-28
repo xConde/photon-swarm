@@ -1,0 +1,200 @@
+@if (isVisible()) {
+  <div class="settings-container" role="dialog" aria-modal="true" aria-labelledby="settings-heading">
+    <div class="settings-console">
+      <span>Ship systems</span>
+      <span class="settings-separator" aria-hidden="true">·</span>
+      <span class="settings-scope">Local profile</span>
+    </div>
+    <h2 id="settings-heading">Settings</h2>
+    <button class="close-button" aria-label="Close settings" (click)="closeSettings()">&times;</button>
+
+    <div class="settings-panel">
+      <section class="settings-group settings-group--aim" aria-labelledby="settings-aim-heading">
+        <h3 id="settings-aim-heading">Aim</h3>
+        <div class="setting-row setting-row--pointer">
+          <label for="setting-sensitivity">Mouse Sensitivity</label>
+          <div class="setting-control setting-control--range">
+            <input
+              #firstControl
+              id="setting-sensitivity"
+              type="range"
+              class="slider"
+              min="50"
+              max="200"
+              step="10"
+              [value]="settings().sensitivity"
+              (input)="onSensitivityInput($event)"
+            />
+            <output for="setting-sensitivity">{{ settings().sensitivity }}%</output>
+          </div>
+        </div>
+
+        <div class="setting-row setting-row--touch">
+          <span>Invert Aim (Y)</span>
+          <button
+            class="toggle-btn"
+            [class.active]="settings().invertAimY"
+            [attr.aria-pressed]="settings().invertAimY"
+            (click)="toggleInvertAimY()"
+          >
+            {{ settings().invertAimY ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-group settings-group--feedback" aria-labelledby="settings-feedback-heading">
+        <h3 id="settings-feedback-heading">Combat Feedback</h3>
+        <div class="setting-row">
+          <span>Screen Shake</span>
+          <button
+            class="toggle-btn"
+            [class.active]="settings().screenShake"
+            [attr.aria-pressed]="settings().screenShake"
+            (click)="toggleScreenShake()"
+          >
+            {{ settings().screenShake ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+        <div class="setting-row">
+          <span>Damage Numbers</span>
+          <button
+            class="toggle-btn"
+            [class.active]="settings().showDamageNumbers"
+            [attr.aria-pressed]="settings().showDamageNumbers"
+            (click)="toggleShowDamageNumbers()"
+          >
+            {{ settings().showDamageNumbers ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+        <div class="setting-row">
+          <span>Hit Distortion</span>
+          <button
+            class="toggle-btn"
+            [class.active]="settings().chromaticAberration"
+            [attr.aria-pressed]="settings().chromaticAberration"
+            (click)="toggleChromaticAberration()"
+          >
+            {{ settings().chromaticAberration ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+        <div class="setting-row">
+          <span>Low Health Warning</span>
+          <button
+            class="toggle-btn"
+            [class.active]="settings().lowHealthVignette"
+            [attr.aria-pressed]="settings().lowHealthVignette"
+            (click)="toggleLowHealthVignette()"
+          >
+            {{ settings().lowHealthVignette ? 'ON' : 'OFF' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="settings-group settings-group--accessibility" aria-labelledby="settings-accessibility-heading">
+        <h3 id="settings-accessibility-heading">Accessibility</h3>
+        <div class="setting-row setting-row--stacked">
+          <label for="setting-theme">Theme</label>
+          <select
+            id="setting-theme"
+            class="select-input"
+            [value]="isDayMode() ? 'light' : 'dark'"
+            (change)="onThemeChange($event)"
+          >
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+        <div class="setting-row setting-row--stacked">
+          <label for="setting-colorblind-mode">Colorblind Palette</label>
+          <select
+            id="setting-colorblind-mode"
+            class="select-input"
+            [value]="settings().colorblindMode"
+            (change)="onColorblindModeChange($event)"
+          >
+            <option value="none">Off</option>
+            <option value="protanopia">Protanopia (red-blind)</option>
+            <option value="deuteranopia">Deuteranopia (green-blind)</option>
+            <option value="tritanopia">Tritanopia (blue-yellow)</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="settings-group settings-group--audio" aria-labelledby="settings-audio-heading">
+        <h3 id="settings-audio-heading">Audio</h3>
+        <div class="setting-row">
+          <label for="setting-volume">Volume</label>
+          <div class="setting-control setting-control--range">
+            <input
+              id="setting-volume"
+              type="range"
+              class="slider"
+              min="0"
+              max="100"
+              step="5"
+              [value]="settings().volume"
+              (input)="onVolumeInput($event)"
+            />
+            <output for="setting-volume">{{ settings().volume }}%</output>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span>Sound</span>
+          <button
+            class="toggle-btn"
+            [class.active]="!audioMuted()"
+            [attr.aria-pressed]="!audioMuted()"
+            (click)="toggleAudioMute()"
+          >
+            {{ audioMuted() ? 'OFF' : 'ON' }}
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div class="controls-section">
+      <h3>Controls</h3>
+
+      @if (conflictWarning(); as warning) {
+        <div class="conflict-warning" role="alert">{{ warning }}</div>
+      }
+
+      <div class="keybind-list">
+        @for (row of keyBindingRows(); track row.action) {
+          <div class="keybind-row">
+            <span class="keybind-label">{{ row.label }}</span>
+            <button
+              class="keybind-btn"
+              [class.rebinding]="rebindingAction() === row.action"
+              [attr.aria-label]="
+                rebindingAction() === row.action
+                  ? 'Waiting for a new key for ' + row.label
+                  : 'Rebind ' + row.label + ', currently ' + getKeyDisplayName(row.key)
+              "
+              (click)="startRebind(row.action)"
+            >
+              @if (rebindingAction() === row.action) {
+                Press a key...
+              } @else {
+                {{ getKeyDisplayName(row.key) }}
+              }
+            </button>
+          </div>
+        }
+      </div>
+
+      <button type="button" class="reset-link keybind-reset" (click)="resetKeyBindings()">Reset controls</button>
+    </div>
+
+    <div class="button-container">
+      <button class="btn-done" (click)="closeSettings()">Done</button>
+      <button type="button" class="reset-link" (click)="resetToDefaults()">Reset all defaults</button>
+    </div>
+  </div>
+}
+
+<!-- Controls display positioned at bottom-right of screen - outside modal -->
+@if (isVisible()) {
+  <app-controls-display [controls]="[{ key: 'ESC', action: 'Close' }]" displayMode="modal-hint" position="bottom-right">
+  </app-controls-display>
+}

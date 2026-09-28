@@ -1,0 +1,103 @@
+@use '../../../styles/design-system' as ds;
+@use 'mixins' as m;
+
+// ── Difficulty Panel (replaces tutorial card when choosing New Game) ──
+.difficulty-panel {
+  inline-size: 100%;
+  max-inline-size: clamp(18rem, 60%, 45rem);
+  margin-block: clamp(ds.$spacing-tight, 2vh, ds.$spacing-comfortable);
+  background-color: var(--game-panel-bg, rgba(0, 30, 60, 0.5));
+  border-radius: ds.$radius-medium;
+  padding: ds.$spacing-standard;
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 150, 255, 0.3));
+  animation: fadeIn ds.$animation-slow ds.$easing-standard;
+  text-align: center;
+
+  @media (max-width: 480px) {
+    max-inline-size: 95%;
+    margin-block: ds.$spacing-micro;
+    padding: ds.$spacing-tight;
+  }
+
+  .difficulty-panel-title {
+    margin: 0 0 ds.$spacing-micro;
+    font-size: clamp(ds.$text-medium, 2vw, ds.$text-large + 2px);
+    color: var(--game-accent-light, ds.$dark-accent);
+    font-weight: ds.$weight-medium;
+    letter-spacing: ds.$tracking-widest;
+  }
+
+  .difficulty-panel-copy {
+    max-width: 34rem;
+    margin: 0 auto ds.$spacing-standard;
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.58));
+    font-size: ds.$text-small;
+    line-height: ds.$leading-normal;
+  }
+
+  .difficulty-options {
+    display: flex;
+    flex-direction: column;
+    gap: ds.$spacing-tight;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .difficulty-btn {
+    @include m.button-styles();
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ds.$spacing-standard;
+    padding: ds.$spacing-standard;
+    border-color: var(--game-button-border, rgba(255, 255, 255, 0.15));
+    text-align: left;
+    width: 100%;
+
+    .difficulty-label {
+      font-size: ds.$text-base;
+      font-weight: ds.$weight-bold;
+      letter-spacing: ds.$tracking-wide;
+      flex-shrink: 0;
+    }
+
+    .difficulty-desc {
+      font-size: ds.$text-small;
+      opacity: 0.5;
+      line-height: ds.$leading-snug;
+      text-align: right;
+    }
+
+    &.selected {
+      border-color: var(--game-accent, ds.$dark-accent);
+      background: color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 10%, transparent);
+      color: var(--game-accent, ds.$dark-accent);
+
+      .difficulty-desc {
+        opacity: 0.7;
+      }
+    }
+
+    &.hard.selected {
+      border-color: var(--game-warning);
+      background: color-mix(in srgb, var(--game-warning) 8%, transparent);
+      color: var(--game-warning);
+    }
+
+    &.extreme.selected {
+      border-color: var(--game-danger);
+      background: color-mix(in srgb, var(--game-danger) 8%, transparent);
+      color: var(--game-danger);
+    }
+
+    &.locked {
+      cursor: not-allowed;
+      opacity: 0.46;
+
+      .difficulty-desc {
+        color: var(--game-text-muted, rgba(255, 255, 255, 0.58));
+        opacity: 1;
+      }
+    }
+  }
+}

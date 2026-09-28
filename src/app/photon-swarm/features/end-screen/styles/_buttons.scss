@@ -1,0 +1,42 @@
+@use '../../../styles/design-system' as ds;
+
+// === RESTART BUTTON ===
+// Ghost style: transparent bg + panel-border. On hover fills with a SOLID accent
+// so the label stays readable (dark text on solid cyan fallback = legible).
+.restart-btn {
+  background: transparent;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  border: ds.$border-width-thick solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: ds.$radius-base;
+  padding: ds.$spacing-tight ds.$spacing-generous;
+  font-size: ds.$text-medium;
+  font-weight: ds.$weight-semibold;
+  letter-spacing: ds.$tracking-wide;
+  cursor: pointer;
+  transition: all ds.$animation-standard ds.$easing-standard;
+  min-width: 140px;
+  min-height: 44px; // WCAG 2.5.5 touch target
+
+  &:hover {
+    // Solid accent fill with dark text ensures label reads clearly in both themes.
+    background: var(--game-accent, #{ds.$dark-accent});
+    color: #{ds.$dark-bg-primary};
+    border-color: var(--game-accent, #{ds.$dark-accent});
+    transform: translateY(-2px);
+    box-shadow: 0 0 8px var(--game-glow-color, rgba(0, 255, 255, 0.5));
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--game-accent, #{ds.$dark-accent});
+    outline-offset: 2px;
+  }
+}
+
+// === CORNER DECORATIONS (removed - too busy) ===
+.corner-decoration {
+  display: none; // Removed for cleaner look
+}

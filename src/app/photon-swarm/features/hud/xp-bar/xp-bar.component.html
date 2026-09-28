@@ -1,0 +1,6 @@
+<div class="xp-bar-container" [class.level-up-flash]="levelUpFlash" [attr.data-tier]="levelTier">
+  <div class="xp-bar-track">
+    <div class="xp-bar-fill" [class.xp-gain-pulse]="xpGainPulse" [style.width.%]="displayedProgress"></div>
+    <div class="xp-bar-level-badge">LV {{ currentLevel }}</div>
+  </div>
+</div>

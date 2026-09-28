@@ -1,0 +1,394 @@
+<div class="intro-container">
+  <div class="star-field" role="presentation" aria-hidden="true">
+    @for (s of stars; track $index) {
+      @if (s.kind === 'star' || s.kind === undefined) {
+        <span
+          class="star"
+          [ngStyle]="{
+            top: s.top,
+            left: s.left,
+            'animation-delay': s.delay,
+            'animation-duration': s.duration,
+            '--sz': s.size,
+            '--op': s.opacity,
+          }"
+        ></span>
+      }
+      @if (s.kind === 'asteroid' && s.isAsteroid) {
+        <span
+          class="asteroid"
+          [ngClass]="{ 'h-dir': s.direction === 'h', 'v-dir': s.direction === 'v', free: !s.direction }"
+          [ngStyle]="{ top: s.top, left: s.left, 'animation-duration': s.duration, '--dx': s.dx, '--dy': s.dy }"
+        ></span>
+      }
+      @if (s.kind === 'star' && !s.isAsteroid && s.direction === 'h' && s.duration === '2s') {
+        <span class="shooting-star" [ngStyle]="{ top: s.top, left: s.left }"></span>
+      }
+      @if (s.kind === 'flash') {
+        <span class="impact-flash" [ngStyle]="{ top: s.top, left: s.left }"></span>
+      }
+      @if (s.kind === 'debris') {
+        <span
+          class="debris-piece"
+          [ngStyle]="{ top: s.top, left: s.left, '--dx': s.dx, '--dy': s.dy, '--sz': s.size }"
+        ></span>
+      }
+      @if (s.kind === 'saucer') {
+        <span class="saucer" [ngStyle]="{ top: s.top, left: s.left, 'animation-duration': s.duration }"></span>
+      }
+    }
+  </div>
+  <div class="stepper" [class.step-transitions-on]="stepTransitionsEnabled">
+    <!-- Step 0: Welcome and Name Input -->
+    <div class="stepper-step welcome-step" [ngClass]="getStepClasses(0)">
+      <div class="intro-header welcome-header">
+        <h1>PHOTON SWARM</h1>
+        <h2>Deep Space Defense</h2>
+      </div>
+      <div class="player-input-section">
+        @if (isReturningPlayer) {
+          <div class="returning-player">
+            <div class="welcome-text">
+              <span>{{ displayedWelcomeText }}</span>
+              <span class="cursor" [class.blink]="cursorBlinking"></span>
+            </div>
+            <div class="action-buttons">
+              @if (typingComplete) {
+                <button (click)="nextStep()">Continue</button>
+                <button (click)="onNotYou()">Not You?</button>
+              }
+            </div>
+          </div>
+        }
+        @if (!isReturningPlayer) {
+          <div class="input-container">
+            <input
+              type="text"
+              id="playerName"
+              [(ngModel)]="playerName"
+              placeholder="Callsign"
+              (keyup.enter)="onSubmit()"
+              autofocus
+            />
+            <p class="name-hint">Leave blank to fly as a generated pilot.</p>
+            <div class="action-buttons">
+              <button (click)="onSubmit()">Continue</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Step 1: Instructions and Start Game -->
+    <div class="stepper-step" [ngClass]="getStepClasses(1)">
+      <div class="intro-header mission-header">
+        <button
+          class="back-link"
+          (click)="instructionPhase === 'difficulty' ? backFromDifficulty() : previousStep()"
+          aria-label="Back"
+        >
+          ← Back
+        </button>
+        <h1>MISSION</h1>
+        <h2>{{ playerName }}</h2>
+      </div>
+      <div class="mission-content">
+        <div class="instructions-container">
+          <p class="mission-text">{{ displayedInstructionText }}</p>
+        </div>
+        <div
+          class="skip-hint"
+          [class.visible]="instructionPhase === 'typing' && !instructionComplete"
+          aria-hidden="true"
+        >
+          click to skip
+        </div>
+        <!-- Tutorial stepper with arrow navigation -->
+        @if (instructionPhase === 'controls') {
+          <div class="stepper-container">
+            <div class="steps-header">
+              <h3>CONTROLS TUTORIAL</h3>
+              <div class="step-indicator" role="tablist" aria-label="Tutorial steps">
+                <button
+                  class="step-dot"
+                  [class.active]="tutorialStep === 0"
+                  (click)="setTutorialStep(0)"
+                  role="tab"
+                  [attr.aria-selected]="tutorialStep === 0"
+                  aria-label="Movement controls"
+                ></button>
+                <button
+                  class="step-dot"
+                  [class.active]="tutorialStep === 1"
+                  (click)="setTutorialStep(1)"
+                  role="tab"
+                  [attr.aria-selected]="tutorialStep === 1"
+                  aria-label="Combat controls"
+                ></button>
+                <button
+                  class="step-dot"
+                  [class.active]="tutorialStep === 2"
+                  (click)="setTutorialStep(2)"
+                  role="tab"
+                  [attr.aria-selected]="tutorialStep === 2"
+                  aria-label="Utility controls"
+                ></button>
+              </div>
+            </div>
+            <!-- Tutorial body: arrows flanking content -->
+            <div class="tutorial-body">
+              <button class="tutorial-arrow" (click)="prevTutorialStep()" aria-label="Previous tutorial step">‹</button>
+              <div class="step-content-area">
+                <!-- Step 0: Movement Controls -->
+                <div class="step-content" [class.active]="tutorialStep === 0">
+                  <h4>Movement Controls</h4>
+                  <div class="key-stack-container">
+                    <div class="key-stack">
+                      <!-- WASD layer -->
+                      <div
+                        class="key-layer"
+                        [class.foreground]="activeKeySet === 'wasd'"
+                        [class.background]="activeKeySet !== 'wasd'"
+                      >
+                        <div class="keyboard-visual">
+                          <div class="key">
+                            <span>W</span>
+                            <div class="key-highlight" [class.active]="isKeyHighlighted('W')"></div>
+                          </div>
+                          <div class="key-row">
+                            <div class="key">
+                              <span>A</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('A')"></div>
+                            </div>
+                            <div class="key">
+                              <span>S</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('S')"></div>
+                            </div>
+                            <div class="key">
+                              <span>D</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('D')"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="key-label">WASD</div>
+                      </div>
+                      <!-- Arrow layer -->
+                      <div
+                        class="key-layer"
+                        [class.foreground]="activeKeySet === 'arrows'"
+                        [class.background]="activeKeySet !== 'arrows'"
+                      >
+                        <div class="keyboard-visual">
+                          <div class="key">
+                            <span>↑</span>
+                            <div class="key-highlight" [class.active]="isKeyHighlighted('ArrowUp')"></div>
+                          </div>
+                          <div class="key-row">
+                            <div class="key">
+                              <span>←</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('ArrowLeft')"></div>
+                            </div>
+                            <div class="key">
+                              <span>↓</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('ArrowDown')"></div>
+                            </div>
+                            <div class="key">
+                              <span>→</span>
+                              <div class="key-highlight" [class.active]="isKeyHighlighted('ArrowRight')"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="key-label">Arrows</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Touch-only hint: shown instead of keyboard diagrams on touch devices -->
+                  <div class="touch-hint touch-hint--movement">
+                    <div class="touch-hint-visual" aria-hidden="true">
+                      <div class="touch-hint-joystick movement">
+                        <div class="th-base"></div>
+                        <div class="th-stick"></div>
+                      </div>
+                    </div>
+                    <div class="touch-hint-label">Left joystick moves your ship</div>
+                  </div>
+                  <div class="instruction-desc">Press any key to swap · Both control your ship</div>
+                </div>
+                <!-- Step 1: Combat Controls -->
+                <div class="step-content" [class.active]="tutorialStep === 1">
+                  <h4>Combat Controls</h4>
+                  <div class="keyboard-mouse-container">
+                    <div class="keyboard-group triple-actions">
+                      <div class="action-key-container">
+                        <div class="keyboard-visual">
+                          <div class="key space-key">
+                            <span>SPACE</span>
+                            <div class="key-highlight" [class.active]="isKeyHighlighted('space')"></div>
+                          </div>
+                        </div>
+                        <div class="key-label">Dash (deals damage on contact)</div>
+                      </div>
+                      <div class="action-key-container">
+                        <div class="keyboard-visual">
+                          <div class="key">
+                            <span>E</span>
+                            <div class="key-highlight" [class.active]="isKeyHighlighted('e')"></div>
+                          </div>
+                        </div>
+                        <div class="key-label">Parry (reflect projectiles)</div>
+                      </div>
+                      <div class="action-key-container">
+                        <div class="keyboard-visual">
+                          <div class="key shift-key">
+                            <span>SHIFT</span>
+                            <div class="key-highlight" [class.active]="isKeyHighlighted('shift')"></div>
+                          </div>
+                        </div>
+                        <div class="key-label">Auto-Beam / Focus Fire</div>
+                      </div>
+                    </div>
+                    <div class="mouse-group animated">
+                      <div class="mouse-visual">
+                        <div class="mouse-body">
+                          <div class="mouse-button left" [class.highlight]="isMouseButtonHighlighted('left')"></div>
+                          <div class="mouse-wheel"></div>
+                          <div class="mouse-button right" [class.highlight]="isMouseButtonHighlighted('right')"></div>
+                        </div>
+                      </div>
+                      <div class="mouse-label">
+                        <div>Left: Toggle Beam / Shooting</div>
+                        <div>Right (Hold): Charged Burst</div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Touch-only hint: the right-thumb action cluster — shows the SAME icons
+                       (and warm weapon accent) the player sees in-game so they're learnable. -->
+                  <div class="touch-hint touch-hint--combat">
+                    <div class="touch-hint-visual" aria-hidden="true">
+                      <div class="th-chip-row">
+                        <div class="th-chip th-chip--weapon">
+                          <span class="th-chip-icon" [innerHTML]="controlIcons['weapon-beam']"></span>
+                          <span class="th-chip-name">Weapon</span>
+                        </div>
+                        <div class="th-chip">
+                          <span class="th-chip-icon" [innerHTML]="controlIcons['dash']"></span>
+                          <span class="th-chip-name">Dash</span>
+                        </div>
+                        <div class="th-chip">
+                          <span class="th-chip-icon" [innerHTML]="controlIcons['parry']"></span>
+                          <span class="th-chip-name">Parry</span>
+                        </div>
+                        <div class="th-chip">
+                          <span class="th-chip-icon" [innerHTML]="controlIcons['focus']"></span>
+                          <span class="th-chip-name">Focus</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="touch-hint-label">Weapon, Dash, Parry, Focus: your lower-right action cluster</div>
+                    <div class="touch-hint-effects">
+                      Weapon: toggle beam / shooting · Dash: damages on contact · Parry: reflects projectiles · Focus:
+                      auto-target (shot mode) · Burst: hold the aim stick still, release to fire
+                    </div>
+                  </div>
+                </div>
+                <!-- Step 2: Utility Controls -->
+                <div class="step-content" [class.active]="tutorialStep === 2">
+                  <h4>Utility Controls</h4>
+                  <div class="keyboard-mouse-container">
+                    <div class="keyboard-group single-key">
+                      <div class="keyboard-visual">
+                        <div class="key escape-key">
+                          <span>ESC</span>
+                          <div class="key-highlight" [class.active]="isKeyHighlighted('Escape')"></div>
+                        </div>
+                      </div>
+                      <div class="key-label">Pause/Menu</div>
+                    </div>
+                    <div class="keyboard-group single-key">
+                      <div class="keyboard-visual">
+                        <div class="key wide-key">
+                          <span>M</span>
+                          <div class="key-highlight" [class.active]="isKeyHighlighted('m')"></div>
+                        </div>
+                      </div>
+                      <div class="key-label">Toggle Map</div>
+                    </div>
+                  </div>
+                  <!-- Touch-only hint: pause + map utilities, and the aim joystick -->
+                  <div class="touch-hint touch-hint--utility">
+                    <div class="touch-hint-visual touch-hint-visual--row" aria-hidden="true">
+                      <div class="th-chip">
+                        <span class="th-chip-icon th-chip-icon--pause"><span class="th-pause-bars"></span></span>
+                        <span class="th-chip-name">Pause</span>
+                      </div>
+                      <div class="th-chip">
+                        <span class="th-chip-icon" [innerHTML]="controlIcons['map']"></span>
+                        <span class="th-chip-name">Map</span>
+                      </div>
+                      <div class="touch-hint-joystick aim">
+                        <div class="th-base"></div>
+                        <div class="th-stick aim-stick"></div>
+                      </div>
+                    </div>
+                    <div class="touch-hint-label">Pause &amp; Map sit up top · your right thumb aims &amp; fires</div>
+                  </div>
+                  <div class="instruction-desc">ESC opens pause menu · M toggles full-screen map</div>
+                </div>
+              </div>
+              <button class="tutorial-arrow" (click)="nextTutorialStep()" aria-label="Next tutorial step">›</button>
+            </div>
+          </div>
+        }
+
+        <!-- Difficulty Selection (shown after clicking New Game) -->
+        @if (instructionPhase === 'difficulty') {
+          <div class="difficulty-panel">
+            <h3 class="difficulty-panel-title">SELECT HEAT</h3>
+            <p class="difficulty-panel-copy">Higher Heat increases danger and payout. It never reduces your rewards.</p>
+            <div class="difficulty-options">
+              @for (opt of difficultyOptions; track opt.mode) {
+                <button
+                  class="difficulty-btn"
+                  [class.selected]="selectedDifficulty === opt.mode"
+                  [class.hard]="opt.mode === 'hard'"
+                  [class.extreme]="opt.mode === 'extreme'"
+                  [class.locked]="!isDifficultyUnlocked(opt.mode)"
+                  [disabled]="!isDifficultyUnlocked(opt.mode)"
+                  (click)="selectDifficulty(opt.mode)"
+                >
+                  <span class="difficulty-label">{{ opt.label }}</span>
+                  <span class="difficulty-desc">
+                    {{ isDifficultyUnlocked(opt.mode) ? opt.description : getDifficultyRequirement(opt.mode) }}
+                  </span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <div
+          class="game-actions centered bottom-buttons"
+          [class.visible]="
+            instructionPhase === 'controls' || instructionPhase === 'completed' || instructionPhase === 'difficulty'
+          "
+        >
+          @if (instructionPhase === 'difficulty') {
+            <button class="start-mission full-width" (click)="onLaunchNewGame()">Launch Mission</button>
+          } @else {
+            @if (hasRunCheckpoint) {
+              <button class="start-mission full-width" (click)="onResumeRun()">
+                Resume Run (Lv {{ checkpointLevel }})
+              </button>
+              <button class="secondary-action" (click)="onNewGame()">New Game</button>
+            } @else if (hasSavedGame) {
+              <button class="start-mission full-width" (click)="onContinueGame()">Continue Saved Game</button>
+              <button class="secondary-action" (click)="onNewGame()">New Game</button>
+            } @else {
+              <button class="start-mission full-width" (click)="onNewGame()">New Game</button>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

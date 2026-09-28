@@ -1,0 +1,787 @@
+// =============================================================================
+// Photon Swarm Design System
+// =============================================================================
+// Direction: Precision & Density (Cyberpunk/Sci-Fi)
+// Philosophy: Technical, information-forward interface for a space combat game
+// Depth Strategy: Borders + subtle glows (space aesthetic - minimal shadows)
+//
+// ARCHITECTURE:
+// 1. CSS custom properties in :root (dark mode default)
+// 2. .day-mode overrides for light theme
+// 3. Components use var(--game-*) for automatic theming
+// 4. :host-context(.day-mode) for scoped component overrides
+// =============================================================================
+
+@use 'sass:color';
+
+// =============================================================================
+// 4px Grid System - All spacing follows this strictly
+// =============================================================================
+$grid-unit: 4px;
+$spacing-micro: $grid-unit; // 4px - icon gaps, hairline spacing
+$spacing-tight: $grid-unit * 2; // 8px - within components
+$spacing-standard: $grid-unit * 3; // 12px - between related elements
+$spacing-comfortable: $grid-unit * 4; // 16px - section padding
+$spacing-generous: $grid-unit * 6; // 24px - between sections
+$spacing-major: $grid-unit * 8; // 32px - major separation
+$spacing-xlarge: $grid-unit * 12; // 48px - large gaps
+
+// =============================================================================
+// Typography System
+// =============================================================================
+$font-primary:
+  'Roboto',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  sans-serif;
+$font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+$font-display: 'Roboto', sans-serif; // For headlines
+
+// Type Scale (4px grid aligned)
+$text-xxs: 8px; // Compact controls (mobile)
+$text-xs: 10px; // Compact controls (tablet)
+$text-micro: 11px; // Labels, metadata
+$text-small: 12px; // Secondary text, captions
+$text-caption: 13px; // Captions, hints
+$text-base: 14px; // Body text (default)
+$text-medium: 16px; // Subheadings
+$text-large: 18px; // Section titles
+$text-xlarge: 24px; // Page headers
+$text-display: 32px; // Display text
+
+// Type Weights
+$weight-light: 300; // Light text
+$weight-regular: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
+$weight-black: 900; // Extra bold headlines
+
+// Letter spacing
+$tracking-tight: -0.02em; // Headlines
+$tracking-normal: 0; // Body
+$tracking-wide: 0.05em; // Labels, uppercase
+$tracking-wider: 0.1em; // All caps labels
+$tracking-widest: 0.15em; // Display uppercase
+
+// Line heights
+$leading-none: 1; // Tight (icons, single line)
+$leading-tight: 1.2; // Compact text
+$leading-snug: 1.3; // Slightly compact
+$leading-normal: 1.4; // Body text
+$leading-relaxed: 1.5; // Readable paragraphs
+
+// =============================================================================
+// Border Radius System - Sharp for technical feel
+// =============================================================================
+$radius-xs: 2px; // Minimal rounding
+$radius-small: 4px; // Badges, small controls
+$radius-base: 6px; // Standard elements
+$radius-medium: 8px; // Cards, panels
+$radius-large: 12px; // Modals, overlays
+
+// =============================================================================
+// Color System - Cyberpunk Neon Palette
+// =============================================================================
+
+// Dark mode colors (primary)
+$dark-bg-primary: #000000;
+$dark-bg-secondary: rgba(0, 10, 20, 0.95);
+$dark-accent: #00ffff; // Cyan
+$dark-accent-dark: #00cccc;
+$dark-accent-light: #66ffff;
+$dark-text: #ffffff;
+
+// Light mode colors (Precision & Density - Cool Slate)
+$light-bg-primary: #f8fafc; // Slate-50 (cool white)
+$light-bg-secondary: #f1f5f9; // Slate-100
+$light-accent: #2f4f4f; // Dark Slate Gray
+$light-accent-light: #3a6666;
+$light-text: #2f4f4f;
+
+// Status colors - Dark Mode (vibrant neon)
+$dark-success: #00ff88;
+$dark-warning: #ffcc00; // Amber-gold; pure yellow (#ffff00) was too harsh
+$dark-danger: #ff3366;
+$dark-special: #ff44ff; // Magenta - Shards
+
+// Status colors - Light Mode (muted earthy)
+$light-success: #2e8b57; // Sea Green
+$light-warning: #b8860b; // Dark Goldenrod
+$light-danger: #dc143c; // Crimson
+$light-special: #9932cc; // Dark Orchid
+
+// Game-specific semantic colors - Dark Mode
+// Risk/Severity levels (upgrade modal)
+$dark-risk-medium: #ff6600; // Orange - medium risk curses
+$dark-risk-alt: #ff9800; // Alternate orange for severity badges
+
+// Tier/Rarity colors (upgrades) — four DISTINCT hue families: cyan → blue → purple → gold
+$dark-tier-common: #33ccff; // Cyan - common tier
+$dark-tier-rare: #3399ff; // Blue - rare tier
+$dark-tier-epic: #a855f7; // Purple - epic tier (was deep-blue #3366ff; moved to distinct hue)
+$dark-tier-legendary: #f59e0b; // Gold - legendary tier
+
+// Light mode tier/rarity variants
+$light-tier-common: #0e7ab5; // Muted cyan
+$light-tier-rare: #1e5b99; // Muted blue
+$light-tier-epic: #7c3aed; // Muted purple
+$light-tier-legendary: #b8860b; // Muted gold (dark goldenrod)
+
+// Wave type indicators (HUD)
+$dark-wave-normal: #4a9eff; // Blue - normal waves
+$dark-wave-swarm: #fb923c; // Amber-orange - swarm waves (moved off portfolio hero orange #ff6b35)
+$dark-wave-elite: #a855f7; // Purple - elite waves
+
+// Entity colors (map)
+$dark-powerup: #4169e1; // Royal Blue - powerups
+
+// Panel/Shop border colors
+$dark-panel-border: #003366; // Dark navy for panels
+$dark-item-desc: #aacccc; // Muted cyan for item descriptions
+
+// Gradient helper colors (darker variants for gradients)
+$dark-success-dark: #00cc6b;
+$dark-special-dark: #cc00cc;
+$dark-special-light: #ff66ff;
+
+// Game-specific semantic colors - Light Mode (muted variants)
+$light-risk-medium: #cc5500;
+$light-wave-normal: #2979b2; // Muted blue
+$light-wave-swarm: #c2620f; // Muted amber-orange (updated to match $dark-wave-swarm family)
+$light-wave-elite: #7136aa; // Muted purple
+$light-powerup: #3d5a9e;
+
+// Light mode gradient helpers
+$light-accent-dark: #1a3a3a; // Dark teal for gradients
+$light-success-dark: #5c4500; // Dark bronze for XP
+$light-special-dark: #6b3a10; // Dark sienna for focus bar
+$light-special-light: #a0522d; // Sienna for charged states
+$light-warning-dark: #8b6914; // Dark goldenrod for light mode cooldowns
+
+// Light mode UI accent colors
+$light-rose: #b85a6e; // Rose accent for guide button
+$light-teal: #5f8f8f; // Slate/teal accent for settings button
+
+// Ability accent — warm tone for weapon-mode toggle, focus-fire, burst-charge
+$dark-ability-warm: #f59e0b; // Amber-yellow
+$light-ability-warm: #b87a0a; // Muted amber
+
+// Weapon-shot — the projectile/shot weapon mode toggle. A distinct warmer orange from
+// ability-warm (beam) so the two modes read apart at a glance; tokenized (vs a hardcoded
+// literal) so the shot color is theme-aware like beam, not stuck at one value in both modes.
+$dark-weapon-shot: #ff7828; // Orange (shot mode)
+$light-weapon-shot: #c2540a; // Muted orange for light mode
+
+// Ascension gold — reward/treasure/zone-complete/cache/xp-flash
+// Same hue family as ability-warm but a separate token so semantics can diverge later
+$dark-ascension-gold: #f59e0b; // Gold
+$light-ascension-gold: #b8860b; // Dark goldenrod (matches $light-warning)
+
+// Charge-bar fill states
+$dark-charge-empty: #553333; // Depleted - dark rose
+$light-charge-empty: #cc8888; // Depleted - muted rose
+$dark-charge-default: #9944ff; // Charging - violet
+$light-charge-default: #9966cc; // Charging - muted violet
+$dark-charge-full: #cc88ff; // Full - bright lavender
+$light-charge-full: #a0522d; // Full - sienna (warm earth, readable on light bg)
+
+// Utility/accent colors
+$dark-warning-bright: #ffff33; // Brightened warning for visibility
+$dark-danger-light: #ff6b6b; // Light red for gradients
+
+// Neutral grays for textures
+$gray-light: #888888;
+$gray-medium: #444444;
+$gray-dark: #222222;
+
+// Legacy color aliases (still referenced internally; kept)
+$color-primary: $dark-accent;
+$color-success: $dark-success;
+$color-warning: $dark-warning;
+$color-danger: $dark-danger;
+$color-special: $dark-special;
+
+// =============================================================================
+// Animation System
+// =============================================================================
+$animation-micro: 100ms; // Instant feedback
+$animation-fast: 150ms; // Micro-interactions
+$animation-standard: 200ms; // Default transitions
+$animation-medium: 250ms; // Larger transitions
+$animation-slow: 400ms; // Complex animations
+$animation-loop: 2s; // Looping animations
+$animation-loop-slow: 3s; // Slow loops
+
+// Easing curves (no spring/bounce for enterprise)
+$easing-standard: cubic-bezier(0.25, 1, 0.5, 1); // Design principles standard
+$easing-out: cubic-bezier(0, 0, 0.2, 1); // Decelerate
+$easing-in: cubic-bezier(0.4, 0, 1, 1); // Accelerate
+$easing-in-out: cubic-bezier(0.4, 0, 0.2, 1); // Smooth
+
+// =============================================================================
+// Z-Index Layers
+// =============================================================================
+$z-content: 10;
+$z-overlay: 100;
+// Touch controls (joysticks, action cluster, pause/map utilities) sit above the HUD but
+// BELOW overlays like the Automap modal ($z-overlay * 5 = 500) — they used to hardcode
+// 999/1000 (modal tier) and poked through the map panel.
+$z-touch-controls: 300;
+$z-hud-toast: 550; // Transient HUD toasts (above overlay, below modal)
+$z-hud-announcement: 600; // Wave/zone announcements (above toasts)
+$z-modal: 1000;
+
+// =============================================================================
+// Minimap extents — single source for the minimap's responsive footprint so other
+// fixed-position HUD elements (e.g. the touch pause button) can clear it exactly.
+// Used by map.component.scss (the renderer) and action-buttons.component.scss.
+// =============================================================================
+$minimap-size-tablet-sm: clamp(84px, 13vw, 104px); // 481–768px viewports
+$minimap-size-phone: clamp(80px, 21.5vw, 120px); // ≤480px viewports
+$mobile-sector-width-tablet: 148px;
+$mobile-sector-width-phone: 140px;
+$mobile-hud-gap: 6px;
+$mobile-hud-row-height: 64px;
+
+// =============================================================================
+// Borders
+// =============================================================================
+$border-width: 1px;
+$border-width-thick: 2px;
+$border-color: rgba($color-primary, 0.3);
+$border-color-active: rgba($color-primary, 0.6);
+
+// =============================================================================
+// CSS Custom Properties - Theme-aware
+// =============================================================================
+:root {
+  // === CORE THEME COLORS (defaults to dark mode) ===
+  --game-bg-primary: #{$dark-bg-primary};
+  --game-bg-secondary: #{$dark-bg-secondary};
+  --game-bg-overlay: rgba(0, 20, 40, 0.9);
+  --game-text-primary: #{$dark-text};
+  --game-text-secondary: rgba(255, 255, 255, 0.7);
+  --game-text-muted: rgba(255, 255, 255, 0.5);
+  --game-panel-bg: #{$dark-bg-secondary};
+  --game-panel-border: rgba(0, 255, 255, 0.3);
+  --game-button-bg: rgba(0, 40, 60, 0.6);
+  --game-button-border: rgba(0, 255, 255, 0.3);
+  --game-accent: #{$dark-accent};
+  --game-accent-dark: #{$dark-accent-dark};
+  --game-accent-light: #{$dark-accent-light};
+  --game-glow-color: rgba(0, 255, 255, 0.5);
+
+  // === STATUS COLORS (semantic) ===
+  --game-success: #{$dark-success};
+  --game-warning: #{$dark-warning}; // Amber-gold #ffcc00
+  --game-danger: #{$dark-danger};
+  --game-special: #{$dark-special};
+
+  // === WAVE TYPE INDICATORS ===
+  --game-wave-normal: #{$dark-wave-normal};
+  --game-wave-swarm: #{$dark-wave-swarm}; // Amber-orange (off hero CTA)
+  --game-wave-elite: #{$dark-wave-elite};
+
+  // === RARITY TIERS (distinct hue families: cyan → blue → purple → gold) ===
+  --game-tier-common: #{$dark-tier-common};
+  --game-tier-rare: #{$dark-tier-rare};
+  --game-tier-epic: #{$dark-tier-epic};
+  --game-tier-legendary: #{$dark-tier-legendary};
+
+  // === ABILITY & REWARD ACCENTS ===
+  --game-ability-warm: #{$dark-ability-warm};
+  --game-weapon-shot: #{$dark-weapon-shot};
+  --game-ascension-gold: #{$dark-ascension-gold};
+
+  // === CHARGE BAR STATES ===
+  --game-charge-empty: #{$dark-charge-empty};
+  --game-charge-default: #{$dark-charge-default};
+  --game-charge-full: #{$dark-charge-full};
+
+  // === AIM ACCENT (aim joystick + MODE button; replaces ad-hoc #ff0080) ===
+  --game-aim-accent: #{$dark-special};
+
+  // === BLUR SCALE (shared across themes) ===
+  --game-blur-subtle: 2px;
+  --game-blur-panel: 6px;
+
+  // === RESPONSIVE HUD GEOMETRY ===
+  // Shared by minimap, sector readout, and objective lane. Keep the values here
+  // so each layer tracks the same mobile footprint.
+  --game-minimap-size-tablet-sm: #{$minimap-size-tablet-sm};
+  --game-minimap-size-phone: #{$minimap-size-phone};
+  --game-mobile-sector-width-tablet: #{$mobile-sector-width-tablet};
+  --game-mobile-sector-width-phone: #{$mobile-sector-width-phone};
+  --game-mobile-hud-gap: #{$mobile-hud-gap};
+  --game-mobile-hud-row-height: #{$mobile-hud-row-height};
+
+  // === INTERACTION PATTERNS ===
+  // Dark mode: Solid → Ghost on hover
+  --game-btn-default-bg: var(--game-accent);
+  --game-btn-default-text: var(--game-bg-primary);
+  --game-btn-hover-bg: transparent;
+  --game-btn-hover-text: var(--game-accent);
+
+  // NOTE: the --game-faction-N tokens deliberately do NOT live in this block.
+  // This partial is @use'd by component stylesheets, so Angular rewrites `:root`
+  // to `[_ngcontent-x]:root` and `.day-mode` to `.day-mode[_ngcontent-x]` —
+  // neither ever matches, and consumers would resolve var(--game-faction-N) to
+  // nothing. They live on :host in component-styles/_host-root.scss and on
+  // :host-context(.day-mode) in component-styles/_theme-light.scss, which is the
+  // same mechanism the rest of the runtime palette already uses.
+
+  // === DEPTH (borders + glows for sci-fi) ===
+  --game-shadow-soft: 0 #{$spacing-micro} #{$spacing-comfortable} rgba(0, 0, 0, 0.5);
+  --game-shadow-glow: 0 0 #{$spacing-comfortable} var(--game-glow-color);
+  --game-text-glow: 0 0 10px currentColor;
+}
+
+// Day mode overrides (Precision & Density - Cool Slate)
+.day-mode {
+  --game-bg-primary: #{$light-bg-primary};
+  --game-bg-secondary: rgba(248, 250, 252, 0.95); // Slate-50
+  --game-bg-overlay: rgba(248, 250, 252, 0.9); // Slate-50
+  --game-text-primary: #{$light-text};
+  --game-text-secondary: rgba(47, 79, 79, 0.7);
+  --game-text-muted: rgba(47, 79, 79, 0.5);
+  --game-panel-bg: rgba(248, 250, 252, 0.95); // Slate-50
+  --game-panel-border: rgba(71, 85, 105, 0.3); // Slate-600
+  --game-button-bg: rgba(71, 85, 105, 0.08); // Slate-600
+  --game-button-border: rgba(71, 85, 105, 0.4); // Slate-600
+  --game-accent: #{$light-accent};
+  --game-accent-dark: #1a3030;
+  --game-accent-light: #{$light-accent-light};
+  --game-glow-color: rgba(71, 85, 105, 0.25); // Slate-600
+
+  --game-success: #{$light-success};
+  --game-warning: #{$light-warning};
+  --game-danger: #{$light-danger};
+  --game-special: #{$light-special};
+
+  // === WAVE TYPE INDICATORS ===
+  --game-wave-normal: #{$light-wave-normal};
+  --game-wave-swarm: #{$light-wave-swarm}; // Muted amber-orange
+  --game-wave-elite: #{$light-wave-elite};
+
+  // === RARITY TIERS (distinct hue families: cyan → blue → purple → gold) ===
+  --game-tier-common: #{$light-tier-common};
+  --game-tier-rare: #{$light-tier-rare};
+  --game-tier-epic: #{$light-tier-epic};
+  --game-tier-legendary: #{$light-tier-legendary};
+
+  // === ABILITY & REWARD ACCENTS ===
+  --game-ability-warm: #{$light-ability-warm};
+  --game-weapon-shot: #{$light-weapon-shot};
+  --game-ascension-gold: #{$light-ascension-gold};
+
+  // === CHARGE BAR STATES ===
+  --game-charge-empty: #{$light-charge-empty};
+  --game-charge-default: #{$light-charge-default};
+  --game-charge-full: #{$light-charge-full};
+
+  // === AIM ACCENT ===
+  --game-aim-accent: #{$light-special};
+
+  // Faction light-mode tokens live on :host-context(.day-mode) in
+  // component-styles/_theme-light.scss — see the note in the :root block above.
+
+  // === BLUR SCALE (shared across themes) ===
+  --game-blur-subtle: 2px;
+  --game-blur-panel: 6px;
+
+  // Light mode: Ghost → Solid on hover
+  --game-btn-default-bg: transparent;
+  --game-btn-default-text: var(--game-accent);
+  --game-btn-hover-bg: var(--game-accent);
+  --game-btn-hover-text: var(--game-bg-primary);
+
+  // Subtle shadows for light mode (slate tinted)
+  --game-shadow-soft: 0 #{$spacing-micro} #{$spacing-comfortable} rgba(71, 85, 105, 0.12);
+  --game-shadow-glow: none;
+  --game-text-glow: none;
+}
+
+// =============================================================================
+// Depth Strategy Mixins - Borders + Glows (Sci-Fi)
+// =============================================================================
+
+// Glass panel effect (dark mode primary)
+@mixin glass-panel($blur: 10px) {
+  background: linear-gradient(135deg, rgba(0, 10, 20, 0.95) 0%, rgba(0, 20, 40, 0.9) 100%);
+  backdrop-filter: blur($blur);
+  border: $border-width solid var(--game-panel-border);
+  border-radius: $radius-medium;
+  position: relative;
+  overflow: hidden;
+}
+
+// Neon glow effect (dark mode)
+@mixin neon-glow($color: $color-primary, $intensity: 1) {
+  box-shadow:
+    0 0 calc(10px * #{$intensity}) rgba($color, 0.5),
+    0 0 calc(20px * #{$intensity}) rgba($color, 0.3),
+    inset 0 0 calc(10px * #{$intensity}) rgba($color, 0.1);
+}
+
+// Subtle glow for light mode
+@mixin subtle-glow($color: $light-accent, $intensity: 1) {
+  box-shadow:
+    0 0 calc(8px * #{$intensity}) rgba($color, 0.15),
+    0 0 calc(16px * #{$intensity}) rgba($color, 0.08);
+}
+
+// Text glow (dark mode)
+@mixin text-glow($color: $color-primary, $intensity: 1) {
+  text-shadow:
+    0 0 calc(4px * #{$intensity}) rgba($color, 0.8),
+    0 0 calc(8px * #{$intensity}) rgba($color, 0.5);
+}
+
+// Border with glow
+@mixin border-glow($color: $color-primary) {
+  border: $border-width solid rgba($color, 0.5);
+  box-shadow: 0 0 #{$spacing-tight} rgba($color, 0.2);
+}
+
+// Animated border pulse
+@mixin animated-border($color: $color-primary) {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, rgba($color, 0.6), rgba($color, 0.2), rgba($color, 0.6));
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.8;
+    animation: border-pulse $animation-loop-slow $easing-in-out infinite;
+  }
+}
+
+// Sci-fi corner accents
+@mixin sci-fi-corners($color: $color-primary) {
+  &::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background:
+      linear-gradient(to right, $color 2px, transparent 2px) 0 0,
+      linear-gradient(to bottom, $color 2px, transparent 2px) 0 0,
+      linear-gradient(to right, $color 2px, transparent 2px) 100% 100%,
+      linear-gradient(to bottom, $color 2px, transparent 2px) 100% 100%;
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+// Authored ship-instrument surface. Unlike the previous full-width neon stripe,
+// these short registration marks read as physical alignment guides cut into a
+// piece of equipment. The opposing clipped corners give Photon Swarm panels a
+// recognizable silhouette without consuming pseudo-elements or adding motion.
+@mixin instrument-panel(
+  $accent: var(--game-accent, #{$dark-accent}),
+  $surface: var(--game-bg-overlay, rgba(0, 20, 40, 0.9)),
+  $cut: 14px
+) {
+  background:
+    linear-gradient($accent, $accent) left 10px top 8px / 26px 1px no-repeat,
+    linear-gradient($accent, $accent) left 10px top 8px / 1px 9px no-repeat,
+    linear-gradient($accent, $accent) right 10px bottom 8px / 26px 1px no-repeat,
+    linear-gradient($accent, $accent) right 10px bottom 8px / 1px 9px no-repeat,
+    $surface;
+  border: $border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - #{$cut}) 0, 100% $cut, 100% 100%, $cut 100%, 0 calc(100% - #{$cut}));
+}
+
+// =============================================================================
+// Component Mixins
+// =============================================================================
+
+// Panel base
+@mixin panel-base {
+  @include glass-panel;
+  padding: $spacing-comfortable;
+}
+
+// Card with hover lift
+@mixin card-interactive {
+  transition: all $animation-standard $easing-standard;
+
+  &:hover {
+    transform: translateY(-#{$spacing-micro});
+    @include neon-glow($color-primary, 0.8);
+  }
+}
+
+// Button base
+@mixin button-base {
+  padding: $spacing-tight $spacing-comfortable;
+  font-size: $text-base;
+  font-weight: $weight-semibold;
+  border-radius: $radius-small;
+  cursor: pointer;
+  transition: all $animation-standard $easing-standard;
+  border: $border-width solid var(--game-button-border);
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// Primary button (follows theme interaction pattern)
+@mixin button-primary {
+  @include button-base;
+  background-color: var(--game-btn-default-bg);
+  color: var(--game-btn-default-text);
+  border-color: var(--game-accent);
+
+  &:hover:not(:disabled) {
+    background-color: var(--game-btn-hover-bg);
+    color: var(--game-btn-hover-text);
+    transform: translateY(-#{$spacing-micro});
+  }
+}
+
+// Ghost button
+@mixin button-ghost {
+  @include button-base;
+  background-color: transparent;
+  color: var(--game-accent);
+  border-color: var(--game-button-border);
+
+  &:hover:not(:disabled) {
+    background-color: var(--game-accent);
+    color: var(--game-bg-primary);
+  }
+}
+
+// =============================================================================
+// Layout Mixins
+// =============================================================================
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin grid-responsive($mobile: 1, $tablet: 2, $desktop: 3) {
+  display: grid;
+  grid-template-columns: repeat($mobile, minmax(0, 1fr));
+  gap: $spacing-standard;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat($tablet, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat($desktop, minmax(0, 1fr));
+  }
+}
+
+// =============================================================================
+// Typography Mixins
+// =============================================================================
+
+@mixin text-headline {
+  font-weight: $weight-semibold;
+  letter-spacing: $tracking-tight;
+}
+
+@mixin text-label {
+  font-size: $text-small;
+  font-weight: $weight-medium;
+  text-transform: uppercase;
+  letter-spacing: $tracking-wide;
+}
+
+@mixin text-data {
+  font-family: $font-mono;
+  font-variant-numeric: tabular-nums;
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin responsive-text($min: $text-small, $preferred: 1.5vw, $max: $text-base) {
+  font-size: clamp($min, $preferred, $max);
+}
+
+// =============================================================================
+// Focus States (Accessibility)
+// =============================================================================
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--game-bg-primary),
+      0 0 0 4px var(--game-accent);
+  }
+}
+
+// =============================================================================
+// Animations
+// =============================================================================
+
+@keyframes border-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// =============================================================================
+// Utility Classes
+// =============================================================================
+
+.text-primary {
+  color: var(--game-accent);
+}
+.text-success {
+  color: var(--game-success);
+}
+.text-warning {
+  color: var(--game-warning);
+}
+.text-danger {
+  color: var(--game-danger);
+}
+.text-special {
+  color: var(--game-special);
+}
+
+.glow-primary {
+  @include text-glow($color-primary);
+}
+.glow-success {
+  @include text-glow($color-success);
+}
+.glow-warning {
+  @include text-glow($color-warning);
+}
+.glow-danger {
+  @include text-glow($color-danger);
+}
+.glow-special {
+  @include text-glow($color-special);
+}
+
+// =============================================================================
+// Scrollbar Styling
+// =============================================================================
+
+@mixin scrollbar-dark {
+  &::-webkit-scrollbar {
+    width: $spacing-tight;
+    height: $spacing-tight;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: $radius-small;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($color-primary, 0.3);
+    border-radius: $radius-small;
+
+    &:hover {
+      background: rgba($color-primary, 0.5);
+    }
+  }
+}
+
+@mixin scrollbar-light {
+  &::-webkit-scrollbar-track {
+    background: rgba($light-accent, 0.05);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($light-accent, 0.2);
+
+    &:hover {
+      background: rgba($light-accent, 0.3);
+    }
+  }
+}
+
+// =============================================================================
+// Reduced Motion Accessibility
+// =============================================================================
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

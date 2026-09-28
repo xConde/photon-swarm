@@ -1,0 +1,492 @@
+@use '../styles/design-system' as ds;
+
+.photon-swarm-container {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  max-block-size: 100%;
+  min-block-size: 0;
+  margin: 0;
+  background: var(--game-bg-primary, ds.$dark-bg-primary);
+  overflow: hidden !important;
+  overscroll-behavior: none; // Block pull-to-refresh / rubber-band bounce on touch
+  touch-action: none; // No browser pan/zoom on the HUD overlays above the canvas
+  -webkit-touch-callout: none; // No iOS long-press share/save callout during play
+  font-family: ds.$font-primary;
+  border-radius: ds.$radius-medium;
+  // Restrained neon edge: one clean 1px border + a single faint shadow.
+  // The old 5-layer neon-glow mixin + ::before double-inset was "glow abuse"
+  // (always-on, never informational). Glow is an event signal, not a rest state.
+  border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  box-shadow: 0 0 8px var(--game-glow-color, rgba(0, 255, 255, 0.08));
+  flex: 1 1 auto;
+  width: 100%;
+  max-inline-size: 100%;
+  align-self: stretch;
+  transition:
+    background-color ds.$animation-slow ds.$easing-in-out,
+    border-color ds.$animation-slow ds.$easing-in-out,
+    box-shadow ds.$animation-slow ds.$easing-in-out;
+
+  // No ::before border-glow layer — the border on the container itself is sufficient.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* subtle animated starfield overlay */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, var(--game-glow-color, rgba(0, 255, 255, 0.25)) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 70% 60%, var(--game-glow-color, rgba(0, 255, 255, 0.18)) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 80%, var(--game-glow-color, rgba(0, 255, 255, 0.15)) 0%, transparent 100%);
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    animation: starfield 60s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Canvas takes full container space */
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-game-canvas);
+    background-color: var(--game-bg-primary, ds.$dark-bg-primary);
+    transition: background-color ds.$animation-slow ds.$easing-in-out;
+    touch-action: none; // Prevent pinch-zoom and scroll interference during gameplay
+    overscroll-behavior: none;
+  }
+
+  .game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--game-bg-overlay, rgba(0, 10, 20, 0.4));
+    z-index: var(--z-background);
+    pointer-events: none;
+    backdrop-filter: blur(1px);
+    transition:
+      opacity ds.$animation-standard ds.$easing-standard,
+      background-color ds.$animation-slow ds.$easing-in-out;
+  }
+
+  .hud-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-ui-background);
+    user-select: none;
+    pointer-events: none;
+    transition: opacity ds.$animation-standard ds.$easing-standard;
+
+    &.dimmed {
+      opacity: 0.7;
+    }
+  }
+
+  .shop-button {
+    position: absolute;
+    top: ds.$spacing-comfortable;
+    right: ds.$spacing-comfortable;
+    background-color: var(--game-button-bg, rgba(0, 0, 0, 0.7));
+    color: var(--game-accent, ds.$dark-accent);
+    border: ds.$border-width solid var(--game-button-border, rgba(0, 255, 255, 0.6));
+    border-radius: ds.$radius-small;
+    padding: ds.$spacing-tight ds.$spacing-standard;
+    font-size: ds.$text-base;
+    cursor: pointer;
+    z-index: var(--z-ui-background);
+    transition: all ds.$animation-medium ds.$easing-standard;
+    text-transform: uppercase;
+    letter-spacing: ds.$tracking-wide;
+
+    // Keyboard focus mirrors pointer-hover so both inputs get the same solid-fill affordance.
+    &:hover,
+    &:focus-visible {
+      background-color: var(--game-accent, #{ds.$dark-accent});
+      color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+      transform: translateY(-#{ds.$spacing-micro});
+      box-shadow: 0 5px 10px var(--game-glow-color, rgba(0, 0, 0, 0.4));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    &.dimmed {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+
+  app-upgrade-modal,
+  app-end-screen,
+  app-intro-screen,
+  app-shop,
+  app-enemy-guide,
+  app-settings,
+  .pause-overlay {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  app-enemy-guide-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: ds.$z-overlay + 50; // Above other overlays
+  }
+
+  .shop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: ds.$z-content + 10;
+    user-select: none;
+  }
+
+  .pause-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: var(--game-bg-overlay, rgba(0, 0, 0, 0.7));
+    backdrop-filter: blur(4px);
+    z-index: ds.$z-overlay;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color ds.$animation-standard ds.$easing-standard;
+
+    // The generic `app-controls-display { bottom/right: $spacing-standard }` rule below
+    // (for the live gameplay HUD panel) also matches this pause-menu instance since both
+    // are literal <app-controls-display> tags in this same template's scope. That stacked
+    // an extra $spacing-standard (12px) on top of the component's own 10px inset, so the
+    // "ESC Resume" hint sat ~12px further from the screen edge than the settings/shop/
+    // enemy-guide/upgrade "ESC" hints. Zero it here so the host reverts to edge-to-edge
+    // fill and the component's own bottom-right offset (identical 10px token) is the only
+    // one applied — matching the other overlays' hint position exactly.
+    app-controls-display {
+      bottom: 0;
+      right: 0;
+    }
+
+    .pause-content {
+      text-align: center;
+      background-color: var(--game-panel-bg, rgba(0, 0, 0, 0.9));
+      padding: ds.$spacing-generous;
+      border-radius: ds.$radius-large;
+      border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+      box-shadow:
+        0 0 ds.$spacing-major rgba(0, 0, 0, 0.3),
+        0 0 ds.$spacing-standard var(--game-glow-color, rgba(0, 255, 255, 0.1));
+      width: 350px;
+      max-width: 40vw;
+      transition:
+        background-color ds.$animation-standard ds.$easing-standard,
+        border-color ds.$animation-standard ds.$easing-standard;
+
+      h2 {
+        font-size: ds.$text-display;
+        color: var(--game-accent, ds.$dark-accent);
+        margin: 0 0 ds.$spacing-generous 0;
+        letter-spacing: ds.$tracking-wide;
+        text-transform: uppercase;
+        text-shadow: 0 0 10px var(--game-glow-color, rgba(0, 255, 255, 0.3));
+        transition: color ds.$animation-standard ds.$easing-standard;
+      }
+    }
+
+    .pause-menu {
+      display: flex;
+      flex-direction: column;
+      gap: ds.$spacing-comfortable;
+      margin: 0 auto;
+      width: 80%;
+
+      .menu-btn {
+        display: flex;
+        align-items: center;
+        background-color: var(--game-button-bg, rgba(0, 40, 60, 0.6));
+        color: var(--game-text-primary, white);
+        border: ds.$border-width solid var(--game-button-border, rgba(0, 255, 255, 0.3));
+        border-radius: ds.$radius-medium;
+        padding: ds.$spacing-standard ds.$spacing-comfortable;
+        font-size: ds.$text-medium;
+        cursor: pointer;
+        transition: all ds.$animation-standard ds.$easing-standard;
+        text-align: left;
+        position: relative;
+
+        // Keyboard focus mirrors the pointer-hover state exactly so the affordance is
+        // identical for mouse and keyboard users (the outline ring is added separately below).
+        // No left accent bar — it read as a stray cyan stripe over the solid fill (worst on the
+        // danger Save & Quit). The solid fill + translateX + border is affordance enough.
+        &:hover,
+        &:focus-visible {
+          background-color: var(--game-accent, #{ds.$dark-accent});
+          color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+          transform: translateX(3px);
+          border-color: var(--game-accent, #{ds.$dark-accent});
+
+          // Invert BOTH child spans to dark so the icon + label are readable on the solid
+          // accent fill — they carry their own light colors and otherwise stay light on hover.
+          .btn-icon {
+            transform: scale(1.2);
+            opacity: 1;
+            color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+          }
+
+          .btn-text {
+            color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+            text-shadow: none;
+          }
+        }
+
+        &:active {
+          transform: translateX(1px) translateY(1px);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--game-accent, ds.$dark-accent);
+          outline-offset: 2px;
+        }
+
+        .btn-icon {
+          margin-right: ds.$spacing-standard;
+          font-size: ds.$text-large;
+          opacity: 0.8;
+          transition: all ds.$animation-standard ds.$easing-standard;
+          width: ds.$spacing-generous;
+          display: flex;
+          justify-content: center;
+        }
+
+        .btn-text {
+          letter-spacing: ds.$tracking-wide;
+          color: var(--game-text-secondary, ds.$dark-accent-light);
+          text-shadow: 0 0 2px var(--game-glow-color, rgba(0, 200, 255, 0.3));
+          transition: color ds.$animation-standard ds.$easing-standard;
+        }
+      }
+
+      .resume-btn {
+        &:hover {
+          box-shadow: 0 0 8px var(--game-glow-color, rgba(0, 255, 255, 0.5));
+        }
+      }
+
+      // Save & Quit is the one semantic exception: destructive action uses danger accent.
+      .save-btn {
+        .btn-icon {
+          color: var(--game-danger, #{ds.$dark-danger});
+        }
+
+        border-color: var(--game-danger, #{ds.$dark-danger});
+        color: var(--game-danger, #{ds.$dark-danger});
+
+        &:hover {
+          background-color: var(--game-danger, #{ds.$dark-danger});
+          color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+          border-color: var(--game-danger, #{ds.$dark-danger});
+          box-shadow: 0 0 8px var(--game-danger, #{ds.$dark-danger});
+
+          .btn-text,
+          .btn-icon {
+            color: var(--game-bg-primary, #{ds.$dark-bg-primary});
+          }
+        }
+      }
+    }
+
+    .pause-stats {
+      margin-top: ds.$spacing-generous;
+      padding: ds.$spacing-comfortable;
+      border-top: none;
+      background: var(--game-button-bg, rgba(0, 40, 60, 0.6));
+      border-radius: ds.$radius-medium;
+      border: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+    }
+
+    .pause-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: ds.$spacing-tight ds.$spacing-standard;
+    }
+
+    .pause-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .pause-stat-label {
+      font-size: ds.$text-micro;
+      color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+      text-transform: uppercase;
+      letter-spacing: ds.$tracking-wider;
+      margin-bottom: 2px;
+    }
+
+    .pause-stat-value {
+      font-family: ds.$font-mono;
+      font-size: ds.$text-xlarge;
+      color: var(--game-text-primary, #{ds.$dark-text});
+      font-weight: ds.$weight-bold;
+    }
+
+    // =========================================================================
+    // Tablet (769–1024px): wider pause content + landscape-safe overflow
+    // =========================================================================
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .pause-content {
+        max-width: 60vw;
+        min-width: 380px;
+        width: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+    }
+
+    // =========================================================================
+    // Mobile: compact pause menu
+    // =========================================================================
+    @media (max-width: 768px) {
+      .pause-content {
+        padding: ds.$spacing-standard;
+        width: auto;
+        min-width: 200px;
+        max-width: 85vw;
+        border-radius: ds.$radius-medium;
+        box-shadow:
+          0 0 ds.$spacing-standard rgba(0, 0, 0, 0.3),
+          0 0 ds.$spacing-tight var(--game-glow-color, rgba(0, 255, 255, 0.1));
+
+        h2 {
+          font-size: ds.$text-large;
+          margin: 0 0 ds.$spacing-standard 0;
+        }
+      }
+
+      .pause-menu {
+        gap: ds.$spacing-tight;
+        width: 100%;
+
+        .menu-btn {
+          width: 100%;
+          min-height: 44px; // WCAG 2.5.5 touch target (was ~33px on mobile)
+          padding: ds.$spacing-tight ds.$spacing-standard;
+          font-size: ds.$text-small;
+          border-radius: ds.$radius-small;
+
+          .btn-icon {
+            margin-right: ds.$spacing-tight;
+            font-size: ds.$text-base;
+            width: ds.$spacing-comfortable;
+            flex-shrink: 0;
+          }
+
+          .btn-text {
+            letter-spacing: ds.$tracking-normal;
+            white-space: nowrap;
+          }
+        }
+      }
+
+      app-controls-display {
+        display: none;
+      }
+    }
+  }
+
+  app-intro-screen {
+    user-select: none;
+    // Position intro-screen above the canvas
+    position: absolute;
+    inset: 0;
+    z-index: ds.$z-content;
+  }
+
+  app-upgrade-modal {
+    user-select: none;
+    position: absolute;
+    inset: 0;
+    z-index: ds.$z-content;
+  }
+
+  app-end-screen {
+    user-select: none;
+    position: absolute;
+    inset: 0;
+    z-index: ds.$z-content;
+  }
+
+  /* Game controls display styling */
+  app-controls-display {
+    position: absolute;
+    bottom: ds.$spacing-standard;
+    right: ds.$spacing-standard;
+    z-index: ds.$z-content;
+    user-select: none;
+    pointer-events: none;
+    transition: opacity ds.$animation-standard ds.$easing-standard;
+
+    &.dimmed {
+      opacity: 0.4;
+    }
+
+    /* Responsive controls for smaller screens */
+    @media (max-width: 600px) {
+      transform: scale(0.85);
+      transform-origin: bottom right;
+    }
+
+    @media (max-width: 480px) {
+      transform: scale(0.75);
+      transform-origin: bottom right;
+    }
+  }
+
+  // Full-screen positioning wrapper for the pause + enemy-guide overlays.
+  .game-overlay-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: ds.$z-overlay;
+    pointer-events: auto; /* Ensure clicks work */
+  }
+
+  /* Media queries for different screen sizes */
+  @media (max-width: 900px), (max-width: 768px), (max-width: 480px) {
+    width: 100% !important;
+    margin: 0;
+  }
+}

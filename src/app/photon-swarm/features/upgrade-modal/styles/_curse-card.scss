@@ -1,0 +1,59 @@
+@use '../../../styles/design-system' as ds;
+
+.curse-card {
+  --upgrade-rarity-color: #{ds.$dark-danger};
+
+  &.curse-severity-low {
+    --upgrade-rarity-color: #{ds.$dark-warning};
+  }
+
+  &.curse-severity-medium {
+    --upgrade-rarity-color: #{ds.$dark-risk-medium};
+  }
+}
+
+.curse-low {
+  color: ds.$dark-warning;
+}
+
+.curse-medium {
+  color: ds.$dark-risk-medium;
+}
+
+.curse-high {
+  color: ds.$dark-danger;
+}
+
+.severity-low {
+  background-color: rgba(ds.$dark-success, 0.2);
+  color: ds.$dark-success;
+}
+
+.severity-medium {
+  background-color: rgba(ds.$dark-risk-alt, 0.2);
+  color: ds.$dark-risk-alt;
+}
+
+.severity-high {
+  background-color: rgba(ds.$dark-danger, 0.2);
+  color: ds.$dark-danger;
+}
+
+.severity-level {
+  margin: ds.$spacing-comfortable 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ds.$spacing-comfortable;
+
+  .severity-label {
+    color: rgba(ds.$dark-text, 0.7);
+    font-weight: ds.$weight-bold;
+  }
+
+  .severity-low,
+  .severity-medium,
+  .severity-high {
+    font-weight: ds.$weight-bold;
+  }
+}

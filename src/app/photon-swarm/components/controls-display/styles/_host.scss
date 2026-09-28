@@ -1,0 +1,38 @@
+// Host element spans the game container
+@use '../../../styles/design-system' as ds;
+
+// Host element spans the game container
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: ds.$z-overlay;
+
+  // Hide keyboard controls reference on touch devices (virtual controls replace it)
+  @media (pointer: coarse) {
+    display: none;
+  }
+
+  // Hide on small screens (desktop browser resized to mobile width)
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  // Faded state: reduce opacity after controls have been seen (still readable, not invisible)
+  &.faded .controls-gameplay {
+    opacity: 0.55;
+  }
+
+  // The inner gameplay panel is hoverable — restores full opacity on hover
+  .controls-gameplay {
+    transition: opacity ds.$animation-standard ds.$easing-standard;
+    pointer-events: auto; // Allow hover; host is pointer-events: none
+
+    &:hover {
+      opacity: 1 !important; // Restore full opacity on hover regardless of faded state
+    }
+  }
+}

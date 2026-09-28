@@ -1,0 +1,76 @@
+@use '../../../styles/design-system' as ds;
+
+@keyframes milestone-fade-in-out {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px) scale(1.02);
+  }
+}
+
+:host {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: ds.$z-content + 6; // Above bars, below modals
+  pointer-events: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.milestone-container {
+  text-align: center;
+  animation: milestone-fade-in-out 1.5s ease-out forwards;
+}
+
+.milestone-text {
+  font-family: ds.$font-display;
+  font-size: ds.$text-xlarge;
+  font-weight: ds.$weight-bold;
+  letter-spacing: ds.$tracking-widest;
+  text-transform: uppercase;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  // Restrained neon: single 8px text-glow (max per design system)
+  text-shadow: var(--game-text-glow, 0 0 10px currentColor);
+}
+
+// Tier-specific coloring
+[data-tier='rising'] .milestone-text {
+  color: var(--game-accent, #{ds.$dark-accent});
+}
+
+[data-tier='surging'] .milestone-text {
+  color: var(--game-warning, #{ds.$dark-warning});
+}
+
+[data-tier='critical'] .milestone-text {
+  color: var(--game-special, #{ds.$dark-special});
+  font-size: ds.$text-display;
+}
+
+// Day mode — --game-text-glow is already set to 'none' in .day-mode
+// in the design system, so no override needed here.
+
+@media (max-width: 640px) {
+  .milestone-text {
+    font-size: 18px; // Down from 24px
+  }
+
+  [data-tier='critical'] .milestone-text {
+    font-size: 22px; // Down from 32px
+  }
+}

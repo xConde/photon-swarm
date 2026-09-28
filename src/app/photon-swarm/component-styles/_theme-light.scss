@@ -1,0 +1,162 @@
+@use '../styles/design-system' as ds;
+
+// =============================================================================
+// LIGHT MODE OVERRIDES
+// Following Contact page patterns with :host-context
+// =============================================================================
+
+:host-context(.day-mode) {
+  // CRITICAL: Override CSS custom properties to use dark slate instead of cyan
+  --game-accent: #{ds.$light-accent};
+  --game-accent-light: #{ds.$light-accent-light};
+  --game-glow-color: rgba(47, 79, 79, 0.3);
+  --game-panel-border: rgba(47, 79, 79, 0.3);
+  --game-button-border: rgba(47, 79, 79, 0.4);
+  --game-bg-primary: #{ds.$light-bg-primary};
+  --game-bg-secondary: #{rgba(ds.$light-bg-primary, 0.95)};
+  --game-bg-overlay: #{rgba(ds.$light-bg-primary, 0.9)};
+  --game-panel-bg: #{rgba(ds.$light-bg-primary, 0.95)};
+  --game-text-primary: #{ds.$light-text};
+  --game-text-secondary: #{rgba(ds.$light-text, 0.7)};
+  --game-text-muted: #{rgba(ds.$light-text, 0.5)};
+  --game-success: #{ds.$light-success};
+  --game-warning: #{ds.$light-warning};
+  --game-danger: #{ds.$light-danger};
+  --game-special: #{ds.$light-special};
+  --game-ability-warm: #{ds.$light-ability-warm};
+
+  // === FACTION IDENTITY (territory lineage) ===
+  // Projection of FACTION_IDENTITIES[n].light.territory.color — the WCAG-contrasted
+  // variants; the dark values fail contrast on the light slate surface. Enforced by
+  // scripts/check-faction-tokens.js, same contract as the :host block in _host-root.scss.
+  //
+  // :host-context is what makes the day-mode swap reach nested overlays: the
+  // .day-mode class lands on .app-wrapper, which belongs to AppComponent, so a bare
+  // `.day-mode` selector inside a component stylesheet is scoped to
+  // `.day-mode[_ngcontent-x]` and never matches.
+  --game-faction-1: #b52020;
+  --game-faction-2: #1a6fa3;
+  --game-faction-3: #1a7a40;
+  --game-faction-4: #6b2e8e;
+
+  .photon-swarm-container {
+    // Set cool slate background for light mode
+    background: ds.$light-bg-primary;
+    // Restrained border in light mode — matches the single-layer approach on dark.
+    // The old subtle-glow mixin stacked two box-shadow layers; not needed at rest.
+    border-color: rgba(ds.$light-accent, 0.3);
+    box-shadow: 0 0 6px rgba(ds.$light-accent, 0.06);
+
+    // Canvas also needs slate background in light mode
+    canvas {
+      background-color: ds.$light-bg-primary;
+    }
+
+    // ::before is empty in dark mode too — no border/shadow overrides needed.
+    &::before {
+      border: none;
+      box-shadow: none;
+    }
+
+    &::after {
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(ds.$light-accent, 0.15) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 70% 60%, rgba(ds.$light-accent, 0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 80%, rgba(ds.$light-accent, 0.08) 0%, transparent 100%);
+    }
+  }
+
+  // Pause overlay - light slate semi-transparent backdrop
+  .pause-overlay {
+    background-color: rgba(ds.$light-bg-primary, 0.85);
+    backdrop-filter: blur(4px);
+
+    .pause-content {
+      background-color: ds.$light-bg-primary;
+      border: ds.$border-width solid rgba(ds.$light-accent, 0.3);
+      box-shadow:
+        0 0 ds.$spacing-major rgba(ds.$light-accent, 0.1),
+        0 0 ds.$spacing-standard rgba(ds.$light-accent, 0.05);
+
+      h2 {
+        color: ds.$light-accent;
+        text-shadow: 0 0 10px rgba(ds.$light-accent, 0.15);
+      }
+    }
+  }
+
+  // Light mode button behavior (Contact page pattern)
+  // Light mode: Ghost → Solid on hover
+  .shop-button {
+    background-color: transparent;
+    color: var(--game-accent, #{ds.$light-accent});
+    border-color: var(--game-button-border, rgba(47, 79, 79, 0.4));
+
+    &:hover:not(:disabled) {
+      background-color: var(--game-accent, #{ds.$light-accent});
+      color: var(--game-bg-primary, #{ds.$light-bg-primary});
+      border-color: var(--game-accent, #{ds.$light-accent});
+    }
+  }
+
+  // Pause menu buttons: Ghost → Solid pattern for light mode
+  .pause-overlay .pause-content .pause-menu .menu-btn {
+    background-color: transparent !important; // Ghost default
+    color: ds.$light-accent;
+    border: ds.$border-width solid rgba(ds.$light-accent, 0.35);
+    box-shadow: none;
+    transition: all ds.$animation-medium ds.$easing-standard;
+
+    &::before {
+      background: ds.$light-accent-light;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: ds.$light-accent !important; // Solid on hover
+      color: ds.$light-bg-primary;
+      border-color: ds.$light-accent;
+      transform: translateX(3px);
+      box-shadow: 0 ds.$spacing-micro ds.$spacing-standard rgba(ds.$light-accent, 0.2);
+
+      .btn-text {
+        color: ds.$light-bg-primary;
+      }
+
+      .btn-icon {
+        color: ds.$light-bg-primary;
+      }
+    }
+
+    .btn-text {
+      color: ds.$light-accent;
+      text-shadow: none;
+    }
+
+    .btn-icon {
+      color: ds.$light-accent;
+    }
+  }
+
+  // Save & Quit is the one semantic exception: destructive action uses danger accent.
+  .pause-overlay .pause-content .pause-menu .save-btn {
+    border-color: rgba(ds.$light-danger, 0.5);
+    color: ds.$light-danger;
+
+    .btn-text,
+    .btn-icon {
+      color: ds.$light-danger;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: ds.$light-danger !important;
+      border-color: ds.$light-danger;
+      color: ds.$light-bg-primary;
+      box-shadow: 0 ds.$spacing-micro ds.$spacing-standard rgba(ds.$light-danger, 0.2);
+
+      .btn-text,
+      .btn-icon {
+        color: ds.$light-bg-primary;
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+/* Charge Bar — bottom-edge discharge cooldown indicator */
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: block;
+  position: absolute;
+  // Flush with the very bottom edge. (Was overridden by `bottom: env(safe-area-inset-bottom)`,
+  // which floated the bar ~34px up from the edge on notched phones — it should hug the raw edge.)
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: ds.$z-content + 5;
+  pointer-events: none;
+}
+
+.charge-bar-container {
+  position: relative;
+  width: 100%;
+  height: 4px;
+}
+
+.charge-bar-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border-top: 1px solid var(--game-panel-border, rgba(255, 255, 255, 0.1));
+}
+
+// ─── Fill ────────────────────────────────────────────────────────────────────
+
+.charge-bar-fill {
+  height: 100%;
+  transition: background 300ms ease-out;
+  background: var(--game-charge-default, #{ds.$dark-charge-default});
+}
+
+// ─── State: Empty (just discharged) ──────────────────────────────────────────
+
+.state-empty {
+  .charge-bar-fill {
+    background: var(--game-charge-empty, #{ds.$dark-charge-empty});
+  }
+}
+
+// ─── State: Charging (cooldown recovering) ──────────────────────────────────
+// Fill color same as default — no special treatment needed
+
+// ─── State: Charged (ready to use) ──────────────────────────────────────────
+
+.state-charged {
+  .charge-bar-fill {
+    background: var(--game-charge-full, #{ds.$dark-charge-full});
+  }
+}
+
+// ─── State: Holding right-click (charging the discharge) ────────────────────
+
+.state-holding {
+  .charge-bar-fill {
+    background: var(--game-charge-default, #{ds.$dark-charge-default});
+  }
+}
+
+// ─── Sprint 4 classes (kept for template compat, no animation) ───────────────
+
+.charge-full-pulse,
+.fire-drain {
+  // intentionally empty — classes bound in template, animation removed
+}
+
+// ─── Day mode ───────────────────────────────────────────────────────────────
+
+:host-context(.day-mode) {
+  .charge-bar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  // Angular emulated encapsulation rewrites bare .day-mode{} selectors so the
+  // design-system :root/.day-mode token blocks do NOT reach this child component.
+  // Per-state :host-context(.day-mode) overrides are required here to apply
+  // light-mode fill colors.
+  .charge-bar-fill {
+    background: #{ds.$light-charge-default};
+  }
+
+  .state-empty .charge-bar-fill {
+    background: #{ds.$light-charge-empty};
+  }
+
+  .state-charged .charge-bar-fill {
+    background: #{ds.$light-charge-full};
+  }
+
+  .state-holding .charge-bar-fill {
+    background: #{ds.$light-charge-default};
+  }
+}

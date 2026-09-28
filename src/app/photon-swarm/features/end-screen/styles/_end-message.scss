@@ -1,0 +1,24 @@
+@use '../../../styles/design-system' as ds;
+
+// === DIFFICULTY STAT ===
+.stat-item.difficulty-stat {
+  &.hard .stat-value {
+    color: var(--game-warning, #{ds.$dark-warning});
+  }
+
+  &.extreme .stat-value {
+    color: var(--game-danger, #{ds.$dark-danger});
+  }
+}
+
+// === END MESSAGE ===
+.end-message {
+  margin: 0 0 ds.$spacing-tight 0;
+  padding: ds.$spacing-tight;
+  font-size: ds.$text-small;
+  font-style: italic;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  line-height: ds.$leading-relaxed;
+  border-top: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+  border-bottom: ds.$border-width solid var(--game-panel-border, rgba(0, 255, 255, 0.3));
+}

@@ -1,0 +1,53 @@
+@use '../styles/design-system' as ds;
+
+/* CSS Custom Properties for Responsive UI */
+:root {
+  --minimap-scale: 0.18;
+  --minimap-margin: #{ds.$spacing-comfortable};
+}
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+
+  // Theme values belong on the game host so every overlay component inherits
+  // the same palette. Component-local :root selectors are scoped by Angular
+  // and cannot provide reliable fallbacks to nested HUD/modal components.
+  --game-bg-primary: #{ds.$dark-bg-primary};
+  --game-bg-secondary: #{ds.$dark-bg-secondary};
+  --game-bg-overlay: #{rgba(ds.$dark-bg-primary, 0.9)};
+  --game-panel-bg: #{ds.$dark-bg-secondary};
+  --game-panel-border: #{rgba(ds.$dark-accent, 0.3)};
+  --game-text-primary: #{ds.$dark-text};
+  --game-text-secondary: #{rgba(ds.$dark-text, 0.7)};
+  --game-text-muted: #{rgba(ds.$dark-text, 0.5)};
+  --game-accent: #{ds.$dark-accent};
+  --game-success: #{ds.$dark-success};
+  --game-warning: #{ds.$dark-warning};
+  --game-danger: #{ds.$dark-danger};
+  --game-special: #{ds.$dark-special};
+  --game-ability-warm: #{ds.$dark-ability-warm};
+
+  // === FACTION IDENTITY (territory lineage) ===
+  // Projection of config/faction-identity.config.ts —
+  // FACTION_IDENTITIES[n].dark.territory.color. SCSS cannot import TS, so this is
+  // a hand-mirrored copy, NOT a second source of truth: the faction token check
+  // parses this block and fails the build if a value drifts from the config.
+  //
+  // These belong on :host for exactly the reason stated above. A component-local
+  // `:root` is rewritten by Angular to `[_ngcontent-x]:root`, which matches nothing
+  // (<html> carries no scope attribute), so nested overlays such as the map legend
+  // would resolve var(--game-faction-N) to an invalid value and render transparent.
+  --game-faction-1: #e74c3c;
+  --game-faction-2: #3498db;
+  --game-faction-3: #27ae60;
+  --game-faction-4: #8e44ad;
+}
+
+// ::selection theming for this project lives in the shell's styles.scss
+// (element-scoped to the `app-photon-swarm` host tag), NOT here — see the
+// comment there for why: `:host ::selection` cannot reach text rendered by
+// child components (HUD, shop, intro-screen, settings) under Angular's
+// emulated encapsulation.

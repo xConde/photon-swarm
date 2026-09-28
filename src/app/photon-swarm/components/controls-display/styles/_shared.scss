@@ -1,0 +1,40 @@
+// Shared key-cap mixin — DRY canonical ghost key cap used in all three modes
+@use '../../../styles/design-system' as ds;
+
+@mixin key-cap-base {
+  font-family: ds.$font-mono;
+  font-size: ds.$text-xs;
+  font-weight: ds.$weight-medium;
+  letter-spacing: ds.$tracking-wide;
+  text-align: center;
+  color: var(--game-accent);
+  background-color: var(--game-button-bg);
+  border: ds.$border-width solid var(--game-button-border);
+  border-radius: ds.$radius-small; // 4px — canonical button radius
+  // 1px bottom shadow = keyboard depth cue, no glow at rest
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--game-accent) 20%, transparent);
+  transition:
+    background-color ds.$animation-standard ds.$easing-standard,
+    border-color ds.$animation-standard ds.$easing-standard,
+    color ds.$animation-standard ds.$easing-standard,
+    box-shadow ds.$animation-standard ds.$easing-standard;
+}
+
+// Single-hint key cap — used by the pause-menu and modal-hint "ESC …" rows.
+// Pulled out so the two modes can't drift in size again: they previously
+// carried independent padding/min-width/font-size (2px 8px @ 40px vs. 4px
+// 10px @ 35px), which rendered the modal-hint chip visibly taller than the
+// pause-menu one despite both showing an identical 3-character "ESC" cap.
+@mixin key-hint-cap {
+  @include key-cap-base;
+  font-size: ds.$text-small;
+  padding: ds.$spacing-micro (ds.$spacing-tight + 2px);
+  min-width: 38px;
+}
+
+// Action label paired with `key-hint-cap` — same rationale: pause-menu and
+// modal-hint previously disagreed on font-size ($text-small vs $text-caption).
+@mixin key-hint-action {
+  font-size: ds.$text-small;
+  color: var(--game-text-secondary);
+}

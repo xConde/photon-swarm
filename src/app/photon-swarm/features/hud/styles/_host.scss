@@ -1,0 +1,14 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: block;
+  color: var(--game-text-primary, ds.$dark-text);
+  font-family: ds.$font-primary;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: ds.$z-overlay;
+}

@@ -1,0 +1,32 @@
+@use '../../../styles/design-system' as ds;
+
+.blessing-card {
+  --upgrade-rarity-color: #{ds.$dark-success};
+
+  &.curse-severity-low {
+    --upgrade-rarity-color: #{ds.$dark-tier-common};
+  }
+
+  &.curse-severity-medium {
+    --upgrade-rarity-color: #{ds.$dark-tier-rare};
+  }
+
+  &.curse-severity-high {
+    --upgrade-rarity-color: #{ds.$dark-tier-epic};
+  }
+}
+
+.secondary-effect {
+  margin-top: ds.$spacing-tight;
+  padding-top: ds.$spacing-tight;
+  border-top: ds.$border-width dashed var(--upgrade-secondary-border, rgba(ds.$dark-text, 0.2));
+  color: var(--game-text-secondary, rgba(ds.$dark-text, 0.7));
+
+  .curse-card & {
+    color: rgba(ds.$dark-danger, 0.9);
+  }
+
+  .blessing-card & {
+    color: rgba(ds.$dark-tier-common, 0.9);
+  }
+}

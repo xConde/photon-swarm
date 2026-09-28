@@ -1,0 +1,12 @@
+// Theme-aware controls display
+// Dark mode: Cyberpunk neon cyan aesthetic
+// Light mode: Cool slate with muted green accents
+// All color tokens via var(--game-*) — no per-mode overrides unless structurally required.
+
+@use './styles/shared';
+@use './styles/host';
+@use './styles/modal-hint';
+@use './styles/pause-menu';
+@use './styles/gameplay';
+@use './styles/animations';
+@use './styles/responsive';

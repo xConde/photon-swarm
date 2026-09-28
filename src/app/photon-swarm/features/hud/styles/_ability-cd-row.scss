@@ -1,0 +1,110 @@
+@use '../../../styles/design-system' as ds;
+
+// Dash and parry live inside the primary status rail. Naming the actions beside
+// their keys removes the two unexplained floating icon boxes from the playfield.
+.ability-cd-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  @media (hover: none) and (pointer: coarse) {
+    display: none;
+  }
+}
+
+.ability-divider {
+  @media (hover: none) and (pointer: coarse) {
+    display: none;
+  }
+}
+
+.ability-slot {
+  position: relative;
+  min-width: 76px;
+  height: 26px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 38%, transparent);
+  border-radius: ds.$radius-xs;
+  background: color-mix(in srgb, var(--game-text-primary) 4%, transparent);
+  color: var(--game-text-primary);
+
+  &.on-cooldown {
+    border-color: color-mix(in srgb, var(--game-text-primary) 16%, transparent);
+    color: var(--game-text-muted);
+  }
+}
+
+.ability-icon {
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--game-accent, #{ds.$dark-accent});
+
+  .on-cooldown & {
+    color: var(--game-text-muted);
+  }
+}
+
+.ability-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-family: ds.$font-mono;
+  line-height: 1;
+
+  strong {
+    font-size: 10px;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  small {
+    margin-top: 2px;
+    color: var(--game-text-muted);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+.ability-recharge {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--game-accent, #{ds.$dark-accent});
+  transition: width 100ms linear;
+}
+
+@media (max-width: 1040px) {
+  .ability-slot {
+    min-width: 56px;
+  }
+
+  .ability-copy strong {
+    display: none;
+  }
+
+  .ability-copy small {
+    margin-top: 0;
+    font-size: 8px;
+  }
+}
+
+// Narrow playfields already expose dash/parry through the touch cluster or the
+// gameplay control legend. Keeping these desktop hints in the primary rail made
+// the second slot disappear beneath the minimap on 320–480px canvases.
+@media (max-width: 768px) {
+  .ability-cd-row,
+  .ability-divider {
+    display: none;
+  }
+}

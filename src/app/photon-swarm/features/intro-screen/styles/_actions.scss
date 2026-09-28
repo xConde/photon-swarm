@@ -1,0 +1,140 @@
+@use '../../../styles/design-system' as ds;
+@use 'mixins' as m;
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: clamp(ds.$spacing-tight, 3vw, ds.$spacing-comfortable);
+  margin-block-start: clamp(ds.$spacing-standard, 3vh, ds.$spacing-generous);
+  min-block-size: clamp(40px, 5vh, ds.$spacing-xlarge);
+  opacity: 1;
+  transition: opacity ds.$animation-slow ds.$easing-standard;
+
+  &.centered {
+    margin-top: ds.$spacing-standard;
+    opacity: 0;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
+  &.bottom-buttons {
+    position: absolute;
+    bottom: ds.$spacing-major - 2px;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+    padding-bottom: ds.$spacing-comfortable;
+
+    @media (max-height: 700px), (max-width: 480px) {
+      position: static;
+      margin-top: ds.$spacing-tight;
+    }
+  }
+
+  button {
+    @include m.button-styles();
+
+    &.start-mission {
+      background-color: transparent;
+      border-color: var(--game-accent, ds.$dark-accent);
+      // WCAG 2.5.5: already inherits min-height:44px from button-styles mixin
+      padding: ds.$spacing-standard - 2px ds.$spacing-comfortable + ds.$spacing-micro;
+      font-weight: ds.$weight-bold;
+      letter-spacing: ds.$tracking-wide;
+
+      &:hover:not(:disabled) {
+        background-color: var(--game-accent, ds.$dark-accent);
+        color: var(--game-bg-primary, ds.$dark-bg-primary);
+        box-shadow: 0 0 ds.$spacing-standard var(--game-glow-color, rgba(0, 255, 255, 0.3));
+      }
+    }
+  }
+}
+
+// Stacked game action buttons — primary CTA on top, secondary below
+.game-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ds.$spacing-micro;
+  width: 100%;
+  max-width: 320px;
+  margin-inline: auto;
+  opacity: 1;
+  transition: opacity ds.$animation-slow ds.$easing-standard;
+
+  &.centered {
+    margin-top: ds.$spacing-standard;
+    opacity: 0;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
+  &.bottom-buttons {
+    position: absolute;
+    bottom: ds.$spacing-major - 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0;
+    padding-bottom: ds.$spacing-comfortable;
+
+    @media (max-height: 700px), (max-width: 768px) {
+      position: static;
+      transform: none;
+      margin-top: auto;
+      padding-bottom: ds.$spacing-tight;
+    }
+  }
+
+  .start-mission.full-width {
+    @include m.button-styles();
+    width: 100%;
+    border-color: var(--game-accent, ds.$dark-accent);
+    padding: ds.$spacing-standard;
+    font-weight: ds.$weight-bold;
+    letter-spacing: ds.$tracking-wide;
+    font-size: ds.$text-base;
+    text-align: center;
+
+    &:hover:not(:disabled) {
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+      box-shadow: 0 0 ds.$spacing-standard var(--game-glow-color, rgba(0, 255, 255, 0.3));
+    }
+  }
+
+  .secondary-action {
+    background: none;
+    border: none;
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.45));
+    font-size: ds.$text-small;
+    cursor: pointer;
+    min-height: 44px;
+    padding: ds.$spacing-tight ds.$spacing-standard;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all ds.$animation-fast ds.$easing-standard;
+    font-family: inherit;
+    border-radius: ds.$radius-small;
+    -webkit-tap-highlight-color: transparent;
+
+    &:hover {
+      color: var(--game-accent, ds.$dark-accent);
+    }
+
+    &:active {
+      color: var(--game-accent, ds.$dark-accent);
+      transform: scale(0.96);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+    }
+  }
+}

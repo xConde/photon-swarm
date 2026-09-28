@@ -1,0 +1,93 @@
+@use '../../../styles/design-system' as ds;
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ds.$spacing-tight;
+  flex-wrap: wrap;
+  gap: ds.$spacing-tight;
+  flex-shrink: 0;
+
+  // Shards counter: special/magenta colour (semantic content, not chrome)
+  .shards-display {
+    font-size: ds.$text-base;
+    color: var(--game-special, ds.$dark-special);
+    font-weight: ds.$weight-bold;
+    white-space: nowrap;
+  }
+}
+
+.shop-tabs {
+  display: flex;
+  // Canonical thin separator using panel-border token
+  border-bottom: ds.$border-width solid var(--game-panel-border, rgba(ds.$dark-accent, 0.3));
+  margin-bottom: ds.$spacing-standard;
+
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+    gap: 0;
+    margin-bottom: ds.$spacing-tight;
+  }
+
+  .tab-button {
+    background: none;
+    border: none;
+    padding: ds.$spacing-tight ds.$spacing-standard;
+    color: var(--game-text-secondary, rgba(ds.$dark-text, 0.7));
+    font-size: ds.$text-base;
+    cursor: pointer;
+    transition: all ds.$animation-standard ds.$easing-standard;
+    margin-right: ds.$spacing-standard;
+    position: relative;
+    border-radius: ds.$radius-small;
+
+    @media (max-width: 600px) {
+      padding: ds.$spacing-micro ds.$spacing-tight;
+      margin-right: ds.$spacing-tight;
+      font-size: ds.$text-small;
+    }
+
+    @media (pointer: coarse) {
+      min-height: 44px;
+    }
+
+    // Hover: solid background fill + contrasting text so label reads clearly
+    &:hover {
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+      background-color: var(--game-accent, ds.$dark-accent);
+      color: var(--game-bg-primary, ds.$dark-bg-primary);
+    }
+
+    // Active underline indicator — single 2px accent line, text stays readable
+    &.active {
+      color: var(--game-accent, ds.$dark-accent);
+      font-weight: ds.$weight-semibold;
+
+      // Reset hover/focus fill on the active tab so the underline stays the indicator —
+      // keyboard focus must match pointer hover (the base :focus-visible outline still applies).
+      &:hover,
+      &:focus-visible {
+        background-color: rgba(ds.$dark-accent, 0.12);
+        color: var(--game-accent, ds.$dark-accent);
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -#{ds.$border-width};
+        left: 0;
+        width: 100%;
+        height: ds.$border-width-thick;
+        background-color: var(--game-accent, ds.$dark-accent);
+        border-radius: ds.$radius-xs ds.$radius-xs 0 0;
+      }
+    }
+  }
+}

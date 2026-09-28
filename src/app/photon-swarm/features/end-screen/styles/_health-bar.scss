@@ -1,0 +1,18 @@
+@use '../../../styles/design-system' as ds;
+
+// === HEALTH BAR (if used) ===
+.health-bar {
+  width: 100%;
+  height: ds.$spacing-tight;
+  background: color-mix(in srgb, var(--game-danger, #{ds.$dark-danger}) 15%, transparent);
+  border-radius: ds.$radius-xs;
+  margin-top: ds.$spacing-micro;
+  overflow: hidden;
+}
+
+.health-bar-fill {
+  height: 100%;
+  background: var(--game-danger, #{ds.$dark-danger});
+  border-radius: ds.$radius-xs;
+  transition: width ds.$animation-standard ds.$easing-standard;
+}

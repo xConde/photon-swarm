@@ -1,0 +1,106 @@
+<!-- Modal hint mode - simple key hints for modals/menus -->
+@if (resolvedDisplayMode() === 'modal-hint') {
+  <div
+    class="controls-modal-hint"
+    [class.position-bottom-right]="position() === 'bottom-right'"
+    [class.position-bottom-left]="position() === 'bottom-left'"
+    [class.position-top-right]="position() === 'top-right'"
+    [class.position-top-left]="position() === 'top-left'"
+  >
+    @for (ctl of resolvedControls(); track trackByControl($index, ctl)) {
+      <div class="key-hint">
+        <span class="key">{{ ctl.key }}</span>
+        <span class="action">{{ ctl.action }}</span>
+      </div>
+    }
+  </div>
+}
+
+<!-- Pause menu mode - controls display for pause menu -->
+@if (resolvedDisplayMode() === 'pause-menu') {
+  <div class="controls-pause-menu">
+    <div class="controls-list">
+      @for (ctl of resolvedControls(); track trackByControl($index, ctl)) {
+        <div class="control-item">
+          <span class="key">{{ ctl.key }}</span>
+          <span class="action">{{ ctl.action }}</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Gameplay mode - full in-game controls with cooldowns and active states -->
+@if (resolvedDisplayMode() === 'gameplay') {
+  <div class="controls-gameplay">
+    <div class="controls-list">
+      <!-- Mouse controls rendered as key→action rows so they read consistently with the
+           keyboard list below. Chips pop via isFlashing() on click and show cooldown overlays. -->
+      <div class="control-item">
+        <div
+          class="key"
+          data-key="LMB"
+          [class.cooldown]="cachedStates().get('L-CLICK')?.isCooldown"
+          [class.ready]="
+            !cachedStates().get('L-CLICK')?.isCooldown && !cachedStates().get('L-CLICK')?.isActive && !isFlashing('LMB')
+          "
+          [class.active]="cachedStates().get('L-CLICK')?.isActive"
+          [class.flash]="isFlashing('LMB')"
+        >
+          @if (cachedStates().get('L-CLICK')?.isCooldown) {
+            <div class="cooldown-overlay" [style.width.%]="cachedStates().get('L-CLICK')?.pct ?? 0"></div>
+          }
+          <span class="key-label">LMB</span>
+        </div>
+        <div class="action">Toggle Beam / Shot</div>
+      </div>
+
+      <div class="control-item">
+        <div
+          class="key"
+          data-key="RMB"
+          [class.cooldown]="cachedStates().get('R-CLICK')?.isCooldown"
+          [class.ready]="
+            !cachedStates().get('R-CLICK')?.isCooldown && !cachedStates().get('R-CLICK')?.isActive && !isFlashing('RMB')
+          "
+          [class.active]="cachedStates().get('R-CLICK')?.isActive"
+          [class.flash]="isFlashing('RMB')"
+        >
+          @if (cachedStates().get('R-CLICK')?.isCooldown) {
+            <div class="cooldown-overlay" [style.width.%]="cachedStates().get('R-CLICK')?.pct ?? 0"></div>
+          }
+          <span class="key-label">RMB</span>
+        </div>
+        <div class="action">Hold to Discharge</div>
+      </div>
+
+      <!-- Regular keyboard controls -->
+      @for (ctl of resolvedControls(); track trackByControl($index, ctl)) {
+        @if (ctl.key !== 'L-CLICK' && ctl.key !== 'R-CLICK') {
+          <div class="control-item" [attr.data-category]="hasCategory(ctl) ? ctl.category : null">
+            <div
+              class="key"
+              [attr.data-key]="ctl.key"
+              [class.cooldown]="cachedStates().get(ctl.key)?.isCooldown"
+              [class.ready]="
+                !cachedStates().get(ctl.key)?.isCooldown &&
+                !cachedStates().get(ctl.key)?.isActive &&
+                !isFlashing(ctl.key)
+              "
+              [class.active]="cachedStates().get(ctl.key)?.isActive"
+              [class.flash]="isFlashing(ctl.key)"
+            >
+              @if (cachedStates().get(ctl.key)?.isCooldown) {
+                <div class="cooldown-overlay" [style.width.%]="cachedStates().get(ctl.key)?.pct ?? 0"></div>
+              }
+
+              <span class="key-label">{{ ctl.key }}</span>
+            </div>
+
+            <div class="action">{{ ctl.action }}</div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

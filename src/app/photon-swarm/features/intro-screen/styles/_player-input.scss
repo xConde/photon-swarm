@@ -1,0 +1,88 @@
+@use '../../../styles/design-system' as ds;
+
+.player-input-section {
+  margin-inline: auto;
+  max-inline-size: 500px;
+  text-align: center;
+  padding-block: clamp(1rem, 5vh, 4rem);
+  min-block-size: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.returning-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2vh, 2rem);
+  min-block-size: 100px;
+}
+
+.welcome-text {
+  font-size: clamp(ds.$text-large, 2.4vw, ds.$text-display);
+  color: var(--game-accent, ds.$dark-accent);
+  min-block-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    display: inline-block;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 24px;
+    background-color: var(--game-accent, ds.$dark-accent);
+    margin-left: 5px;
+
+    &.blink {
+      animation: blink 1s step-start infinite;
+    }
+  }
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: ds.$spacing-comfortable + ds.$spacing-micro;
+  min-height: 110px;
+
+  input {
+    background-color: var(--game-button-bg, rgba(0, 0, 0, 0.5));
+    border: ds.$border-width solid var(--game-button-border, rgba(0, 255, 255, 0.5));
+    border-radius: ds.$radius-small;
+    color: var(--game-text-primary, ds.$dark-text);
+    // Explicit 16px floor: iOS zooms the viewport when a focused input has
+    // font-size < 16px. Using max() ensures a future design-token change that
+    // drops $text-large below 18px can never push this under the threshold.
+    font-size: max(16px, ds.$text-large - 2px);
+    padding: ds.$spacing-standard ds.$spacing-standard;
+    text-align: center;
+    touch-action: manipulation; // suppress double-tap zoom on the input
+    transition: all ds.$animation-standard ds.$easing-standard;
+
+    &:focus {
+      outline: none;
+      border-color: var(--game-accent, ds.$dark-accent);
+      box-shadow: 0 0 10px var(--game-glow-color, rgba(0, 255, 255, 0.5));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--game-accent, ds.$dark-accent);
+      outline-offset: 2px;
+    }
+
+    &::placeholder {
+      color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+    }
+  }
+}
+
+.name-hint {
+  margin: -#{ds.$spacing-standard} 0 0;
+  font-size: ds.$text-small;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+}

@@ -1,0 +1,22 @@
+@use '../../../styles/design-system' as ds;
+
+// Difficulty Badge (shown for Hard/Extreme) — background info, kept subtle
+.difficulty-badge {
+  position: absolute;
+  top: 240px; // Below FPS counter (215px) to avoid overlap during low-FPS warning
+  right: ds.$spacing-standard;
+  font-family: ds.$font-mono;
+  font-size: ds.$text-xs; // 10px
+  font-weight: ds.$weight-bold;
+  letter-spacing: ds.$tracking-wide;
+  text-shadow: 0 0 ds.$spacing-micro rgba(0, 0, 0, 0.8);
+  z-index: ds.$z-content;
+  pointer-events: none;
+  opacity: 0.4;
+
+  @media (max-width: 768px) {
+    top: 160px;
+    right: ds.$spacing-tight;
+    font-size: ds.$text-xxs; // 8px
+  }
+}

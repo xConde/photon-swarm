@@ -1,0 +1,119 @@
+@use '../../../styles/design-system' as ds;
+
+.upgrade-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'console count'
+    'title reroll'
+    'note note';
+  align-items: end;
+  gap: 3px ds.$spacing-standard;
+  padding: 0 2px ds.$spacing-standard;
+  border-bottom: 1px solid color-mix(in srgb, var(--game-accent, #{ds.$dark-accent}) 24%, transparent);
+}
+
+.reroll-button {
+  grid-area: reroll;
+  align-self: center;
+  justify-self: end;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--upgrade-accent, #21e6ed) 48%, transparent);
+  background: transparent;
+  color: var(--upgrade-muted, #91a6b8);
+  font:
+    600 10px/1.2 'Space Mono',
+    monospace;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+
+  span {
+    margin-left: 5px;
+    color: var(--upgrade-accent, #21e6ed);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--upgrade-text, #f4f7fa);
+    border-color: var(--upgrade-accent, #21e6ed);
+    outline: none;
+  }
+}
+
+.upgrade-console,
+.upgrade-count {
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: ds.$text-micro;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.upgrade-console {
+  grid-area: console;
+  color: var(--game-accent, #{ds.$dark-accent});
+}
+
+.upgrade-count {
+  grid-area: count;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.5));
+  text-align: right;
+}
+
+h2 {
+  grid-area: title;
+  margin: 0;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  font-size: ds.$text-xlarge;
+  font-weight: ds.$weight-semibold;
+  letter-spacing: ds.$tracking-tight;
+  line-height: ds.$leading-tight;
+  text-align: left;
+}
+
+.upgrade-deck-note {
+  grid-area: note;
+  max-width: 560px;
+  margin: 5px 0 0;
+  color: var(--game-text-muted, rgba(255, 255, 255, 0.56));
+  font-size: ds.$text-small;
+  line-height: ds.$leading-normal;
+}
+
+.upgrade-application-error {
+  max-width: 640px;
+  margin: ds.$spacing-standard auto 0;
+  padding: ds.$spacing-tight ds.$spacing-standard;
+  color: var(--game-danger, #{ds.$dark-danger});
+  background-color: rgba(ds.$dark-danger, 0.1);
+  border: ds.$border-width solid rgba(ds.$dark-danger, 0.35);
+  border-radius: 2px;
+  font-size: ds.$text-small;
+  font-weight: ds.$weight-semibold;
+  line-height: ds.$leading-normal;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .upgrade-header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'console'
+      'title'
+      'note'
+      'reroll';
+    padding-bottom: ds.$spacing-tight;
+  }
+
+  .upgrade-count {
+    display: none;
+  }
+
+  h2 {
+    font-size: ds.$text-base;
+  }
+
+  .reroll-button {
+    justify-self: start;
+  }
+}

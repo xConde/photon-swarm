@@ -1,0 +1,161 @@
+<div class="end-screen-container" [class.victory]="isVictory()">
+  <div class="end-screen-content">
+    <h1 class="end-title" [class.victory-title]="isVictory()">{{ endHeadline() }}</h1>
+    <p class="end-tagline">{{ endTagline() }}</p>
+
+    <div class="stats-container">
+      <div class="stat-item">
+        <span class="stat-label">Level</span>
+        <span class="stat-value">{{ stats().level }}</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-label">Shards</span>
+        <span class="stat-value">{{ stats().shards }}</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-label">Kills</span>
+        <span class="stat-value">{{ stats().kills }}</span>
+      </div>
+
+      <div class="stat-item">
+        <span class="stat-label">Time</span>
+        <span class="stat-value">{{ formattedTime() }}</span>
+      </div>
+
+      <div class="stat-item difficulty-stat" [class.hard]="heatLevel() === 1" [class.extreme]="heatLevel() === 2">
+        <span class="stat-label">Heat</span>
+        <span class="stat-value">{{ heatLevel() }}</span>
+      </div>
+
+      @if (stats().zonesVisited && stats().zonesVisited!.length > 0) {
+        <div class="stat-item">
+          <span class="stat-label">Zones Visited</span>
+          <span class="stat-value">{{ stats().zonesVisited!.length }}</span>
+        </div>
+      }
+
+      @if (stats().cachesOpened !== undefined) {
+        <div class="stat-item">
+          <span class="stat-label">Caches Opened</span>
+          <span class="stat-value">{{ stats().cachesOpened }}</span>
+        </div>
+      }
+
+      @if (stats().guardiansSlain !== undefined) {
+        <div class="stat-item">
+          <span class="stat-label">Guardians Slain</span>
+          <span class="stat-value">{{ stats().guardiansSlain }}</span>
+        </div>
+      }
+    </div>
+
+    @if (stats().zoneStats && stats().zoneStats!.length > 0) {
+      <div class="zone-breakdown">
+        <div class="section-title">ZONE BREAKDOWN</div>
+        @for (zone of stats().zoneStats!; track zone.zoneId) {
+          <div class="zone-stat-row">
+            <span class="zone-name" [style.color]="zone.themeColor"
+              >{{ zone.zoneName }}
+              @if (zone.isCompleted) {
+                <span class="zone-cleared-badge">CLEARED</span>
+              }
+            </span>
+            <span class="zone-detail"
+              >{{ formatZoneTime(zone.timeSpentMs) }} | {{ zone.guardiansSlain }} guardians |
+              {{ zone.cachesOpened }} caches</span
+            >
+          </div>
+        }
+      </div>
+    }
+
+    @if (stats().runBuild && stats().runBuild!.length > 0) {
+      <section class="run-build" aria-labelledby="run-build-title">
+        <h2 id="run-build-title" class="section-title">RUN BUILD</h2>
+        <div class="run-build-grid">
+          @for (item of stats().runBuild!; track item.id) {
+            <div
+              class="run-build-item"
+              [class.curse]="item.type === 'curse'"
+              [class.blessing]="item.type === 'blessing'"
+            >
+              <span class="run-build-name">{{ item.name }}</span>
+              <span class="run-build-meta">
+                {{ item.type === 'upgrade' ? item.rarity : item.type }}
+                @if (item.stacks > 1) {
+                  <strong>&times;{{ item.stacks }}</strong>
+                }
+              </span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="personal-bests">
+      <h2 class="bests-title">Personal Bests</h2>
+      <div class="bests-grid">
+        <div class="best-item" [class.new-record]="newRecords().kills">
+          <span class="best-label">Kills</span>
+          <span class="best-value">{{ personalBests().bestKills }}</span>
+          @if (newRecords().kills) {
+            <span class="record-badge">NEW</span>
+          }
+        </div>
+        <div class="best-item" [class.new-record]="newRecords().level">
+          <span class="best-label">Level</span>
+          <span class="best-value">{{ personalBests().bestLevel }}</span>
+          @if (newRecords().level) {
+            <span class="record-badge">NEW</span>
+          }
+        </div>
+        <div class="best-item" [class.new-record]="newRecords().time">
+          <span class="best-label">Time</span>
+          <span class="best-value">{{ formatTime(personalBests().bestTime) }}</span>
+          @if (newRecords().time) {
+            <span class="record-badge">NEW</span>
+          }
+        </div>
+        <div class="best-item" [class.new-record]="newRecords().combo">
+          <span class="best-label">Streak</span>
+          <span class="best-value">{{ personalBests().bestCombo }}</span>
+          @if (newRecords().combo) {
+            <span class="record-badge">NEW</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (ascensionLevel() > 0) {
+      <div class="ascension-badge">
+        <span class="ascension-label">Mastery</span>
+        <span class="ascension-value">{{ ascensionLevel() }}</span>
+      </div>
+      <div class="ascension-active-bonuses" aria-label="Unlocked mastery options">
+        <span class="bonus-label">Unlocked for future runs</span>
+        <div class="bonus-list">
+          @for (unlock of currentMasteryUnlocks(); track unlock) {
+            <span class="bonus-item">{{ unlock }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    @if (canAscend()) {
+      <div class="ascension-panel">
+        <p class="ascension-available">Mastery Available</p>
+        <p class="ascension-desc">Record this milestone and expand future run choices</p>
+        <div class="bonus-list">
+          <span class="bonus-item">{{ nextMasteryUnlock() }}</span>
+        </div>
+        <button class="ascend-btn" (click)="onAscend()">Increase Mastery</button>
+      </div>
+    }
+
+    <button class="restart-btn" [class.victory-restart]="isVictory()" (click)="onRestart()">
+      {{ isVictory() ? 'Run Again' : 'Deploy Again' }}
+    </button>
+  </div>
+</div>

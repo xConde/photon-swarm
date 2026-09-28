@@ -1,0 +1,275 @@
+@use '../../../styles/design-system' as ds;
+
+.upgrade-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: ds.$spacing-standard;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: ds.$spacing-tight;
+    margin-top: ds.$spacing-tight;
+  }
+}
+
+.upgrade-card {
+  --upgrade-rarity-color: rgba(150, 170, 190, 0.7);
+
+  &.rarity-common,
+  &.rarity-uncommon {
+    --upgrade-rarity-color: var(--game-tier-common, #{ds.$dark-tier-common});
+  }
+
+  &.rarity-rare {
+    --upgrade-rarity-color: var(--game-tier-rare, #{ds.$dark-tier-rare});
+  }
+
+  &.rarity-epic {
+    --upgrade-rarity-color: var(--game-tier-epic, #{ds.$dark-tier-epic});
+  }
+
+  &.rarity-legendary {
+    --upgrade-rarity-color: var(--game-tier-legendary, #{ds.$dark-tier-legendary});
+  }
+}
+
+.upgrade-card {
+  position: relative;
+  min-width: 0;
+  min-height: 238px;
+  padding: 12px 14px 15px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  color: var(--game-text-primary, #{ds.$dark-text});
+  text-align: left;
+  background:
+    linear-gradient(var(--upgrade-rarity-color), var(--upgrade-rarity-color)) left top / 34% 2px no-repeat,
+    linear-gradient(var(--upgrade-rarity-color), var(--upgrade-rarity-color)) right bottom / 24% 2px no-repeat,
+    var(--upgrade-card-bg, rgba(11, 17, 27, 0.96));
+  border: ds.$border-width solid color-mix(in srgb, var(--upgrade-rarity-color) 34%, transparent);
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 13px 100%, 0 calc(100% - 13px));
+  cursor: pointer;
+  transition:
+    transform ds.$animation-fast ds.$easing-out,
+    border-color ds.$animation-fast ds.$easing-out,
+    background-color ds.$animation-fast ds.$easing-out;
+
+  // A fixed calibration rack replaces the perpetual shimmer. Its four marks
+  // make the surface feel manufactured and remain quiet during decision time.
+  &::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    bottom: 9px;
+    width: 31px;
+    height: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--upgrade-rarity-color) 62%, transparent) 0 3px,
+      transparent 3px 8px
+    );
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--upgrade-rarity-color) 78%, transparent);
+    background:
+      linear-gradient(var(--upgrade-rarity-color), var(--upgrade-rarity-color)) left top / 48% 2px no-repeat,
+      linear-gradient(var(--upgrade-rarity-color), var(--upgrade-rarity-color)) right bottom / 34% 2px no-repeat,
+      color-mix(in srgb, var(--upgrade-card-bg, rgba(11, 17, 27, 0.96)) 92%, var(--upgrade-rarity-color));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--upgrade-rarity-color);
+    outline-offset: 3px;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.application-failed {
+    cursor: not-allowed;
+    opacity: 0.45;
+    filter: grayscale(0.75);
+
+    &:hover,
+    &:active {
+      transform: none;
+      border-color: color-mix(in srgb, var(--upgrade-rarity-color) 34%, transparent);
+    }
+  }
+
+  .card-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: ds.$spacing-tight;
+    min-height: 22px;
+  }
+
+  .classification,
+  .card-slot,
+  .hero-caption {
+    font-family: 'Space Mono', ds.$font-mono;
+    text-transform: uppercase;
+  }
+
+  .classification {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--upgrade-rarity-color);
+    font-size: ds.$text-micro;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.12em;
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 4px;
+      background: currentColor;
+      opacity: 0.8;
+    }
+  }
+
+  &.rarity-common .classification::after {
+    content: ' / BASE';
+  }
+
+  &.rarity-uncommon .classification::after {
+    content: ' / I';
+  }
+
+  &.rarity-rare .classification::after {
+    content: ' / II';
+  }
+
+  &.rarity-epic .classification::after {
+    content: ' / III';
+  }
+
+  &.rarity-legendary .classification::after {
+    content: ' / IV';
+  }
+
+  .card-slot {
+    color: color-mix(in srgb, var(--upgrade-rarity-color) 52%, transparent);
+    font-size: ds.$text-small;
+    font-weight: ds.$weight-bold;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+
+  .card-hero {
+    min-height: 64px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ds.$spacing-standard;
+    border-block: 1px solid color-mix(in srgb, var(--upgrade-rarity-color) 16%, transparent);
+  }
+
+  .card-hero--stat {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .hero-caption {
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.46));
+    font-size: ds.$text-micro;
+    letter-spacing: 0.08em;
+  }
+
+  h3 {
+    margin: 12px 0 0;
+    color: var(--upgrade-rarity-color);
+    font-size: ds.$text-base;
+    font-weight: ds.$weight-bold;
+    letter-spacing: 0.065em;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+
+  .build-context {
+    margin-top: 5px;
+    color: var(--game-primary, #24e8ff);
+    font-family: 'Space Mono', ds.$font-mono;
+    font-size: ds.$text-micro;
+    font-weight: ds.$weight-semibold;
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin: 7px 0 12px;
+    color: var(--upgrade-card-text, rgba(ds.$dark-text, 0.62));
+    font-size: ds.$text-small;
+    font-style: normal;
+    line-height: ds.$leading-normal;
+  }
+
+  .application-failed-label {
+    margin-top: auto;
+    padding: ds.$spacing-tight 40px 0 0;
+    color: var(--game-danger, #{ds.$dark-danger});
+    font-family: 'Space Mono', ds.$font-mono;
+    font-size: ds.$text-caption;
+    font-weight: ds.$weight-bold;
+    letter-spacing: ds.$tracking-wide;
+    text-transform: uppercase;
+  }
+
+  .stat-change {
+    color: var(--upgrade-rarity-color);
+    font-family: 'Space Mono', ds.$font-mono;
+    font-size: ds.$text-large;
+    font-weight: ds.$weight-black;
+    letter-spacing: ds.$tracking-tight;
+    line-height: ds.$leading-none;
+  }
+}
+
+@media (max-width: 600px) {
+  .upgrade-card {
+    min-height: 0;
+    padding: 10px 12px 12px;
+
+    .card-top-row {
+      min-height: 18px;
+    }
+
+    .card-hero {
+      min-height: 46px;
+      margin-top: 5px;
+    }
+
+    h3 {
+      margin-top: 7px;
+      font-size: ds.$text-small;
+    }
+
+    p {
+      margin: 4px 0 7px;
+      font-size: ds.$text-caption;
+      line-height: ds.$leading-snug;
+    }
+
+    &:hover {
+      transform: none;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+  }
+}

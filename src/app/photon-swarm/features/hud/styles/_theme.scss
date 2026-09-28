@@ -1,0 +1,88 @@
+@use '../../../styles/design-system' as ds;
+
+// ===== THEME-SPECIFIC OVERRIDES =====
+
+// Light mode (Day mode) - A24-style vintage aesthetic
+:host-context(.day-mode) {
+  // Consumable hotbar: swap black bg for translucent cream
+  .consumable-hotbar .consumable-slot {
+    background: rgba(255, 255, 255, 0.7);
+
+    &:hover:not(.on-cooldown) {
+      background: rgba(255, 255, 255, 0.9);
+    }
+  }
+  // CRITICAL: Override game-* variables for text visibility on cream backgrounds
+  --game-text-primary: #{ds.$light-text}; // Dark slate gray
+  --game-text-secondary: #{rgba(ds.$light-text, 0.8)};
+  --game-text-muted: #{rgba(ds.$light-text, 0.6)};
+  --game-accent: #{ds.$light-accent}; // Dark cyan for health
+  --game-accent-light: #{ds.$light-accent-light}; // Slightly lighter for titles
+  --game-panel-border: #{rgba(ds.$light-accent, 0.3)};
+
+  // FPS counter in light mode
+  .fps-counter {
+    text-shadow: 0 0 ds.$spacing-micro rgba(ds.$light-bg-primary, 0.8);
+    color: ds.$light-accent;
+  }
+
+  // ─── Stats Pill: day-mode WCAG AA overrides ──────────────────────────────
+  // The pill bg is rgba(0,0,0,0.75) in both modes (dark on any canvas).
+  // Light-mode game-* semantic vars are tuned for light surfaces and fail on the
+  // dark pill. Use bright vibrant equivalents that all clear 4.5:1 on the pill.
+  .stats-pill {
+    // Base pill text (label + value) is already forced white in the shared rules.
+    // Only semantic color overrides are needed here.
+
+    .pill-value {
+      &.health-value {
+        color: #00ff88; // 7.88:1 on pill bg — bright green
+      }
+
+      &.health-low {
+        color: #ff8888; // 4.59:1 on pill bg — bright red-pink
+      }
+
+      &.shards {
+        color: #ee88ff; // 4.83:1 on pill bg — bright magenta
+      }
+
+      &.wave-normal {
+        color: #70b2ff; // 4.78:1 on pill bg — bright blue
+      }
+
+      &.wave-swarm {
+        color: #ff8f52; // 4.68:1 on pill bg — bright orange
+      }
+
+      &.wave-elite {
+        color: #cc99ff; // 4.81:1 on pill bg — bright lavender
+      }
+    }
+
+    .ascension-value,
+    .ascension-stat {
+      color: #fbbf24; // amber-300 — 5.74:1 on rgba(0,0,0,0.75) pill bg, passes WCAG AA
+    }
+  }
+
+  // Active effects strip: swap dark bg for translucent white
+  .effect-tag {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(var(--game-blur-subtle, 2px));
+    border-color: rgba(47, 79, 79, 0.3);
+    color: #2f4f4f;
+
+    .buff-name {
+      opacity: 1;
+      color: #2f4f4f;
+    }
+
+    .buff-timer {
+      opacity: 1;
+      color: #1a3333;
+    }
+  }
+
+  // focus-fire-indicator is token-based (--game-ability-warm) — no day-mode override needed
+}

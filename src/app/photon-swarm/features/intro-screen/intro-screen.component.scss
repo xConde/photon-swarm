@@ -1,0 +1,13 @@
+// Theme-aware intro screen following design system principles
+// Uses CSS variables for dynamic theme switching
+
+@use 'styles/mixins' as m;
+@use 'styles/layout';
+@use 'styles/header';
+@use 'styles/player-input';
+@use 'styles/difficulty';
+@use 'styles/actions';
+@use 'styles/tutorial';
+@use 'styles/star-field';
+@use 'styles/touch';
+@use 'styles/themes';

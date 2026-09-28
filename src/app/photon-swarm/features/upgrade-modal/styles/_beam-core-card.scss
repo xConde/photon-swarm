@@ -1,0 +1,258 @@
+@use '../../../styles/design-system' as ds;
+
+// The starter choice is a rack of three pieces of weapon hardware, not three
+// rarity cards. Each silhouette previews the actual beam geometry in combat.
+.beam-core-card {
+  --core-hardware: #7ddcff;
+  --core-hardware-rgb: 125, 220, 255;
+  --upgrade-rarity-color: var(--core-hardware);
+  min-height: 360px;
+  background:
+    repeating-linear-gradient(0deg, rgba(var(--core-hardware-rgb), 0.035) 0 1px, transparent 1px 18px),
+    var(--upgrade-card-bg, #0b111b);
+
+  &.beam-core-lance {
+    --core-hardware: #ffb45e;
+    --core-hardware-rgb: 255, 180, 94;
+  }
+
+  &.beam-core-prism {
+    --core-hardware: #ff72c7;
+    --core-hardware-rgb: 255, 114, 199;
+  }
+
+  &.beam-core-arc {
+    --core-hardware: #57e8ff;
+    --core-hardware-rgb: 87, 232, 255;
+  }
+
+  .classification::after {
+    content: ' / BINDING';
+  }
+
+  h3 {
+    margin-top: 13px;
+    font-size: ds.$text-large;
+    letter-spacing: 0.045em;
+  }
+
+  p.core-description {
+    display: block;
+    min-height: 54px;
+    margin-bottom: 10px;
+  }
+
+  .build-context {
+    display: none;
+  }
+}
+
+.core-blueprint {
+  position: relative;
+  height: 88px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-block: 1px solid rgba(var(--core-hardware-rgb), 0.22);
+}
+
+.core-designation {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  color: var(--core-hardware);
+  font-family: 'Space Mono', ds.$font-mono;
+  font-size: ds.$text-micro;
+  font-weight: ds.$weight-bold;
+  letter-spacing: 0.15em;
+}
+
+.emitter-pattern {
+  position: absolute;
+  inset: 0;
+}
+
+.emitter-origin,
+.arc-node {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--core-hardware);
+  background: var(--upgrade-card-bg, #0b111b);
+  transform: rotate(45deg);
+}
+
+.emitter-origin {
+  left: 17px;
+  top: 53px;
+}
+
+.beam-line {
+  position: absolute;
+  left: 25px;
+  top: 57px;
+  height: 1px;
+  background: var(--core-hardware);
+  transform-origin: left center;
+}
+
+.beam-line--lance {
+  width: calc(100% - 38px);
+  height: 2px;
+}
+
+.beam-line--prism {
+  width: calc(100% - 48px);
+}
+
+.beam-line--high {
+  transform: rotate(-12deg);
+}
+
+.beam-line--low {
+  transform: rotate(12deg);
+}
+
+.arc-node--one {
+  left: 42%;
+  top: 34px;
+}
+
+.arc-node--two {
+  left: 65%;
+  top: 57px;
+}
+
+.arc-node--three {
+  right: 10px;
+  top: 29px;
+}
+
+.beam-line--arc {
+  width: 22%;
+}
+
+.arc-leg--one {
+  width: 40%;
+  transform: rotate(-9deg);
+}
+
+.arc-leg--two {
+  left: 43%;
+  top: 39px;
+  width: 24%;
+  transform: rotate(8deg);
+}
+
+.arc-leg--three {
+  left: 66%;
+  top: 61px;
+  width: 27%;
+  transform: rotate(-13deg);
+}
+
+.core-doctrine {
+  margin: auto 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(var(--core-hardware-rgb), 0.16);
+
+  div {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  dt,
+  dd {
+    margin: 0;
+    font-size: ds.$text-caption;
+    line-height: ds.$leading-snug;
+  }
+
+  dt {
+    color: rgba(var(--core-hardware-rgb), 0.62);
+    font-family: 'Space Mono', ds.$font-mono;
+    text-transform: uppercase;
+  }
+
+  dd {
+    color: var(--game-text-primary, #{ds.$dark-text});
+  }
+
+  .core-tradeoff dd {
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.54));
+  }
+}
+
+.mutation-doctrine {
+  display: grid;
+  gap: 3px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--upgrade-rarity-color) 18%, transparent);
+
+  span,
+  small {
+    font-size: ds.$text-caption;
+    line-height: ds.$leading-snug;
+  }
+
+  span {
+    color: var(--game-text-primary, #{ds.$dark-text});
+  }
+
+  small {
+    color: var(--game-text-muted, rgba(255, 255, 255, 0.48));
+  }
+}
+
+.build-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+  padding-right: 38px;
+
+  span {
+    color: color-mix(in srgb, var(--upgrade-rarity-color) 70%, var(--game-text-muted, #8494a8));
+    font-family: 'Space Mono', ds.$font-mono;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    &::before {
+      content: '#';
+      opacity: 0.58;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .beam-core-card {
+    min-height: 0;
+
+    p.core-description {
+      min-height: 0;
+    }
+  }
+
+  .core-blueprint {
+    height: 54px;
+  }
+
+  .core-designation {
+    top: 4px;
+  }
+
+  .emitter-origin {
+    top: 35px;
+  }
+
+  .beam-line {
+    top: 39px;
+  }
+
+  .core-doctrine div {
+    grid-template-columns: 68px 1fr;
+  }
+}

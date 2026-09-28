@@ -1,0 +1,122 @@
+@use '../../../styles/design-system' as ds;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  // On iOS, when the soft keyboard opens the layout viewport shrinks but the
+  // host is still sized to the outer scroll container (100% of the original
+  // height), causing a rubber-band / bounce. --intro-vh is written by the
+  // component to window.visualViewport.height whenever the visual viewport
+  // resizes; falling back to 100% on desktop / non-supporting browsers.
+  height: var(--intro-vh, 100%);
+  background-color: var(--game-bg-primary, ds.$dark-bg-primary);
+  color: var(--game-accent, ds.$dark-accent);
+  font-family: ds.$font-display;
+  transition:
+    background-color ds.$animation-slow ds.$easing-in-out,
+    color ds.$animation-standard ds.$easing-standard;
+}
+
+.intro-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  inline-size: 100%;
+  block-size: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding-block: clamp(ds.$spacing-tight, 2vh, ds.$spacing-major);
+  position: relative;
+  // clip, not hidden: this is the step-carousel viewport, and hidden overflow
+  // still honors programmatic and focus-triggered scrolls. A stray scroll left
+  // this container at scrollTop ~160, shoving the MISSION heading above the
+  // visible area on every viewport. clip forbids scrolling entirely.
+  overflow: clip;
+  color: var(--game-text-primary, ds.$dark-text);
+  font-family: ds.$font-primary;
+}
+
+.stepper {
+  width: 100%;
+  max-inline-size: 1200px;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+// Consolidate stepper-step transitions
+.stepper-step {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  // NO transition on first paint: otherwise the non-active steps (.next/.previous) animate
+  // from their default centered/visible position to off-screen on load, which reads as a
+  // panel "flying off the screen". Transitions are enabled via .step-transitions-on (added
+  // one tick after first paint) so real step navigation still animates.
+  transition: none;
+
+  &.active {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 1;
+  }
+
+  &.previous,
+  &.next {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    // Off-screen slides keep real buttons (Back / New Game) — visibility removes them
+    // from the focus order + accessibility tree (opacity:0 alone leaves them tabbable).
+    // visibility is in the transition list below, so it flips at the END of the slide-out.
+    visibility: hidden;
+  }
+
+  &.previous {
+    transform: translateX(-100%);
+  }
+
+  &.next {
+    transform: translateX(100%);
+  }
+}
+
+// Enabled one tick after first paint (see IntroScreenComponent.stepTransitionsEnabled) so
+// step navigation animates, while the initial load stays still (no panel flying off-screen).
+.step-transitions-on .stepper-step {
+  transition:
+    transform ds.$animation-slow ds.$easing-standard,
+    opacity ds.$animation-slow ds.$easing-standard,
+    visibility ds.$animation-slow ds.$easing-standard;
+}
+
+// The welcome step (step 0) is sparse — title + welcome line + two buttons.
+// Left top-aligned in the full-height column it clustered in the top third
+// over a large void. Center the group vertically so it reads as an intentional
+// hero. (The mission step stays top-aligned: its .mission-content is flex:1
+// and fills the height, so it never had the void.)
+//
+// Gate the centering to roomy viewports: the step has no scroll fallback
+// (.stepper is overflow:hidden), so on short screens (landscape phone / small
+// window) centering would clip BOTH the title and the Continue button. Below
+// 600px tall, fall back to the original non-clipping top-aligned flow.
+.stepper-step.welcome-step {
+  @media (min-height: 600px) {
+    justify-content: center;
+
+    .welcome-header {
+      // Drop the large top padding so the centered group sits at true center
+      // rather than being nudged down by 3vh of header lead-in.
+      padding-block-start: 0;
+    }
+  }
+}
